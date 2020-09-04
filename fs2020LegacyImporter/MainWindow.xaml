@@ -1,0 +1,158 @@
+﻿<Window x:Class="msfsLegacyImporter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:msfsLegacyImporter"
+        mc:Ignorable="d"
+        Title="MSFS Legacy Importer" Height="800" Width="500">
+
+    <DockPanel>
+        <TabControl Name="fsTabControl" >
+            <TabItem Header="Init">
+                <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
+                    <TextBlock Name="Header" TextWrapping="Wrap" Text="Choose imported MSFS Legacy Aircraft folder" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                    <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,20,0,10" VerticalAlignment="Top">
+                        <Button x:Name="btnOpenFile" Click="BtnOpenFile_Click">Browse</Button>
+                    </WrapPanel>
+                    <TextBlock TextWrapping="Wrap" Text="Make backup before using this program" VerticalAlignment="Top" DockPanel.Dock="Top"  FontSize="16" HorizontalAlignment="Center" Background="#00808080"/>
+                    <Separator Height="1" Margin="0 20 0 0" Width="auto"/>
+                    <StackPanel DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom">
+                        <TextBlock Name="Header3" TextWrapping="Wrap" Text="Scan imported legacy aircraft directory" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                        <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,20,0,10" VerticalAlignment="Top">
+                            <Button Margin="5,5,5,5" Width="auto" x:Name="btnScan" Click="BtnScan_Click">Rescan legacy aircraft directory</Button>
+                        </WrapPanel>
+                    </StackPanel>
+                    <Separator Height="1" Margin="0 20 0 0" Width="auto"/>
+                    <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
+                        <TextBlock Name="Header2" TextWrapping="Wrap" Text="Import new FSX aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                        <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,20,0,10" VerticalAlignment="Top">
+                            <Button Margin="5,5,5,5" Width="auto" x:Name="btnSourceFolder" Click="BtnOpenSourceFile_Click">Source FSX aircraft directory</Button>
+                            <Button Margin="5,5,5,5" x:Name="btnTargetFolder" Click="BtnOpenTargetFile_Click">Community MSFS directory</Button>
+                        </WrapPanel>
+                        <Grid Margin="5,5,5,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Title"/>
+                            <TextBox Name="PackageTitle" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="5,5,5,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Directory name"/>
+                            <TextBox Name="PackageDir" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="5,5,5,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Manufacturer"/>
+                            <TextBox Name="PackageManufacturer" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="5,5,5,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Author"/>
+                            <TextBox Name="PackageAuthor" Grid.Column="1" Text=""/>
+                        </Grid>
+                        <Grid Margin="5,5,5,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Package version"/>
+                            <TextBox Name="PackageVer1" Grid.Column="1" Text="1"/>
+                            <TextBox Name="PackageVer2" Grid.Column="2" Text="0"/>
+                            <TextBox Name="PackageVer3" Grid.Column="3" Text="0"/>
+                        </Grid>
+                        <Grid Margin="5,5,5,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Min game version"/>
+                            <TextBox Name="PackageMinVer1" Grid.Column="1" Text="1"/>
+                            <TextBox Name="PackageMinVer2" Grid.Column="2" Text="17"/>
+                            <TextBox Name="PackageMinVer3" Grid.Column="3" Text="10"/>
+                        </Grid>
+                        <Button Margin="5,5,5,5" Width="auto" x:Name="btnImportSubmit" Click="BtnImportSubmit_Click">Import</Button>
+                    </StackPanel>
+                    <Separator Height="1" Margin="0 20 0 10" Width="auto"/>
+                    <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Bottom">
+                        <TextBlock TextWrapping="Wrap" Text="Alex Marko @ 2020" DockPanel.Dock="Bottom"  HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#03FFFFFF"/>
+                        <TextBlock TextWrapping="Wrap" Text="For personal use only"  HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#03FFFFFF"/>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Name="tabAircraft" Header="Aircraft">
+                <StackPanel>
+                    <Button Content="Edit" Click="AircraftEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                    <!--<TextBlock x:Name="AircraftContent" VerticalAlignment="Top" TextWrapping="Wrap"  DockPanel.Dock="Top">
+                    </TextBlock>-->
+                    <StackPanel Name="AircraftProcess"  Margin="0,0,0,0"  DockPanel.Dock="Top" VerticalAlignment="Top">
+                    </StackPanel>
+                    <Button x:Name="btnAircraftProcess" Click="BtnAircraftProcess_Click" Margin="0,0,0,0" MinHeight="30" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontFamily="Arial Black">Process aircraft.cfg file</Button>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Name="tabEngines" Header="Engines">
+                <StackPanel VerticalAlignment="Top">
+                    <Button Content="Edit" Click="EnginesEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                    <StackPanel Name="EnginesData" VerticalAlignment="Top">
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Name="tabCockpit" Header="Cockpit">
+                <StackPanel VerticalAlignment="Top">
+                    <Button Content="Edit" Click="CockpitEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                    <StackPanel Name="CockpitGauges" VerticalAlignment="Top">
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Name="tabTextures" Header="Textures">
+                <StackPanel VerticalAlignment="Top">
+                    <StackPanel Name="TexturesList" VerticalAlignment="Top">
+
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Name="tabAbout" Header="About">
+                <StackPanel>
+                    <StackPanel Name="AboutContent" VerticalAlignment="Top">
+                    </StackPanel>
+                    <TextBlock Name="Header4" TextWrapping="Wrap" Text="Useful links" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://forums.flightsimulator.com/" RequestNavigate="Hyperlink_RequestNavigate">
+                            Flight Simulator official website
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://discord.com/channels/746517825413447750/747831930212581479" RequestNavigate="Hyperlink_RequestNavigate">
+                            MFS SDK Discord channel
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </TabItem>
+            <!--<TabItem Name="tabAir" Header="AIR">
+
+            </TabItem>-->
+        </TabControl>
+
+    </DockPanel>
+
+</Window>
