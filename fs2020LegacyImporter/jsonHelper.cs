@@ -62,7 +62,7 @@ namespace msfsLegacyImporter
                         var txtFiles = Directory.EnumerateFiles(subdir, "*.*", SearchOption.TopDirectoryOnly);
                         foreach (string currentFile in txtFiles)
                         {
-                            if (currentFile[0] != '.' && Path.GetFileName(currentFile).ToLower() != "layout.json")
+                            if (Path.GetFileName(currentFile)[0] != '.' && Path.GetFileName(currentFile).ToLower() != "layout.json")
                             {
                                 FileInfo info = new System.IO.FileInfo(currentFile);
                                 array[i] = new Content(currentFile.Replace(TargetFolder, "").Replace("\\", "/"), info.Length, info.LastWriteTime.Ticks);

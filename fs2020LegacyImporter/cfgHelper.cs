@@ -130,12 +130,15 @@ namespace msfsLegacyImporter
                                     lastSection.Name = lastSection.Name.Trim().ToUpper();
 
                                     // MATCH CURRENT VERSION
-                                    //Console.WriteLine("Section match: " + currentSection + " - " + lastSection.Name);
                                     if (lastSection.Name == currentSection || 
                                         lastSection.Name.Contains(".") && currentSection.Contains(".") && lastSection.Name.Split('.')[0] == currentSection.Split('.')[0])
                                     {
+                                        //Console.WriteLine("Section match: " + currentSection + " - " + lastSection.Name);
                                         brk = true;
                                         break;
+                                    } else
+                                    {
+                                        //Console.WriteLine("Section does not match: " + currentSection + " - " + lastSection.Name);
                                     }
                                 }
 
@@ -144,7 +147,7 @@ namespace msfsLegacyImporter
                             }
 
                             // COPY LINES INTO RELATIVE CFG
-                            string filename = brk && lastFile != null ? lastFile.Name + ".cfg" : "unknown.cfg";
+                            string filename = brk && lastFile != null ? lastFile.Name + ".cfg" : ".unknown.cfg";
                             {
                                 FileInfo fi = new FileInfo(aircraftDirectory + "\\" + filename);
                                 
@@ -160,7 +163,7 @@ namespace msfsLegacyImporter
 
                                 using (FileStream fs = File.Open(aircraftDirectory + "\\" + filename, FileMode.Append, FileAccess.Write, FileShare.Write))
                                 {
-                                    byte[] text = new UTF8Encoding(true).GetBytes("\n" + lastSection.Name + "\n" + "\n");
+                                    byte[] text = new UTF8Encoding(true).GetBytes("\n" + currentSection + "\n" + "\n");
                                     fs.Write(text, 0, text.Length);
 
 

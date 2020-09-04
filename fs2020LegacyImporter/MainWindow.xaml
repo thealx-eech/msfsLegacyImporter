@@ -137,6 +137,11 @@
                     </StackPanel>
                     <TextBlock Name="Header4" TextWrapping="Wrap" Text="Useful links" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
                     <TextBlock>
+                        <Hyperlink NavigateUri="http://eech.online/msfslegacyimporter/" RequestNavigate="Hyperlink_RequestNavigate">
+                            Versions history
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
                         <Hyperlink NavigateUri="https://forums.flightsimulator.com/" RequestNavigate="Hyperlink_RequestNavigate">
                             Flight Simulator official website
                         </Hyperlink>
