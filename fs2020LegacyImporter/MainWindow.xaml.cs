@@ -80,7 +80,6 @@ namespace msfsLegacyImporter
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 setAircraftDirectory(dialog.FileName);
-                btnOpenFilePath.Text = dialog.FileName;
             }
         }
 
@@ -102,6 +101,7 @@ namespace msfsLegacyImporter
                 Header.Text = "Current aircraft: " + new DirectoryInfo(projectDirectory).Name;
                 btnOpenFile.Content = "Select another aircraft";
 
+                btnOpenFilePath.Text = projectDirectory;
                 SummaryUpdate();
             }
             else
@@ -220,7 +220,7 @@ namespace msfsLegacyImporter
 
                     Button btn = new Button();
                     btn = SetButtonAtts(btn);
-                    btn.Content = "Add missing desciption parameters";
+                    btn.Content = "Add missing desrciption parameters";
                     btn.Click += AddDescriptionClick;
                     myPanel.Children.Add(btn);
                 }
@@ -309,7 +309,7 @@ namespace msfsLegacyImporter
                                         Match match = regex.Match(content);
                                         if (match.Success && match.Groups.Count >= 3)
                                         {
-                                            content = content.Replace("ui_createdby", val + " = \"" + match.Groups[2].Value + "\"" + Environment.NewLine + "ui_createdby");
+                                            content = content.Replace("ui_createdby", val + " = \"" + match.Groups[2].Value.Replace(",", "") + "\"" + Environment.NewLine + "ui_createdby");
                                         }
                                     }
                                     else if (val == "ui_max_range")
@@ -318,7 +318,7 @@ namespace msfsLegacyImporter
                                         Match match2 = regex2.Match(content);
                                         if (match2.Success && match2.Groups.Count >= 3)
                                         {
-                                            content = content.Replace("ui_createdby", val + " = \"" + match2.Groups[2].Value + "\"" + Environment.NewLine + "ui_createdby");
+                                            content = content.Replace("ui_createdby", val + " = \"" + match2.Groups[2].Value.Replace(",", "") + "\"" + Environment.NewLine + "ui_createdby");
                                         }
                                     }
                                     else if (val == "ui_autonomy")
@@ -327,7 +327,7 @@ namespace msfsLegacyImporter
                                         Match match3 = regex3.Match(content);
                                         if (match3.Success && match3.Groups.Count >= 3)
                                         {
-                                            content = content.Replace("ui_createdby", val + " = \"" + match3.Groups[2].Value + "\"" + Environment.NewLine + "ui_createdby");
+                                            content = content.Replace("ui_createdby", val + " = \"" + match3.Groups[2].Value.Replace(",", "") + "\"" + Environment.NewLine + "ui_createdby");
                                         }
                                     }
                                     else if (val == "cruise_speed")
@@ -336,7 +336,7 @@ namespace msfsLegacyImporter
                                         Match match4 = regex4.Match(content);
                                         if (match4.Success && match4.Groups.Count >= 3)
                                         {
-                                            content = content.Replace("ui_createdby", val + " = \"" + match4.Groups[2].Value + "\"" + Environment.NewLine + "ui_createdby");
+                                            content = content.Replace("ui_createdby", val + " = \"" + match4.Groups[2].Value.Replace(",", "") + "\"" + Environment.NewLine + "ui_createdby");
                                         }
                                     }
 

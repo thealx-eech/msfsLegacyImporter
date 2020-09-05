@@ -171,6 +171,11 @@
                             MFS SDK Discord channel
                         </Hyperlink>
                     </TextBlock>
+                    <TextBlock>
+                        <Hyperlink NavigateUri="https://www.facebook.com/groups/1803376689823050" RequestNavigate="Hyperlink_RequestNavigate">
+                            MS Flight Simulator Gliders FB group
+                        </Hyperlink>
+                    </TextBlock>
                 </StackPanel>
             </TabItem>
             <!--<TabItem Name="tabAir" Header="AIR">
