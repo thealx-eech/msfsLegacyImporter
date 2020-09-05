@@ -177,34 +177,4 @@ namespace msfsLegacyImporter
     }
 
 }
-/*
- 
- {
-  "content": [
-    {
-      "path": "manifest.json",
-      "size": 313,
-      "date": 132436404000000000
-    },
-    {
-      "path": "SimObjects/Airplanes/Mooney_Bravo/aircraft.cfg",
-      "size": 24599,
-      "date": 132436404000000000
-    },
 
-{
-  "dependencies": [],
-  "content_type": "AIRCRAFT",
-  "title": "Mooney Bravo",
-  "manufacturer": "Mooney",
-  "creator": "Microsoft",
-  "package_version": "0.1.0",
-  "minimum_game_version": "1.7.12",
-  "release_notes": {
-    "neutral": {
-      "LastUpdate": "",
-      "OlderHistory": ""
-    }
-  }
-}
- * */

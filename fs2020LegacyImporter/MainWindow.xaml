@@ -12,13 +12,16 @@
             <TabItem Header="Init">
                 <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
                     <TextBlock Name="Header" TextWrapping="Wrap" Text="Choose imported MSFS Legacy Aircraft folder" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
-                    <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,20,0,10" VerticalAlignment="Top">
+                    <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,20,0,0" VerticalAlignment="Top">
+                        <TextBlock Name="btnOpenFilePath"></TextBlock>
+                    </WrapPanel>
+                    <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,10" VerticalAlignment="Top">
                         <Button x:Name="btnOpenFile" Click="BtnOpenFile_Click">Browse</Button>
                     </WrapPanel>
                     <TextBlock TextWrapping="Wrap" Text="Make backup before using this program" VerticalAlignment="Top" DockPanel.Dock="Top"  FontSize="16" HorizontalAlignment="Center" Background="#00808080"/>
-                    <Separator Height="1" Margin="0 20 0 0" Width="auto"/>
+                    <Separator Height="1" Margin="0 10 0 0" Width="auto"/>
                     <StackPanel DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom">
-                        <TextBlock Name="Header3" TextWrapping="Wrap" Text="Scan imported legacy aircraft directory" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                        <TextBlock Name="Header3" TextWrapping="Wrap" Text="Scan imported legacy aircraft directory" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,10,0,-1" Background="Transparent"/>
                         <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,20,0,10" VerticalAlignment="Top">
                             <Button Margin="5,5,5,5" Width="auto" x:Name="btnScan" Click="BtnScan_Click">Rescan legacy aircraft directory</Button>
                         </WrapPanel>
@@ -26,7 +29,11 @@
                     <Separator Height="1" Margin="0 20 0 0" Width="auto"/>
                     <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
                         <TextBlock Name="Header2" TextWrapping="Wrap" Text="Import new FSX aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
-                        <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,20,0,10" VerticalAlignment="Top">
+                        <WrapPanel Width="auto" DockPanel.Dock="Top" Margin="0,0,0,0" VerticalAlignment="Top" HorizontalAlignment="center">
+                            <TextBlock Name="btnSourceFolderPath" MinWidth="100" HorizontalAlignment="Left"></TextBlock>
+                            <TextBlock Name="btnTargetFolderPath" MinWidth="100" HorizontalAlignment="Left"></TextBlock>
+                        </WrapPanel>
+                        <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,10" VerticalAlignment="Top">
                             <Button Margin="5,5,5,5" Width="auto" x:Name="btnSourceFolder" Click="BtnOpenSourceFile_Click">Source FSX aircraft directory</Button>
                             <Button Margin="5,5,5,5" x:Name="btnTargetFolder" Click="BtnOpenTargetFile_Click">Community MSFS directory</Button>
                         </WrapPanel>
@@ -103,7 +110,7 @@
                     </TextBlock>-->
                     <StackPanel Name="AircraftProcess"  Margin="0,0,0,0"  DockPanel.Dock="Top" VerticalAlignment="Top">
                     </StackPanel>
-                    <Button x:Name="btnAircraftProcess" Click="BtnAircraftProcess_Click" Margin="0,0,0,0" MinHeight="30" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontFamily="Arial Black">Process aircraft.cfg file</Button>
+                    <Button x:Name="btnAircraftProcess" Click="BtnAircraftProcess_Click" Margin="0,20,0,0" MinHeight="30" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" FontFamily="Arial Black">Process aircraft.cfg file</Button>
                 </StackPanel>
             </TabItem>
 
@@ -145,8 +152,13 @@
                     </StackPanel>
                     <TextBlock Name="Header4" TextWrapping="Wrap" Text="Useful links" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
                     <TextBlock>
+                        <Hyperlink NavigateUri="readme.txt" RequestNavigate="Hyperlink_RequestNavigate">
+                            Readme
+                        </Hyperlink>
+                    </TextBlock>
+                    <TextBlock>
                         <Hyperlink NavigateUri="http://eech.online/msfslegacyimporter/" RequestNavigate="Hyperlink_RequestNavigate">
-                            Versions history
+                            Releases archive
                         </Hyperlink>
                     </TextBlock>
                     <TextBlock>

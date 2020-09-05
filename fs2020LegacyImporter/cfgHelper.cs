@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows;
 
 namespace msfsLegacyImporter
 {
@@ -19,18 +20,28 @@ namespace msfsLegacyImporter
         private List<CfgFile> cfgFiles;
 
 
-        public void processTemplateCfgs()
+        public bool processTemplateCfgs()
         {
             cfgFiles = new List<CfgFile>();
             List<CfgLine> cfgLines;
 
             foreach (var file in new[] { "aircraft.cfg", "cameras.cfg", "cockpit.cfg", "engines.cfg", "flight_model.cfg", "gameplay.cfg", "systems.cfg" })
             {
-                string content = System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "\\cfgTpl\\" + file);
-                cfgLines = readCSV(content + "[]");
-                //Console.WriteLine(cfgLines.First().Name);
-                parseCfg(file.Split('.')[0], cfgLines);
+                string path = AppDomain.CurrentDomain.BaseDirectory + "\\cfgTpl\\" + file;
+                if (File.Exists(path))
+                {
+                    string content = System.IO.File.ReadAllText(path);
+                    cfgLines = readCSV(content + "[]");
+                    //Console.WriteLine(cfgLines.First().Name);
+                    parseCfg(file.Split('.')[0], cfgLines);
+                } else
+                {
+                    MessageBox.Show("File does not exists: " + path);
+                    return false;
+                }
             }
+
+            return true;
 
             //Console.WriteLine(cfgFiles.Last().Sections.Last().Lines.First().Name + " " + cfgFiles.Last().Sections.Last().Lines.First().Value + " " + cfgFiles.Last().Sections.Last().Lines.First().Comment);
         }

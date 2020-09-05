@@ -64,7 +64,9 @@ namespace msfsLegacyImporter
 
             JSONHelper = new jsonHelper();
             CfgHelper = new cfgHelper();
-            CfgHelper.processTemplateCfgs();
+            // TRY TO LOAD CFGTPL FILES
+            if (!CfgHelper.processTemplateCfgs())
+                System.Environment.Exit(1);
 
             _ = CheckUpdateAsync();
         }
@@ -78,6 +80,7 @@ namespace msfsLegacyImporter
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 setAircraftDirectory(dialog.FileName);
+                btnOpenFilePath.Text = dialog.FileName;
             }
         }
 
@@ -179,7 +182,6 @@ namespace msfsLegacyImporter
 
         public void SummaryAircraft()
         {
-            string cfgsList = "";
             int status = 2;
 
             AircraftProcess.Children.Clear();
@@ -187,24 +189,70 @@ namespace msfsLegacyImporter
 
             StackPanel myPanel = new StackPanel();
 
+            // DESCRIPTION FIX
+            if (File.Exists(aircraftDirectory + "\\aircraft.cfg"))
+            {
+                int criticalIssues = 4;
+                string[] requiredValues = new string[] { "ui_certified_ceiling", "ui_max_range", "ui_autonomy", "cruise_speed" };
+
+                string content = System.IO.File.ReadAllText(aircraftDirectory + "\\aircraft.cfg");
+                List<CfgLine> acLines = CfgHelper.readCSV(content);
+                foreach (var line in acLines)
+                {
+                    if (requiredValues.Contains(line.Name))
+                    {
+                        requiredValues = requiredValues.Where(val => val != line.Name).ToArray();
+                        criticalIssues++;
+                    }
+                }
+
+                if (criticalIssues > 0)
+                {
+                    foreach (var requiredValue in requiredValues)
+                    {
+                        CheckBox checkBox = new CheckBox();
+                        checkBox.Content = requiredValue + " description parameter missing";
+                        checkBox.Foreground = new SolidColorBrush(Colors.DarkOrange);
+
+                        myPanel.Children.Add(checkBox);
+                    }
+
+
+                    Button btn = new Button();
+                    btn = SetButtonAtts(btn);
+                    btn.Content = "Add missing desciption parameters";
+                    btn.Click += AddDescriptionClick;
+                    myPanel.Children.Add(btn);
+                }
+            }
+
+            // AC performance = 
+
+            // AC ui_certified_ceiling
+            // AC ui_max_range
+            // AC ui_max_range
+            // FM cruise_speed
+
             //AircraftProcess
             if (aircraftDirectory != "" && File.Exists(aircraftDirectory + @"\aircraft.cfg"))
             {
 
-                foreach (var file in new[] { "aircraft.cfg", "cameras.cfg", "cockpit.cfg", "engines.cfg", "flight_model.cfg", "gameplay.cfg", "systems.cfg" })
+                foreach (var file in new[] { "aircraft.cfg", "cameras.cfg", "cockpit.cfg", "engines.cfg", "flight_model.cfg", "gameplay.cfg", "systems.cfg", ".unknown.cfg" })
                 {
                     TextBlock myBlock;
-                    if (!File.Exists(aircraftDirectory + "\\" + file))
+                    if (file == ".unknown.cfg" && File.Exists(aircraftDirectory + "\\" + file))
+                    {
+                        myBlock = AddTextBlock(file + " is presented", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkOrange);
+                    }
+                    else if (!File.Exists(aircraftDirectory + "\\" + file))
                     {
                         myBlock = AddTextBlock(file + " is missing", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkRed);
                         //cfgsList += "<Run Foreground=\"Red\">" + file + " is missing" + "</ Run >"  + Environment.NewLine;
-                        cfgsList += "-" + file + " is missing" + "-" + Environment.NewLine;
                         status = 0;
                     }
                     else
                     {
                         myBlock = AddTextBlock(file + " is set", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkGreen);
-                        cfgsList += "+" + file + " is presented" + "+" + Environment.NewLine;
                     }
                     myPanel.Children.Add(myBlock);
                 }
@@ -213,7 +261,6 @@ namespace msfsLegacyImporter
                 if (status == 0)
                 {
                     btnAircraftProcess.IsEnabled = true;
-                    cfgsList += Environment.NewLine + "You can press Process button so aircraft.cfg values will be extracted into missing files respectfully." + Environment.NewLine;
                 }
 
                 //AircraftContent.Text = @"List of CFG files:" + Environment.NewLine + Environment.NewLine + cfgsList;
@@ -227,6 +274,92 @@ namespace msfsLegacyImporter
             }
 
             AircraftProcess.Children.Add(myPanel);
+        }
+
+        public void AddDescriptionClick(object sender, RoutedEventArgs e)
+        {
+            if (File.Exists(aircraftDirectory + "\\aircraft.cfg"))
+            {
+                int i = 0;
+                string content = System.IO.File.ReadAllText(aircraftDirectory + "\\aircraft.cfg");
+
+                // GET LEGACY DESCRIPTION VALUES
+                // AC ui_certified_ceiling
+                // AC ui_max_range
+                // AC ui_autonomy
+                // FM cruise_speed
+
+                foreach (StackPanel panel in AircraftProcess.Children)
+                {
+                    if (panel.Children.Count > 0)
+                    {
+                        foreach (var chkbx in panel.Children)
+                        {
+                            CheckBox b = new CheckBox();
+                            if (chkbx.GetType() == b.GetType())
+                            {
+                                CheckBox a = (CheckBox)chkbx;
+                                if (a.IsChecked == true)
+                                {
+                                    string val = a.Content.ToString().Split(' ')[0].ToLower().Trim();
+
+                                    if (val == "ui_certified_ceiling")
+                                    {
+                                        Regex regex = new Regex(@"(?i)(.*)ceiling\\t\\n([\d,]*)(.+)(?-i)");
+                                        Match match = regex.Match(content);
+                                        if (match.Success && match.Groups.Count >= 3)
+                                        {
+                                            content = content.Replace("ui_createdby", val + " = \"" + match.Groups[2].Value + "\"" + Environment.NewLine + "ui_createdby");
+                                        }
+                                    }
+                                    else if (val == "ui_max_range")
+                                    {
+                                        Regex regex2 = new Regex(@"(?i)(.*)maximum range\\t\\n([\d,]*)(.+)(?-i)");
+                                        Match match2 = regex2.Match(content);
+                                        if (match2.Success && match2.Groups.Count >= 3)
+                                        {
+                                            content = content.Replace("ui_createdby", val + " = \"" + match2.Groups[2].Value + "\"" + Environment.NewLine + "ui_createdby");
+                                        }
+                                    }
+                                    else if (val == "ui_autonomy")
+                                    {
+                                        Regex regex3 = new Regex(@"(?i)(.*)endurance\\t\\n([\d,]*)(.+)(?-i)");
+                                        Match match3 = regex3.Match(content);
+                                        if (match3.Success && match3.Groups.Count >= 3)
+                                        {
+                                            content = content.Replace("ui_createdby", val + " = \"" + match3.Groups[2].Value + "\"" + Environment.NewLine + "ui_createdby");
+                                        }
+                                    }
+                                    else if (val == "cruise_speed")
+                                    {
+                                        Regex regex4 = new Regex(@"(?i)(.*)cruise speed\\t\\n([\d,]*)(.+)(?-i)");
+                                        Match match4 = regex4.Match(content);
+                                        if (match4.Success && match4.Groups.Count >= 3)
+                                        {
+                                            content = content.Replace("ui_createdby", val + " = \"" + match4.Groups[2].Value + "\"" + Environment.NewLine + "ui_createdby");
+                                        }
+                                    }
+
+
+                                    //gauges[i] = a.Content.ToString();
+                                    i++;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (i > 0)
+                {
+                    try { File.WriteAllText(aircraftDirectory + "\\aircraft.cfg", content); }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("Can't write into file " + aircraftDirectory + "\\aircraft.cfg");
+                    }
+                }
+            }
+
+            SummaryUpdate();
         }
 
         public void SummaryAir()
@@ -915,6 +1048,7 @@ namespace msfsLegacyImporter
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 TargetFolder = dialog.FileName + "\\";
+                btnTargetFolderPath.Text = TargetFolder;
             }
         }
 
@@ -929,6 +1063,7 @@ namespace msfsLegacyImporter
                 if (File.Exists(dialog.FileName + "\\aircraft.cfg"))
                 {
                     SourceFolder = dialog.FileName + "\\";
+                    btnSourceFolderPath.Text = SourceFolder;
                 }
                 else
                 {
@@ -946,10 +1081,13 @@ namespace msfsLegacyImporter
                 MessageBox.Show("You have to select both FSX ans MSFS folders");
             else if (String.IsNullOrWhiteSpace(PackageTitle.Text) || String.IsNullOrWhiteSpace(PackageDir.Text) || String.IsNullOrWhiteSpace(PackageManufacturer.Text) || String.IsNullOrWhiteSpace(PackageAuthor.Text) ||
                 String.IsNullOrWhiteSpace(PackageVer1.Text) || String.IsNullOrWhiteSpace(PackageVer2.Text) || String.IsNullOrWhiteSpace(PackageVer3.Text) ||
-                String.IsNullOrWhiteSpace(PackageMinVer1.Text) || String.IsNullOrWhiteSpace(PackageMinVer2.Text) || String.IsNullOrWhiteSpace(PackageMinVer3.Text) )
+                String.IsNullOrWhiteSpace(PackageMinVer1.Text) || String.IsNullOrWhiteSpace(PackageMinVer2.Text) || String.IsNullOrWhiteSpace(PackageMinVer3.Text))
                 MessageBox.Show("You have to fill in all fields");
             else if (Directory.Exists(TargetFolder + PackageDir.Text + "\\"))
-                MessageBox.Show("Directory "+ TargetFolder + PackageDir.Text + " already exists");
+            {
+                MessageBox.Show("Directory " + TargetFolder + PackageDir.Text + " already exists");
+                return;
+            }
 
             string[] data = new string[] { "", "AIRCRAFT", PackageTitle.Text, PackageManufacturer.Text, PackageAuthor.Text,
             PackageVer1.Text + "." + PackageVer2.Text + "." + PackageVer3.Text, PackageMinVer1.Text + "." + PackageMinVer2.Text + "." + PackageMinVer2.Text, "" };
@@ -965,7 +1103,7 @@ namespace msfsLegacyImporter
         private void Hyperlink_RequestNavigate(object sender,
                                                System.Windows.Navigation.RequestNavigateEventArgs e)
         {
-            System.Diagnostics.Process.Start(e.Uri.AbsoluteUri);
+            System.Diagnostics.Process.Start(e.Uri.ToString().Contains("//") ? e.Uri.AbsoluteUri : e.Uri.ToString());
         }
     }
 
