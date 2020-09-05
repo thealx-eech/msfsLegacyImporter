@@ -118,7 +118,15 @@
             <TabItem Name="tabCockpit" Header="Cockpit">
                 <StackPanel VerticalAlignment="Top">
                     <Button Content="Edit" Click="CockpitEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
-                    <StackPanel Name="CockpitGauges" VerticalAlignment="Top">
+                    <StackPanel Name="CockpitData" VerticalAlignment="Top">
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Name="tabSystems" Header="Systems">
+                <StackPanel VerticalAlignment="Top">
+                    <Button Content="Edit" Click="SystemsEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                    <StackPanel Name="SystemsData" VerticalAlignment="Top">
                     </StackPanel>
                 </StackPanel>
             </TabItem>

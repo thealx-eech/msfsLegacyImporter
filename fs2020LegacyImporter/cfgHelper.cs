@@ -38,10 +38,10 @@ namespace msfsLegacyImporter
         public List<CfgLine> readCSV(string content)
         {
             List<CfgLine> list = new List<CfgLine>();
-            foreach (var line in content.Split('\n'))
+            foreach (var line in content.Split(new string[] { System.Environment.NewLine },StringSplitOptions.None))
             {
                 string[] data = line.Split(';');
-                if (data.Length == 2)
+                if (data.Length >= 2)
                     list.Add(new CfgLine(data[0].Split('=')[0].Trim().ToLower(), data[0].Split('=').Length >= 2 ? data[0].Split('=')[1].Trim().ToLower() : "", data[1].Trim().ToLower()));
                 else if (data.Length == 1)
                     list.Add(new CfgLine(data[0].Split('=')[0].Trim().ToLower(), data[0].Split('=').Length >= 2 ? data[0].Split('=')[1].Trim().ToLower() : "", ""));
@@ -95,7 +95,7 @@ namespace msfsLegacyImporter
         public void splitCfg(string aircraftDirectory)
         {
             string content = System.IO.File.ReadAllText(aircraftDirectory + "\\aircraft.cfg");
-            content += "\n" + "[]"; // TO FINALIZE PARSING
+            content += System.Environment.NewLine + "[]"; // TO FINALIZE PARSING
             content = content.Replace("//", ";"); // REPLACE COMMENT SYMBOLS
 
             string currentSection = "";
@@ -155,7 +155,7 @@ namespace msfsLegacyImporter
                                 {
                                     using (FileStream fs = File.Create(aircraftDirectory + "\\" + filename))
                                     {
-                                        byte[] text = new UTF8Encoding(true).GetBytes("[VERSION]" + "\n" + "major = 1" + "\n" + "minor = 0" + "\n");
+                                        byte[] text = new UTF8Encoding(true).GetBytes("[VERSION]" + System.Environment.NewLine + "major = 1" + System.Environment.NewLine + "minor = 0" + System.Environment.NewLine);
                                         // Add some information to the file.
                                         fs.Write(text, 0, text.Length);
                                     }
@@ -163,12 +163,12 @@ namespace msfsLegacyImporter
 
                                 using (FileStream fs = File.Open(aircraftDirectory + "\\" + filename, FileMode.Append, FileAccess.Write, FileShare.Write))
                                 {
-                                    byte[] text = new UTF8Encoding(true).GetBytes("\n" + currentSection + "\n" + "\n");
+                                    byte[] text = new UTF8Encoding(true).GetBytes(System.Environment.NewLine + currentSection + System.Environment.NewLine + System.Environment.NewLine);
                                     fs.Write(text, 0, text.Length);
 
 
                                     foreach (var cfgLine in cfgLines) {
-                                        text = new UTF8Encoding(true).GetBytes(cfgLine.Name + " = " + cfgLine.Value + " ; " + cfgLine.Comment + "\n");
+                                        text = new UTF8Encoding(true).GetBytes(cfgLine.Name + " = " + cfgLine.Value + " ; " + cfgLine.Comment + System.Environment.NewLine);
                                         fs.Write(text, 0, text.Length);
                                     }
                                 }
@@ -236,7 +236,7 @@ namespace msfsLegacyImporter
                             if (String.IsNullOrEmpty(gauge))
                                 break;
 
-                            byte[] text = new UTF8Encoding(true).GetBytes("\n" + gauge + "\n");
+                            byte[] text = new UTF8Encoding(true).GetBytes(System.Environment.NewLine + gauge + System.Environment.NewLine);
                             fs.Write(text, 0, text.Length);
 
                             foreach (var sect in availableCockpitSections.Sections)
@@ -248,7 +248,7 @@ namespace msfsLegacyImporter
                                     //Console.WriteLine("availableGaugeLines found in section " + sect.Name + " lines " + sect.Lines.Count);
                                     foreach (var cfgLine in sect.Lines)
                                     {
-                                        text = new UTF8Encoding(true).GetBytes(cfgLine.Name + " = " + cfgLine.Value + " ; " + cfgLine.Comment + "\n");
+                                        text = new UTF8Encoding(true).GetBytes(cfgLine.Name + " = " + cfgLine.Value + " ; " + cfgLine.Comment + System.Environment.NewLine);
                                         fs.Write(text, 0, text.Length);
                                     }
 
@@ -265,6 +265,29 @@ namespace msfsLegacyImporter
             }
         }
 
+        public string[] getLights(string aircraftDirectory)
+        {
+            string[] lightsList = new string[100];
+            int i = 0;
+
+            if (File.Exists(aircraftDirectory + "\\systems.cfg"))
+            {
+                string content = System.IO.File.ReadAllText(aircraftDirectory + "\\systems.cfg");
+                foreach (string line in Regex.Split(content, "\r\n|\r|\n")) {
+                    if (line.ToLower().Trim().StartsWith("lightdef."))
+                    {
+                        lightsList[i] = line;
+                        i++;
+                    } else if (line.ToLower().Trim().StartsWith("light."))
+                    {
+                        lightsList[i] = "-" + line;
+                        i++;
+                    }
+                }
+            }
+
+            return lightsList;
+        }
 
 
         // MISC STUFF

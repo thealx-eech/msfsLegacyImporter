@@ -112,6 +112,7 @@ namespace msfsLegacyImporter
             SummaryAircraft();
             SummaryEngines();
             SummaryCockpit();
+            SummarySystems();
             SummaryTextures();
             SummaryAir();
 
@@ -127,6 +128,12 @@ namespace msfsLegacyImporter
                         break;
                     case "tabCockpit":
                         if (File.Exists(aircraftDirectory + "\\cockpit.cfg"))
+                            item.Visibility = Visibility.Visible;
+                        else
+                            item.Visibility = Visibility.Collapsed;
+                        break;
+                    case "tabSystems":
+                        if (File.Exists(aircraftDirectory + "\\systems.cfg"))
                             item.Visibility = Visibility.Visible;
                         else
                             item.Visibility = Visibility.Collapsed;
@@ -317,9 +324,182 @@ namespace msfsLegacyImporter
             SummaryUpdate();
         }
 
+        public void SummarySystems()
+        {
+            SystemsData.Children.Clear();
+
+            if (aircraftDirectory != "" && File.Exists(aircraftDirectory + "\\systems.cfg"))
+            {
+                int lightsBroken = 0;
+                foreach (var light in CfgHelper.getLights(aircraftDirectory))
+                {
+                    if (!String.IsNullOrEmpty(light))
+                    {
+                        StackPanel myPanel = new StackPanel();
+                        myPanel.Height = 16;
+                        myPanel.VerticalAlignment = VerticalAlignment.Top;
+
+                        if (light[0] == '-')
+                        {
+                            CheckBox checkBox = new CheckBox();
+
+                            checkBox.Content = light.Substring(1, light.Length - 1);
+                            checkBox.Foreground = new SolidColorBrush(Colors.DarkRed);
+                            myPanel.Children.Add(checkBox);
+
+                            lightsBroken++;
+                        }
+                        else
+                        {
+                            TextBlock myBlock = AddTextBlock(light, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkGreen);
+                            myPanel.Children.Add(myBlock);
+                        }
+
+                        SystemsData.Children.Add(myPanel);
+                    }
+
+                }
+
+                if (lightsBroken > 0)
+                {
+                    StackPanel myPanel = new StackPanel();
+                    Button btn = new Button();
+                    btn = SetButtonAtts(btn);
+                    btn.Content = "Fix broken lights";
+                    btn.Click += FixLightsClick;
+                    myPanel.Children.Add(btn);
+                    SystemsData.Children.Add(myPanel);
+                }
+
+                if (lightsBroken > 0)
+                {
+                    tabSystems.Foreground = new SolidColorBrush(Colors.DarkRed);
+                }
+                else
+                {
+                    tabSystems.Foreground = new SolidColorBrush(Colors.DarkGreen);
+                }
+
+                //SystemContent.Foreground = new SolidColorBrush(Colors.Black);
+            }
+        }
+
+        private void FixLightsClick(object sender, RoutedEventArgs e)
+        {
+            if (File.Exists(aircraftDirectory + "\\systems.cfg"))
+            {
+                int i = 0;
+                string content = System.IO.File.ReadAllText(aircraftDirectory + "\\systems.cfg");
+
+                foreach (StackPanel panel in SystemsData.Children)
+                {
+                    if (panel.Children.Count > 0)
+                    {
+                        CheckBox b = new CheckBox();
+                        if (panel.Children[0].GetType() == b.GetType())
+                        {
+                            CheckBox a = (CheckBox)panel.Children[0];
+                            if (a.IsChecked == true)
+                            {
+                                string val = a.Content.ToString();
+
+                                if (val.ToLower().Trim().StartsWith("light.")) {
+                                    // CONVERTS LIGHT DATA
+                                    // light\.(\d+)(.*)=(.*)(\d+),(.*)(\d+),(.*)(\d+),(.*)(fx_[A-Za-z]+)(.*)
+                                    // MSFS lightdef.0 = Type:1#Index:1#LocalPosition:-11.5,0,11.6#LocalRotation:0,0,0#EffectFile:LIGHT_ASOBO_BeaconTop#Node:#PotentiometerIndex:1#EmMesh:LIGHT_ASOBO_BeaconTop
+                                    // FSX light.0 = 3,  -39.00, -23.6,  -0.25, fx_navredm ,
+                                    string[] fsxLight = val.Split('=');
+                                    if (fsxLight.Length >= 2) {
+                                        string fsxNum = fsxLight[0].Replace("light.","");
+                                        string[] fsxData = fsxLight[1].Split(',');
+                                        if (fsxData.Length >= 5)
+                                        {
+                                            string type = fsxData[0].Replace(" ", "");
+                                            string x = fsxData[1].Replace(" ", "");
+                                            string y = fsxData[2].Replace(" ", "");
+                                            string z = fsxData[3].Replace(" ", "");
+                                            Regex regex = new Regex(@"(fx_[A-Za-z]*)");
+                                            Match match = regex.Match(fsxData[4]);
+                                            Regex digRregex = new Regex("[0-9.-]+");
+                                            if (match.Success && digRregex.IsMatch(fsxNum) && digRregex.IsMatch(type) && digRregex.IsMatch(x) && digRregex.IsMatch(y) && digRregex.IsMatch(z))
+                                            {
+                                                string msfsLight = "lightdef."+ fsxNum + " = Type:"+getMfsfLightType(type) +"#Index:0#LocalPosition:"+x+","+y+","+z+"#LocalRotation:0,0,0#EffectFile:"+ getMfsfLightEff(match.Value) + "#Node:#PotentiometerIndex:1#EmMesh:" + getMfsfLightEff(match.Value);
+                                                content = content.Replace(val, msfsLight);
+                                                i++;
+
+                                                Console.WriteLine(val);
+                                                Console.WriteLine(msfsLight);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (i > 0)
+                {
+                    try { File.WriteAllText(aircraftDirectory + "\\systems.cfg", content); }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("Can't write into file " + aircraftDirectory + "\\systems.cfg");
+                    }
+                }
+            }
+
+            SummaryUpdate();
+        }
+
+        public string getMfsfLightEff(string fsxEff)
+        {
+            switch (fsxEff)
+            {
+                case "fx_beacon":
+                    return "LIGHT_ASOBO_BeaconTop";
+                case "fx_beaconb":
+                    return "LIGHT_ASOBO_BeaconBelly";
+                case "fx_beaconh":
+                    return "LIGHT_ASOBO_BeaconTop_POS";
+                case "fx_landing":
+                    return "LIGHT_ASOBO_Landing";
+                case "fx_navgre":
+                    return "LIGHT_ASOBO_NavigationGreen";
+                case "fx_navgrem":
+                    return "LIGHT_ASOBO_Navigation_Green";
+                case "fx_navred":
+                    return "LIGHT_ASOBO_NavigationRed";
+                case "fx_navredm":
+                    return "LIGHT_ASOBO_Navigation_Red";
+                case "fx_navwhi":
+                    return "LIGHT_ASOBO_NavigationWhite";
+                case "fx_navwhih":
+                    return "LIGHT_ASOBO_NavigationWhite";
+                case "fx_recog":
+                    return "LIGHT_ASOBO_RecognitionLeft";
+                case "fx_strobe":
+                    return "LIGHT_ASOBO_StrobeSimple";
+                case "fx_strobeh":
+                    return "LIGHT_ASOBO_StrobeBelly";
+                case "fx_vclight":
+                    return "LIGHT_ASOBO_CabinBounceLarge";//"LIGHT_ASOBO_Gauge";
+                case "fx_vclighth":
+                    return "LIGHT_ASOBO_CabinBounceSmall";//"LIGHT_ASOBO_GaugeSmall";
+                case "fx_vclightwhi":
+                    return "LIGHT_ASOBO_CabinBounce";//"LIGHT_ASOBO_GaugeSmall";
+                default:
+                    return "LIGHT_ASOBO_BeaconTop";
+            }
+        }
+
+        public string getMfsfLightType(string fsxType)
+        {
+            return fsxType;
+        }
+
         public void SummaryCockpit()
         {
-            CockpitGauges.Children.Clear();
+            CockpitData.Children.Clear();
 
             if (File.Exists(aircraftDirectory + "\\cockpit.cfg"))
             {
@@ -355,7 +535,7 @@ namespace msfsLegacyImporter
                                 myPanel.Children.Add(myBlock);
                             }
 
-                            CockpitGauges.Children.Add(myPanel);
+                            CockpitData.Children.Add(myPanel);
 
                             gaugesTotal++;
                         }
@@ -371,7 +551,7 @@ namespace msfsLegacyImporter
                     btn.Content = "Enable selected gauges";
                     btn.Click += EnableGaugesClick;
                     myPanel.Children.Add(btn);
-                    CockpitGauges.Children.Add(myPanel);
+                    CockpitData.Children.Add(myPanel);
                 }
 
                 if (gaugesTotal - gaugesMissing < 5)
@@ -396,7 +576,7 @@ namespace msfsLegacyImporter
             string[] gauges = new string[100];
             int i = 0;
 
-            foreach (StackPanel panel in CockpitGauges.Children)
+            foreach (StackPanel panel in CockpitData.Children)
             {
                 if (panel.Children.Count > 0)
                 {
@@ -696,6 +876,14 @@ namespace msfsLegacyImporter
             if (File.Exists(aircraftDirectory + "\\cockpit.cfg"))
             {
                 Process.Start(aircraftDirectory + "\\cockpit.cfg");
+            }
+        }
+
+        private void SystemsEditClick(object sender, RoutedEventArgs e)
+        {
+            if (File.Exists(aircraftDirectory + "\\systems.cfg"))
+            {
+                Process.Start(aircraftDirectory + "\\systems.cfg");
             }
         }
 
