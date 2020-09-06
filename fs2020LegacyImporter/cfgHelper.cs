@@ -109,6 +109,9 @@ namespace msfsLegacyImporter
             content += System.Environment.NewLine + "[]"; // TO FINALIZE PARSING
             content = content.Replace("//", ";"); // REPLACE COMMENT SYMBOLS
 
+            // CHECK FOR NEW LINE SYMBOLS
+            content = Regex.Replace(content, "(?<!\r)\n", "\r\n");
+
             string currentSection = "";
 
             // RENAME

@@ -139,11 +139,11 @@
             </TabItem>
 
             <TabItem Name="tabTextures" Header="Textures">
-                <StackPanel VerticalAlignment="Top">
-                    <StackPanel Name="TexturesList" VerticalAlignment="Top">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                    <StackPanel Name="TexturesList" VerticalAlignment="Top" >
 
                     </StackPanel>
-                </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
             <TabItem Name="tabAbout" Header="About">

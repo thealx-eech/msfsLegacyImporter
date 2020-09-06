@@ -96,11 +96,14 @@ namespace msfsLegacyImporter
                 projectDirectory = directory;
                 aircraftDirectory = Get_aircraft_directory();
 
-                Header.Text = "Current aircraft: " + new DirectoryInfo(projectDirectory).Name;
-                btnOpenFile.Content = "Select another aircraft";
+                if (aircraftDirectory != "")
+                {
+                    Header.Text = "Current aircraft: " + new DirectoryInfo(projectDirectory).Name;
+                    btnOpenFile.Content = "Select another aircraft";
 
-                btnOpenFilePath.Text = projectDirectory;
-                SummaryUpdate();
+                    btnOpenFilePath.Text = projectDirectory;
+                    SummaryUpdate();
+                }
             }
             else
             {
@@ -833,13 +836,20 @@ namespace msfsLegacyImporter
 
         public string Get_aircraft_directory()
         {
-            String[] childFolders = Directory.GetDirectories(projectDirectory + @"\SimObjects\Airplanes\");
-            if (childFolders.Length > 0)
+            if (Directory.Exists(projectDirectory + @"\SimObjects\Airplanes\"))
             {
-                return childFolders[0];
-            }
-            else
+                String[] childFolders = Directory.GetDirectories(projectDirectory + @"\SimObjects\Airplanes\");
+                if (childFolders.Length > 0)
+                {
+                    return childFolders[0];
+                }
+                else
+                {
+                    return "";
+                }
+            } else
             {
+                MessageBox.Show("Directory not found " + projectDirectory + @"\SimObjects\Airplanes\");
                 return "";
             }
         }
