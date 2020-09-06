@@ -1056,7 +1056,7 @@ namespace msfsLegacyImporter
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             dialog.InitialDirectory = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0", "SetupPath",
-                new string[] { "C:\\\\" });
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
             dialog.IsFolderPicker = true;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
