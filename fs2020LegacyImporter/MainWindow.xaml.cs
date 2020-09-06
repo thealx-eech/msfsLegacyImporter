@@ -14,8 +14,6 @@ using System.Reflection;
 using static msfsLegacyImporter.cfgHelper;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Windows.Documents;
-using System.Windows.Navigation;
 
 namespace msfsLegacyImporter
 {
@@ -75,7 +73,7 @@ namespace msfsLegacyImporter
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             dialog.InitialDirectory = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath",
-                new string[] { "C:\\\\" });
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
             dialog.IsFolderPicker = true;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
@@ -106,7 +104,7 @@ namespace msfsLegacyImporter
             }
             else
             {
-                MessageBox.Show("Folder " + directory + " does not contain any aircraft");
+                MessageBox.Show("Selected folder " + directory + " should contain SimObjects folder, and layout.json + manifest.json files");
             }
         }
 
@@ -157,14 +155,14 @@ namespace msfsLegacyImporter
         {
             if (!File.Exists(aircraftDirectory + "\\aircraft.cfg"))
             {
-                MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show("aircraft.cfg not found in aircraft directory", "", MessageBoxButton.OK);
+                MessageBoxResult messageBoxResult = MessageBox.Show("aircraft.cfg not found in aircraft directory", "", MessageBoxButton.OK);
             }
             else
             {
                 // PROCESS AIRCRAFT FILE
                 if (File.Exists(aircraftDirectory + "\\.aircraft.cfg"))
                 {
-                    MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show("Backup of aircraft.cfg already exists", "Are you sure it can be removed?", System.Windows.MessageBoxButton.YesNo);
+                    MessageBoxResult messageBoxResult = MessageBox.Show("Backup of aircraft.cfg already exists", "Are you sure it can be removed?", System.Windows.MessageBoxButton.YesNo);
                     if (messageBoxResult == MessageBoxResult.Yes)
                     {
                         File.Delete(aircraftDirectory + "\\.aircraft.cfg");
@@ -807,8 +805,6 @@ namespace msfsLegacyImporter
 
                             Process process = new Process();
                             process.StartInfo.FileName = "cmd.exe";
-                            //process.StartInfo.WorkingDirectory = "c:\temp";
-                            //process.StartInfo.Arguments = "somefile.txt";
 
                             Process.Start(AppDomain.CurrentDomain.BaseDirectory + "nvdxt.exe", "-dxt5 -quality_highest -flip -file \"" + bmp + "\" -output \"" + dds + "\"");
 
@@ -1043,7 +1039,7 @@ namespace msfsLegacyImporter
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             dialog.InitialDirectory = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0", "CommunityPath",
-                new string[] { "C:\\\\" });
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
             dialog.IsFolderPicker = true;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
@@ -1078,21 +1074,22 @@ namespace msfsLegacyImporter
         {
             // VALIDATE FIELDS
             if (TargetFolder == "" || SourceFolder == "")
-                MessageBox.Show("You have to select both FSX ans MSFS folders");
+                MessageBox.Show("You have to select both source (FSX) ans destination (MSFS) folders");
             else if (String.IsNullOrWhiteSpace(PackageTitle.Text) || String.IsNullOrWhiteSpace(PackageDir.Text) || String.IsNullOrWhiteSpace(PackageManufacturer.Text) || String.IsNullOrWhiteSpace(PackageAuthor.Text) ||
                 String.IsNullOrWhiteSpace(PackageVer1.Text) || String.IsNullOrWhiteSpace(PackageVer2.Text) || String.IsNullOrWhiteSpace(PackageVer3.Text) ||
                 String.IsNullOrWhiteSpace(PackageMinVer1.Text) || String.IsNullOrWhiteSpace(PackageMinVer2.Text) || String.IsNullOrWhiteSpace(PackageMinVer3.Text))
                 MessageBox.Show("You have to fill in all fields");
             else if (Directory.Exists(TargetFolder + PackageDir.Text + "\\"))
             {
-                MessageBox.Show("Directory " + TargetFolder + PackageDir.Text + " already exists");
-                return;
+                MessageBox.Show("Aircraft already exists in folder " + TargetFolder + PackageDir.Text);
             }
-
-            string[] data = new string[] { "", "AIRCRAFT", PackageTitle.Text, PackageManufacturer.Text, PackageAuthor.Text,
+            else
+            {
+                string[] data = new string[] { "", "AIRCRAFT", PackageTitle.Text, PackageManufacturer.Text, PackageAuthor.Text,
             PackageVer1.Text + "." + PackageVer2.Text + "." + PackageVer3.Text, PackageMinVer1.Text + "." + PackageMinVer2.Text + "." + PackageMinVer2.Text, "" };
 
-            JSONHelper.createManifest(this, SourceFolder, TargetFolder + PackageDir.Text + "\\", data);
+                JSONHelper.createManifest(this, SourceFolder, TargetFolder + PackageDir.Text + "\\", data);
+            }
     }
 
         private void BtnScan_Click(object sender, RoutedEventArgs e)

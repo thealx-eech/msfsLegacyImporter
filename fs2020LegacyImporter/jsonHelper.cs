@@ -30,7 +30,7 @@ namespace msfsLegacyImporter
             try { File.WriteAllText(TargetFolder + "manifest.json", json); }
             catch (Exception)
             {
-                MessageBox.Show("Can't write into file " + TargetFolder + "manifest.json");
+                MessageBox.Show("Can't write into file " + TargetFolder + "\\manifest.json");
                 return;
             }
 
