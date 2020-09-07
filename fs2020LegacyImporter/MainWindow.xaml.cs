@@ -221,7 +221,7 @@ namespace msfsLegacyImporter
 
                     Button btn = new Button();
                     btn = SetButtonAtts(btn);
-                    btn.Content = "Add missing desrciption parameters";
+                    btn.Content = "Add missing description parameters";
                     btn.Click += AddDescriptionClick;
                     myPanel.Children.Add(btn);
                 }
@@ -243,7 +243,10 @@ namespace msfsLegacyImporter
                     TextBlock myBlock;
                     if (file == ".unknown.cfg" && File.Exists(aircraftDirectory + "\\" + file))
                     {
-                        myBlock = AddTextBlock(file + " is presented", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkOrange);
+                        myBlock = AddTextBlock(file, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkOrange);
+                    } else if (file == ".unknown.cfg")
+                    {
+                        myBlock = AddTextBlock("", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkGreen);
                     }
                     else if (!File.Exists(aircraftDirectory + "\\" + file))
                     {
@@ -255,6 +258,7 @@ namespace msfsLegacyImporter
                     {
                         myBlock = AddTextBlock(file + " is set", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkGreen);
                     }
+
                     myPanel.Children.Add(myBlock);
                 }
 
@@ -809,14 +813,15 @@ namespace msfsLegacyImporter
                             Process process = new Process();
                             process.StartInfo.FileName = "cmd.exe";
 
-                            Process.Start(AppDomain.CurrentDomain.BaseDirectory + "nvdxt.exe", "-dxt5 -quality_highest -flip -file \"" + bmp + "\" -output \"" + dds + "\"");
+                            //Process.Start(AppDomain.CurrentDomain.BaseDirectory + "nvdxt.exe", "-dxt5 -quality_highest -flip -file \"" + bmp + "\" -output \"" + dds + "\"");
+                            Process.Start(AppDomain.CurrentDomain.BaseDirectory + "ImageTool.exe", "-nogui -dds -dxt5 -32 -nostop -vflip -o \"" + dds + "\" \"" + bmp + "\"");
 
                             Stopwatch sw = new Stopwatch();
                             sw.Start();
 
                             while (true)
                             {
-                                if (sw.ElapsedMilliseconds > 500) break;
+                                if (sw.ElapsedMilliseconds > 1000 || File.Exists(dds)) break;
                             }
 
                             if (File.Exists(dds))
@@ -868,85 +873,73 @@ namespace msfsLegacyImporter
 
         public async System.Threading.Tasks.Task CheckUpdateAsync()
         {
-            /*WebClient wc = new WebClient();
-            wc.DownloadStringCompleted += new DownloadStringCompletedEventHandler(wc_dc);
-            wc.DownloadStringAsync(new Uri(updatedirectory));*/
+            string pubVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-            //void wc_dc(object sender, DownloadStringCompletedEventArgs e)
             {
-                string pubVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                var client = new HttpClient();
+                string data = await client.GetStringAsync(updatedirectory);
 
-                //if (e.Error == null)
+                Console.WriteLine(data);
+
+                Version nullVer = Version.Parse("0.0.0.0");
+
+                var regex = new Regex("href\\s*=\\s*(?:\"(?<1>[^\"]*)\"|(?<1>\\S+))");
+                foreach (var match in regex.Matches(data))
                 {
-                    //Assembly assembly = Assembly.GetExecutingAssembly();
-                    //FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-                    //string productVersion = fileVersionInfo.ProductVersion;
+                    string url = match.ToString().Replace("href=", "").Replace("\"", "");
 
-                    //string data = e.Result;
-                    var client = new HttpClient();
-                    string data = await client.GetStringAsync(updatedirectory);
-
-                    Version nullVer = Version.Parse("0.0.0.0");
-
-                    var regex = new Regex("href\\s*=\\s*(?:\"(?<1>[^\"]*)\"|(?<1>\\S+))");
-                    foreach (var match in regex.Matches(data))
+                    if (url.Contains(".exe") || url.Contains(".zip"))
                     {
-                        string url = match.ToString().Replace("href=", "").Replace("\"", "");
-
-                        if (url.Contains(".exe") || url.Contains(".zip"))
+                        // COMPARE VERSIONS
+                        if (Version.TryParse(Regex.Replace(url, "[^0-9.]", "").TrimEnd('.'), out nullVer))
                         {
-                            // COMPARE VERSIONS
-                            if (Version.TryParse(Regex.Replace(url, "[^0-9.]", "").TrimEnd('.'), out nullVer))
+                            Version ver = Version.Parse(Regex.Replace(url, "[^0-9.]", "").TrimEnd('.'));
+                            if (ver > Version.Parse(pubVer))
                             {
-                                Version ver = Version.Parse(Regex.Replace(url, "[^0-9.]", "").TrimEnd('.'));
-                                if (ver > Version.Parse(pubVer))
-                                {
-                                    updateVersion = ver.ToString();
-                                    updateURL = updatedirectory + url;
-                                }
-                                Console.WriteLine(ver + " " + pubVer);
+                                updateVersion = ver.ToString();
+                                updateURL = updatedirectory + url;
                             }
+                            Console.WriteLine(ver + " " + pubVer);
                         }
                     }
-
-                    Button btn = null;
-                    Button btn2 = null;
-                    StackPanel myPanel = new StackPanel();
-                    TextBlock myBlock = AddTextBlock("", HorizontalAlignment.Center, VerticalAlignment.Top, Colors.DarkGreen);
-
-                    if (updateVersion != "")
-                    {
-                        btn = new Button();
-                        btn2 = new Button();
-                        btn = SetButtonAtts(btn);
-                        btn.Content = "Update automatically";
-                        btn.Click += UpdateAutomaticallyClick;
-
-                        btn2 = SetButtonAtts(btn2);
-                        btn2.Content = "Update manually";
-                        btn2.Click += UpdateManuallyClick;
-
-                        myBlock.Text = "Update ver" + updateVersion + " available";
-                        myBlock.Foreground = new SolidColorBrush(Colors.DarkRed);
-
-                        tabAbout.Foreground = new SolidColorBrush(Colors.DarkRed);
-                    }
-                    else
-                    {
-                        myBlock.Text = "You are using latest program version";
-                        myBlock.Foreground = new SolidColorBrush(Colors.Black);
-                    }
-
-                    myPanel.Children.Add(myBlock);
-
-                    if (btn != null)
-                        myPanel.Children.Add(btn);
-                    if (btn2 != null)
-                        myPanel.Children.Add(btn2);
-
-                    AboutContent.Children.Add(myPanel);
-
                 }
+
+                Button btn = null;
+                Button btn2 = null;
+                StackPanel myPanel = new StackPanel();
+                TextBlock myBlock = AddTextBlock("", HorizontalAlignment.Center, VerticalAlignment.Top, Colors.DarkGreen);
+
+                if (updateVersion != "")
+                {
+                    btn = new Button();
+                    btn2 = new Button();
+                    btn = SetButtonAtts(btn);
+                    btn.Content = "Update automatically";
+                    btn.Click += UpdateAutomaticallyClick;
+
+                    btn2 = SetButtonAtts(btn2);
+                    btn2.Content = "Update manually";
+                    btn2.Click += UpdateManuallyClick;
+
+                    myBlock.Text = "Update ver" + updateVersion + " available";
+                    myBlock.Foreground = new SolidColorBrush(Colors.DarkRed);
+
+                    tabAbout.Foreground = new SolidColorBrush(Colors.DarkRed);
+                }
+                else
+                {
+                    myBlock.Text = "You are using latest program version";
+                    myBlock.Foreground = new SolidColorBrush(Colors.Black);
+                }
+
+                myPanel.Children.Add(myBlock);
+
+                if (btn != null)
+                    myPanel.Children.Add(btn);
+                if (btn2 != null)
+                    myPanel.Children.Add(btn2);
+
+                AboutContent.Children.Add(myPanel);
             }
         }
 
