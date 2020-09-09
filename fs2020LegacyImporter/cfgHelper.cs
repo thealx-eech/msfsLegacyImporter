@@ -48,6 +48,7 @@ namespace msfsLegacyImporter
 
         public List<CfgLine> readCSV(string content)
         {
+            content = content.Replace("//", ";");
             List<CfgLine> list = new List<CfgLine>();
             foreach (var line in content.Split(new string[] { System.Environment.NewLine },StringSplitOptions.None))
             {
@@ -234,7 +235,7 @@ namespace msfsLegacyImporter
             return availableSections;
         }
 
-        public void enableGauges(string aircraftDirectory, string[] gauges)
+        public void enableGauges(string aircraftDirectory, string[] gauges, int cruiseSpeed)
         {
             if (File.Exists(aircraftDirectory + "\\cockpit.cfg") && gauges.Length > 0)
             {
@@ -262,7 +263,28 @@ namespace msfsLegacyImporter
                                     //Console.WriteLine("availableGaugeLines found in section " + sect.Name + " lines " + sect.Lines.Count);
                                     foreach (var cfgLine in sect.Lines)
                                     {
-                                        text = new UTF8Encoding(true).GetBytes(cfgLine.Name + " = " + cfgLine.Value + " ; " + cfgLine.Comment + System.Environment.NewLine);
+                                        // AIRSPEED INDICATOR ADJUSTMENTS
+                                        if (cruiseSpeed > 0 && sect.Name.ToString() == "[AIRSPEED]") {
+                                            switch (cfgLine.Name.ToString())
+                                            {
+                                                case "white_start":
+                                                    cfgLine.Value = Math.Max(30, cruiseSpeed/3).ToString();
+                                                    break;
+                                                case "white_end":
+                                                case "green_start":
+                                                    cfgLine.Value = Math.Max(50, cruiseSpeed/2).ToString(); ;
+                                                    break;
+                                                case "green_end":
+                                                case "highlimit":
+                                                    cfgLine.Value = (cruiseSpeed).ToString();
+                                                    break;
+                                                case "max":
+                                                    cfgLine.Value = (1.1 * cruiseSpeed).ToString();
+                                                    break;
+                                            }
+                                        }
+
+                                         text = new UTF8Encoding(true).GetBytes(cfgLine.Name + " = " + cfgLine.Value + " ; " + cfgLine.Comment + System.Environment.NewLine);
                                         fs.Write(text, 0, text.Length);
                                     }
 
@@ -301,6 +323,28 @@ namespace msfsLegacyImporter
             }
 
             return lightsList;
+        }
+
+        public string[] getContactPoints(string aircraftDirectory)
+        {
+            string[] contactPointsList = new string[100];
+            int i = 0;
+
+            if (File.Exists(aircraftDirectory + "\\flight_model.cfg"))
+            {
+                string content = System.IO.File.ReadAllText(aircraftDirectory + "\\flight_model.cfg");
+                foreach (string line in Regex.Split(content, "\r\n|\r|\n"))
+                {
+                    if (line.ToLower().Trim().StartsWith("point."))
+                    {
+                        contactPointsList[i] = line;
+                        //Console.WriteLine(line);
+                        i++;
+                    }
+                }
+            }
+
+            return contactPointsList;
         }
 
 

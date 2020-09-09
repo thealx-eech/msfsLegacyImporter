@@ -14,6 +14,7 @@ using System.Reflection;
 using static msfsLegacyImporter.cfgHelper;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Globalization;
 
 namespace msfsLegacyImporter
 {
@@ -32,6 +33,9 @@ namespace msfsLegacyImporter
 
         string SourceFolder = "";
         string TargetFolder = "";
+
+        int cruiseSpeed = 0;
+
         public MainWindow()
         {
             try
@@ -73,9 +77,11 @@ namespace msfsLegacyImporter
         private void BtnOpenFile_Click(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.InitialDirectory = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath",
+            string defaultPath = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath",
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
+            dialog.RestoreDirectory = (String.IsNullOrEmpty(defaultPath) || defaultPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)) ? true : false;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 setAircraftDirectory(dialog.FileName);
@@ -118,6 +124,7 @@ namespace msfsLegacyImporter
             SummaryEngines();
             SummaryCockpit();
             SummarySystems();
+            SummaryFlightModel();
             SummaryTextures();
             SummaryAir();
 
@@ -143,6 +150,12 @@ namespace msfsLegacyImporter
                         else
                             item.Visibility = Visibility.Collapsed;
                         break;
+                    case "tabFlightModel":
+                        if (File.Exists(aircraftDirectory + "\\flight_model.cfg"))
+                            item.Visibility = Visibility.Visible;
+                        else
+                            item.Visibility = Visibility.Collapsed;
+                        break;
                     case "tabEngines":
                         if (File.Exists(aircraftDirectory + "\\engines.cfg"))
                             item.Visibility = Visibility.Visible;
@@ -155,6 +168,8 @@ namespace msfsLegacyImporter
                 }
             }
         }
+
+        // AIRCRAFT START
         private void BtnAircraftProcess_Click(object sender, RoutedEventArgs e)
         {
             if (!File.Exists(aircraftDirectory + "\\aircraft.cfg"))
@@ -196,14 +211,25 @@ namespace msfsLegacyImporter
                 int criticalIssues = 4;
                 string[] requiredValues = new string[] { "ui_certified_ceiling", "ui_max_range", "ui_autonomy", "cruise_speed" };
 
-                string content = System.IO.File.ReadAllText(aircraftDirectory + "\\aircraft.cfg");
+                string content = File.ReadAllText(aircraftDirectory + "\\aircraft.cfg");
+                if (File.Exists(aircraftDirectory + "\\flight_model.cfg"))
+                    content += File.ReadAllText(aircraftDirectory + "\\flight_model.cfg");
                 List<CfgLine> acLines = CfgHelper.readCSV(content);
                 foreach (var line in acLines)
                 {
-                    if (requiredValues.Contains(line.Name))
+                    if (requiredValues.Contains(line.Name) && !String.IsNullOrEmpty(line.Value.Trim('"').Trim()))
                     {
-                        requiredValues = requiredValues.Where(val => val != line.Name).ToArray();
-                        criticalIssues++;
+                        int num = int.Parse(line.Value.Contains('.') ? line.Value.Trim('"').Split('.')[0] : line.Value.Trim('"'), NumberStyles.Any);
+                        if (num > 0)
+                        {
+                            if (line.Name == "cruise_speed")
+                            {
+                                //Console.WriteLine(line.Value);
+                                cruiseSpeed = int.Parse(line.Value.Contains('.') ? line.Value.Trim('"').Split('.')[0] : line.Value.Trim('"'), NumberStyles.Any);
+                            }
+                            requiredValues = requiredValues.Where(val => val != line.Name).ToArray();
+                            criticalIssues--;
+                        }
                     }
                 }
 
@@ -211,12 +237,12 @@ namespace msfsLegacyImporter
                 {
                     int i = 0;
                     foreach (var requiredValue in requiredValues)
-                        AircraftProcess = AddCheckBox(AircraftProcess, requiredValue + " description parameter missing", Colors.DarkOrange, i++);
+                        AircraftProcess = AddCheckBox(AircraftProcess, requiredValue + " performance parameter missing", Colors.DarkOrange, i++);
 
 
                     Button btn = new Button();
                     btn = SetButtonAtts(btn);
-                    btn.Content = "Add missing description parameters";
+                    btn.Content = "Try to add missing performance parameters";
                     btn.Click += AddDescriptionClick;
                     myPanel.Children.Add(btn);
                 }
@@ -334,12 +360,14 @@ namespace msfsLegacyImporter
 
             SummaryUpdate();
         }
+        // AIRCRAFT END
 
         public void SummaryAir()
         {
 
         }
 
+        // ENGINES START
         public void SummaryEngines()
         {
             EnginesData.Children.Clear();
@@ -355,21 +383,26 @@ namespace msfsLegacyImporter
                         EnginesData = AddCheckBox(EnginesData, line.Name + " = " + line.Value, Colors.DarkRed, criticalIssues++);
 
                 StackPanel myPanel2 = new StackPanel();
+
+                Button btn = new Button();
+                btn = SetButtonAtts(btn);
+
                 if (criticalIssues > 0)
                 {
-                    Button btn = new Button();
-                    btn = SetButtonAtts(btn);
-                    btn.Content = "Fix engine issues";
+                    btn.Content = "Fix engines issues";
                     btn.Click += FixengineClick;
-                    myPanel2.Children.Add(btn);
+
                     tabEngines.Foreground = new SolidColorBrush(Colors.DarkRed);
                 }
                 else
                 {
-                    TextBlock myBlock = AddTextBlock("No engine issues found", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkGreen);
-                    myPanel2.Children.Add(myBlock);
+                    btn.Content = "No engines issues";
+                    btn.IsEnabled = false;
+
                     tabEngines.Foreground = new SolidColorBrush(Colors.DarkGreen);
                 }
+
+                myPanel2.Children.Add(btn);
                 EnginesData.Children.Add(myPanel2);
             }
         }
@@ -413,7 +446,9 @@ namespace msfsLegacyImporter
 
             SummaryUpdate();
         }
+        // ENGINES END
 
+        // SYSTEMS START
         public void SummarySystems()
         {
             SystemsData.Children.Clear();
@@ -425,25 +460,27 @@ namespace msfsLegacyImporter
                     if (!String.IsNullOrEmpty(light) && light[0] == '-')
                         SystemsData = AddCheckBox(SystemsData, light.Substring(1, light.Length - 1), Colors.DarkRed, lightsBroken++);
 
-                if (lightsBroken > 0)
-                {
-                    StackPanel myPanel = new StackPanel();
-                    Button btn = new Button();
-                    btn = SetButtonAtts(btn);
-                    btn.Content = "Fix broken lights";
-                    btn.Click += FixLightsClick;
-                    myPanel.Children.Add(btn);
-                    SystemsData.Children.Add(myPanel);
-                }
+                StackPanel myPanel2 = new StackPanel();
+                Button btn = new Button();
+                btn = SetButtonAtts(btn);
 
                 if (lightsBroken > 0)
                 {
+                    btn.Content = "Fix broken lights";
+                    btn.Click += FixLightsClick;
+
                     tabSystems.Foreground = new SolidColorBrush(Colors.DarkRed);
                 }
                 else
                 {
+                    btn.Content = "No lights issues";
+                    btn.IsEnabled = false;
+
                     tabSystems.Foreground = new SolidColorBrush(Colors.DarkGreen);
                 }
+
+                myPanel2.Children.Add(btn);
+                SystemsData.Children.Add(myPanel2);
 
                 //SystemContent.Foreground = new SolidColorBrush(Colors.Black);
             }
@@ -475,7 +512,7 @@ namespace msfsLegacyImporter
                                     // FSX light.0 = 3,  -39.00, -23.6,  -0.25, fx_navredm ,
                                     string[] fsxLight = val.Split('=');
                                     if (fsxLight.Length >= 2) {
-                                        string fsxNum = fsxLight[0].Replace("light.","");
+                                        string fsxNum = fsxLight[0].Trim().Replace("light.","");
                                         string[] fsxData = fsxLight[1].Split(',');
                                         if (fsxData.Length >= 5)
                                         {
@@ -492,8 +529,8 @@ namespace msfsLegacyImporter
                                                 content = content.Replace(val, msfsLight);
                                                 i++;
 
-                                                Console.WriteLine(val);
-                                                Console.WriteLine(msfsLight);
+                                                //Console.WriteLine(val);
+                                                //Console.WriteLine(msfsLight);
                                             }
                                         }
                                     }
@@ -561,7 +598,234 @@ namespace msfsLegacyImporter
         {
             return fsxType;
         }
+        // SYSTEMS END
 
+        // FLIGHT MODEL START
+        public void SummaryFlightModel()
+        {
+            FlightModelData.Children.Clear();
+
+            if (aircraftDirectory != "" && File.Exists(aircraftDirectory + "\\flight_model.cfg"))
+            {
+                int contactPointsBroken = 0;
+                string[] contactPoints = CfgHelper.getContactPoints(aircraftDirectory);
+                string[] possiblyDamaged = new string[100];
+                int possiblyDamagedCounter = 0;
+
+                int firstCounter = 0;
+                foreach (string firstContactPoint in contactPoints)
+                {
+                    int secondCounter = 0;
+
+                    if (String.IsNullOrEmpty(firstContactPoint))
+                        continue;
+
+                    foreach (string secondContactPoint in contactPoints)
+                    {
+                        if (String.IsNullOrEmpty(secondContactPoint))
+                            continue;
+
+                        if (!String.IsNullOrEmpty(firstContactPoint) && !String.IsNullOrEmpty(secondContactPoint) && firstContactPoint != secondContactPoint &&
+                            secondCounter > firstCounter)
+                        {
+                            double[] testOne = parseContactPoint(firstContactPoint);
+                            double[] testTwo = parseContactPoint(secondContactPoint);
+
+                            if (testOne.Length >= 5 && testTwo.Length >= 5)
+                            {
+                                double distance = Math.Pow(
+                                        Math.Pow(testTwo[2] - testOne[2], 2) +
+                                        Math.Pow(testTwo[3] - testOne[3], 2) +
+                                        Math.Pow(testTwo[4] - testOne[4], 2), 
+                                    0.5);
+
+                                if (distance <= 4)
+                                {
+                                    Color color;
+                                    if (distance <= 2)
+                                        color = Colors.DarkRed;
+                                    else
+                                        color = Colors.DarkOrange;
+
+                                    FlightModelData = AddCheckBox(FlightModelData, firstContactPoint, color, contactPointsBroken++);
+                                    FlightModelData = AddCheckBox(FlightModelData, secondContactPoint, color, contactPointsBroken);
+
+                                    StackPanel myPanel = new StackPanel();
+                                    myPanel.Height = 16;
+                                    myPanel.VerticalAlignment = VerticalAlignment.Top;
+                                    myPanel.Margin = new Thickness(30,0,0,10);
+
+                                    TextBlock myBlock = AddTextBlock(distance.ToString("N2") + "ft between landing gear points", HorizontalAlignment.Left, VerticalAlignment.Top, color);
+                                    myPanel.Children.Add(myBlock);
+                                    FlightModelData.Children.Add(myPanel);
+                                }
+                            } 
+                            else if (firstCounter == 0 && (testOne.Length < 5 ? testOne.Length == 1 : testTwo.Length == 1))
+                            {
+                                possiblyDamaged[possiblyDamagedCounter] = testOne.Length < 5 ? firstContactPoint : secondContactPoint;
+                                possiblyDamagedCounter++;
+                            }
+                        }
+
+                        secondCounter++;
+                    }
+
+                    firstCounter++;
+                }
+
+                StackPanel myPanel2 = new StackPanel();
+                Button btn = new Button();
+                btn = SetButtonAtts(btn);
+
+                if (contactPointsBroken > 0)
+                {
+                    btn.Content = "Fix contact points duplicates";
+                    btn.Click += FixContactsClick;
+
+                    tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkRed);
+                }
+                else
+                {
+                    btn.Content = "No contact points issues";
+                    btn.IsEnabled = false;
+
+                    tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkGreen);
+                }
+
+                myPanel2.Children.Add(btn);
+
+                // BROKEN POINTS WARNING
+                if (possiblyDamagedCounter > 0)
+                {
+                    TextBlock headeBlock = AddTextBlock("Contact points that possibly formatted incorrectly, press Edit button and fix values manually", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black);
+                    myPanel2.Children.Add(headeBlock);
+
+                    foreach (string val in possiblyDamaged)
+                    {
+                        TextBlock myBlock = AddTextBlock(val, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkRed);
+                        myPanel2.Children.Add(myBlock);
+                    }
+
+                    tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkRed);
+                }
+
+                FlightModelData.Children.Add(myPanel2);
+            }
+        }
+
+        private double[] parseContactPoint(string val)
+        {
+            // point.0 = 1,  43.00,   -0.05,  -9.70, 1600, 0, 1.442, 55.92, 0.6, 2.5, 0.9, 4.0, 4.0, 0, 220.0, 250.0 ; 
+            string[] contactPoint = val.Split('=');
+            if (contactPoint.Length >= 2)
+            {
+                string fsxNum = contactPoint[0].Replace("point.", "").Trim();
+                string[] fsxData = contactPoint[1].Split(',');
+                if (fsxData.Length >= 4)
+                {
+                    Regex digRregex = new Regex("[0-9.-]+");
+                    if (digRregex.IsMatch(fsxNum) && fsxData[0].Replace(" ", "").Trim() == "1")
+                    {
+                        double[] msfsData = new double[fsxData.Length+1];
+                        msfsData[0] = int.Parse(fsxNum);
+
+                        int i = 0;
+                        for (; i < fsxData.Length; i++)
+                        {
+                            string word = Regex.Replace(fsxData[i], "[^-0-9.]", "").TrimEnd('.');;
+                            if (!word.Contains('.'))
+                                word += ".0";
+
+                            double num;
+                            bool validNum = double.TryParse(word, NumberStyles.Any, CultureInfo.InvariantCulture, out num);
+                            if (validNum)
+                                msfsData[i + 1] = num;
+                            else
+                            {
+                                Console.WriteLine("Bad contact point coordinate: '" + fsxData[i].Replace(" ", "").Trim() + "'");
+                                return new double[] { 1 };
+                            }
+                        }
+
+                        return msfsData;
+                    }
+                }
+            }
+
+            return new double[] { };
+        }
+
+        private void FixContactsClick(object sender, RoutedEventArgs e)
+        {
+            if (File.Exists(aircraftDirectory + "\\flight_model.cfg"))
+            {
+                int i = 0;
+                string content = System.IO.File.ReadAllText(aircraftDirectory + "\\flight_model.cfg");
+
+                string lastPoint = null;
+                foreach (StackPanel panel in FlightModelData.Children)
+                {
+                    if (panel.Children.Count > 0)
+                    {
+                        CheckBox b = new CheckBox();
+                        if (panel.Children[0].GetType() == b.GetType())
+                        {
+                            CheckBox a = (CheckBox)panel.Children[0];
+                            if ((string)a.Content != "Toggle all")
+                            {
+                                string val = a.Content.ToString();
+
+                                if (lastPoint == null)
+                                {
+                                    lastPoint = a.IsChecked == true ? val : "";
+                                }
+                                else
+                                {
+                                    // CALCULATE AVERAGE
+                                    if (!String.IsNullOrEmpty(lastPoint) && a.IsChecked == true)
+                                    {
+                                        //Console.WriteLine(lastPoint + " " + a.Content);
+                                        double[] testOne = parseContactPoint(lastPoint.ToLower().Replace(" ", "").Trim());
+                                        double[] testTwo = parseContactPoint(val.ToLower().Replace(" ", "").Trim());
+
+                                        if (testOne.Length >= 3 && testTwo.Length >= 3)
+                                        {
+                                            testTwo[2] = ((testOne[2] + testTwo[2]) / 2);
+                                            testTwo[3] = ((testOne[3] + testTwo[3]) / 2);
+                                            testTwo[4] = ((testOne[4] + testTwo[4]) / 2);
+
+                                            string newLine = "point." + String.Join(", ", testTwo);
+                                            int index = newLine.IndexOf(",");
+                                            newLine = index >= 0 ? newLine.Substring(0, index) + " =" + newLine.Substring(index + 1) : newLine;
+                                            content = content.Replace(lastPoint, "");
+                                            content = content.Replace(val, newLine);
+
+                                            i++;
+                                        }
+                                    }
+
+                                    lastPoint = null;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (i > 0)
+                {
+                    try { File.WriteAllText(aircraftDirectory + "\\flight_model.cfg", content); }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("Can't write into file " + aircraftDirectory + "\\systems.cfg");
+                    }
+                }
+            }
+
+            SummaryUpdate();
+        }
+        // FLIGHT MODEL END
+
+        // COCKPIT START
         public void SummaryCockpit()
         {
             CockpitData.Children.Clear();
@@ -569,7 +833,7 @@ namespace msfsLegacyImporter
             if (File.Exists(aircraftDirectory + "\\cockpit.cfg"))
             {
                 int gaugesMissing = 0;
-                int gaugesTotal = 0;
+                int requiredMissing = 0;
                 if (aircraftDirectory != "" && File.Exists(aircraftDirectory + @"\cockpit.cfg"))
                 {
                     foreach (var secton in CfgHelper.getInstruments(aircraftDirectory))
@@ -578,9 +842,12 @@ namespace msfsLegacyImporter
                         {
                             if (secton[0] == '-')
                             {
-                                if (secton.Contains("FUEL_QUANTITY") || secton.Contains("AIRSPEED") || secton.Contains("RPM") || 
+                                if (secton.Contains("FUEL_QUANTITY") || secton.Contains("AIRSPEED") || secton.Contains("RPM") ||
                                     secton.Contains("THROTTLE_LEVELS") || secton.Contains("FLAPS_LEVELS"))
+                                {
                                     CockpitData = AddCheckBox(CockpitData, secton.Replace("-", ""), Colors.DarkRed, gaugesMissing++);
+                                    requiredMissing++;
+                                }
                                 else
                                     CockpitData = AddCheckBox(CockpitData, secton.Replace("-", ""), Colors.DarkOrange, gaugesMissing++);
                             }
@@ -594,8 +861,6 @@ namespace msfsLegacyImporter
                                 myPanel.Children.Add(myBlock);
                                 CockpitData.Children.Add(myPanel);
                             }
-
-                            gaugesTotal++;
                         }
                             
                     }
@@ -612,13 +877,9 @@ namespace msfsLegacyImporter
                     CockpitData.Children.Add(myPanel);
                 }
 
-                if (gaugesTotal - gaugesMissing < 5)
+                if (requiredMissing > 0)
                 {
                     tabCockpit.Foreground = new SolidColorBrush(Colors.DarkRed);
-                }
-                else if (gaugesMissing > 0)
-                {
-                    tabCockpit.Foreground = new SolidColorBrush(Colors.DarkOrange);
                 }
                 else
                 {
@@ -651,10 +912,12 @@ namespace msfsLegacyImporter
                 }
             }
 
-            CfgHelper.enableGauges(aircraftDirectory, gauges);
+            CfgHelper.enableGauges(aircraftDirectory, gauges, cruiseSpeed);
             SummaryUpdate();
         }
+        // COCKPIT END
 
+        // TEXTURES START
         public void SummaryTextures()
         {
             TexturesList.Children.Clear();
@@ -700,7 +963,7 @@ namespace msfsLegacyImporter
             }
             else
             {
-                btn.Content = "All textures in DDS format";
+                btn.Content = "No textures issues";
                 btn.IsEnabled = false;
                 tabTextures.Foreground = new SolidColorBrush(Colors.DarkGreen);
             }
@@ -731,7 +994,7 @@ namespace msfsLegacyImporter
 
                             Button button = (Button)sender;
                             if (button.Content.ToString().Contains("ImageTool"))
-                                Process.Start(AppDomain.CurrentDomain.BaseDirectory + "ImageTool.exe", "-nogui -dds -dxt5 -32 -nostop -vflip -o \"" + dds + "\" \"" + bmp + "\"");
+                                Process.Start(AppDomain.CurrentDomain.BaseDirectory + "ImageTool.exe", "-nogui -dds -dxt5 -32 -nostop -o \"" + dds + "\" \"" + bmp + "\"");
                             else
                                 Process.Start(AppDomain.CurrentDomain.BaseDirectory + "nvdxt.exe", "-dxt5 -quality_highest -flip -file \"" + bmp + "\" -output \"" + dds + "\"");
 
@@ -756,6 +1019,7 @@ namespace msfsLegacyImporter
             JSONHelper.scanTargetFolder(projectDirectory);
             SummaryUpdate();
         }
+        // TEXTURES END
 
 
         public string Get_aircraft_directory()
@@ -814,6 +1078,14 @@ namespace msfsLegacyImporter
             }
         }
 
+        private void FlightModelEditClick(object sender, RoutedEventArgs e)
+        {
+            if (File.Exists(aircraftDirectory + "\\flight_model.cfg"))
+            {
+                Process.Start(aircraftDirectory + "\\flight_model.cfg");
+            }
+        }
+
         private void EnginesEditClick(object sender, RoutedEventArgs e)
         {
             if (File.Exists(aircraftDirectory + "\\engines.cfg"))
@@ -836,9 +1108,11 @@ namespace msfsLegacyImporter
         private void BtnOpenTargetFile_Click(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.InitialDirectory = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0", "CommunityPath",
+            string defaultPath = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath",
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
+            dialog.RestoreDirectory = (String.IsNullOrEmpty(defaultPath) || defaultPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)) ? true : false;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 TargetFolder = dialog.FileName + "\\";
@@ -857,9 +1131,11 @@ namespace msfsLegacyImporter
         private void BtnOpenSourceFile_Click(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.InitialDirectory = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0", "SetupPath",
+            string defaultPath = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\microsoft games\\Flight Simulator\\10.0", "SetupPath",
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
+            dialog.RestoreDirectory = (String.IsNullOrEmpty(defaultPath) || defaultPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)) ? true : false;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 if (File.Exists(dialog.FileName + "\\aircraft.cfg"))
@@ -899,7 +1175,7 @@ namespace msfsLegacyImporter
 
                 JSONHelper.createManifest(this, SourceFolder, TargetFolder + PackageDir.Text + "\\", data);
             }
-    }
+        }
 
         private void BtnScan_Click(object sender, RoutedEventArgs e)
         {
@@ -976,6 +1252,7 @@ namespace msfsLegacyImporter
             }
         }
 
+        // UPDATES START
         public async System.Threading.Tasks.Task CheckUpdateAsync()
         {
             string pubVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -1004,7 +1281,7 @@ namespace msfsLegacyImporter
                                 updateVersion = ver.ToString();
                                 updateURL = updatedirectory + url;
                             }
-                            Console.WriteLine(ver + " " + pubVer);
+                            //Console.WriteLine(ver + " " + pubVer);
                         }
                     }
                 }
@@ -1099,6 +1376,7 @@ namespace msfsLegacyImporter
                 AboutContent.Children.Add(myPanel);
             }
         }
+        // UPDATES END
     }
 
 }

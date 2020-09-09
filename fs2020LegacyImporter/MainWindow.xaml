@@ -11,7 +11,7 @@
         <TabControl Name="fsTabControl" >
             <TabItem Header="Init">
                     <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
-                        <TextBlock Name="Header" TextWrapping="Wrap" Text="Choose imported MSFS Legacy Aircraft folder" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                        <TextBlock Name="Header" TextWrapping="Wrap" Text="Load imported MSFS Legacy Aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
                         <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" VerticalAlignment="Top">
                             <TextBlock Name="btnOpenFilePath"></TextBlock>
                         </WrapPanel>
@@ -30,8 +30,8 @@
                         <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
                             <TextBlock Name="Header2" TextWrapping="Wrap" Text="Import new FSX aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
                             <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,10" VerticalAlignment="Top">
-                                <Button Width="auto" x:Name="btnSourceFolder" Click="BtnOpenSourceFile_Click">FSX aircraft directory</Button>
-                                <Button x:Name="btnTargetFolder" Click="BtnOpenTargetFile_Click">MSFS Community directory</Button>
+                                <Button Width="auto" Name="btnSourceFolder" Click="BtnOpenSourceFile_Click">FSX aircraft directory</Button>
+                                <Button Name="btnTargetFolder" Click="BtnOpenTargetFile_Click">MSFS Community directory</Button>
                             </WrapPanel>
                         <WrapPanel Width="auto" DockPanel.Dock="Top" Margin="5,0,0,5" VerticalAlignment="Top">
                             <TextBlock Name="btnSourceFolderPath" MinWidth="100" HorizontalAlignment="Left"></TextBlock>
@@ -146,6 +146,16 @@
                 </ScrollViewer>
             </TabItem>
 
+            <TabItem Name="tabFlightModel" Header="FlightModel">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <StackPanel VerticalAlignment="Top">
+                        <Button Content="Edit" Click="FlightModelEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                        <StackPanel Name="FlightModelData" VerticalAlignment="Top">
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            
             <TabItem Name="tabTextures" Header="Textures">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel Name="TexturesList" VerticalAlignment="Top" >
