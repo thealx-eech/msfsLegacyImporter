@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -9,294 +12,392 @@ namespace msfsLegacyImporter
 {
     class cfgHelper
     {
-        // cfgFiles
+        // cfg file
         // ---- filename
         // ---- sections
         // --------- sectionname
         // --------- lines
+        // ------------- active
         // ------------- parameter
         // ------------- value
         // ------------- comment
-        private List<CfgFile> cfgFiles;
+        private List<CfgFile> cfgTemplates;
+        private List<CfgFile> cfgAircraft;
+        public long lastChangeTimestamp;
 
 
-        public bool processTemplateCfgs()
+        public bool processCfgfiles(string sourcesPath, bool isAircraft = false)
         {
-            cfgFiles = new List<CfgFile>();
+            List<CfgFile> cfgFiles = new List<CfgFile>();
             List<CfgLine> cfgLines;
 
-            foreach (var file in new[] { "aircraft.cfg", "cameras.cfg", "cockpit.cfg", "engines.cfg", "flight_model.cfg", "gameplay.cfg", "systems.cfg" })
+            foreach (var file in new[] { "aircraft.cfg", "cameras.cfg", "cockpit.cfg", "engines.cfg", "flight_model.cfg", "gameplay.cfg", "systems.cfg", "runway.flt" })
             {
-                string path = AppDomain.CurrentDomain.BaseDirectory + "\\cfgTpl\\" + file;
+                string path = sourcesPath + file;
+
+                if (isAircraft)
+                    Console.WriteLine(file + " file " + (File.Exists(file)? "exists" : "not exists; cfg " + (cfgFileExists(file) ? "exists" : "not exists")));
+
                 if (File.Exists(path))
                 {
-                    string content = System.IO.File.ReadAllText(path);
-                    cfgLines = readCSV(content + "[]");
+                    string content = File.ReadAllText(path);
+                    cfgLines = readCSV(content + "\r\n[]");
                     //Console.WriteLine(cfgLines.First().Name);
-                    parseCfg(file.Split('.')[0], cfgLines);
-                } else
+                    cfgFiles.Add(parseCfg(file, cfgLines));
+                } else if (isAircraft && file.Contains(".flt")) {
+                    cfgFiles.Add(new CfgFile(true, file, new List<CfgSection>()));
+                }
+                else if (!isAircraft)
                 {
                     MessageBox.Show("File does not exists: " + path);
                     return false;
                 }
             }
 
+            if (isAircraft)
+                cfgAircraft = cfgFiles;
+            else
+                cfgTemplates = cfgFiles;
+
             return true;
 
-            //Console.WriteLine(cfgFiles.Last().Sections.Last().Lines.First().Name + " " + cfgFiles.Last().Sections.Last().Lines.First().Value + " " + cfgFiles.Last().Sections.Last().Lines.First().Comment);
+            //Console.WriteLine(cfgTemplates.Last().Sections.Last().Lines.First().Name + " " + cfgTemplates.Last().Sections.Last().Lines.First().Value + " " + cfgTemplates.Last().Sections.Last().Lines.First().Comment);
         }
 
         public List<CfgLine> readCSV(string content)
         {
             content = content.Replace("//", ";");
             List<CfgLine> list = new List<CfgLine>();
-            foreach (var line in content.Split(new string[] { System.Environment.NewLine },StringSplitOptions.None))
+            foreach (string line in Regex.Split(content, "\r\n|\r|\n"))// Split(new string[] { System.Environment.NewLine },StringSplitOptions.None))
             {
-                string[] data = line.Split(';');
-                if (data.Length >= 2)
-                    list.Add(new CfgLine(data[0].Split('=')[0].Trim().ToLower(), data[0].Split('=').Length >= 2 ? data[0].Split('=')[1].Trim().ToLower() : "", data[1].Trim().ToLower()));
-                else if (data.Length == 1)
-                    list.Add(new CfgLine(data[0].Split('=')[0].Trim().ToLower(), data[0].Split('=').Length >= 2 ? data[0].Split('=')[1].Trim().ToLower() : "", ""));
-                else
-                    list.Add(new CfgLine("", "", ""));
+                bool active = true;
+                string fixedLine = line.Trim();
+                string comment = "";
+
+                // STORE ACTIVE FLAG
+                if (/*(fixedLine.Contains("=") || fixedLine.Contains("[") && fixedLine.Contains("]")) && fixedLine[0] == ';' ||*/
+                    fixedLine.Length >= 2 && fixedLine.Substring(0,2) == ";-")
+                {
+                    active = false;
+                    fixedLine = Regex.Replace(fixedLine, @"^([;-]+)", "").Trim();
+                }
+
+                // STORE COMMENTS
+                int pos = fixedLine.IndexOf(";");
+                if (pos >= 0)
+                {
+                    comment = fixedLine.Substring(pos + 1).Trim();
+                    fixedLine = fixedLine.Substring(0, pos).Trim();
+                }
+
+                if (String.IsNullOrEmpty(fixedLine) || !fixedLine.Contains("="))
+                {
+                    list.Add(new CfgLine(active, fixedLine, "", comment));
+                } else
+                {
+                    list.Add(new CfgLine(active, fixedLine.Split('=')[0].Trim().ToLower(), fixedLine.Split('=')[1].Trim(), comment));
+                }
             }
 
-            //list.Reverse();
+            //foreach (var test in list)
+                //Console.WriteLine("<" + test.Active + "> <" + test.Name + "> <" + test.Value + "> <" + test.Comment + ">");
+
             return list;
         }
 
-        private void parseCfg(string file, List<CfgLine> lines)
+        private CfgFile parseCfg(string file, List<CfgLine> lines)
         {
-            //CfgFile currentFile = new CfgFile();
-           // currentFile.Name = file;
-
             List<CfgSection> cfgSections = new List<CfgSection>();
             List<CfgLine> cfgLines = new List<CfgLine>();
-
 
             string currentSection = "";
 
             foreach (var line in lines)
             {
                 // SECTION START CHECK
-                if (!String.IsNullOrEmpty(line.Name))
+                if (!String.IsNullOrEmpty(line.Name) || !String.IsNullOrEmpty(line.Comment))
                 {
-                    if (line.Name.Trim()[0] == '[')
+                    if (!String.IsNullOrEmpty(line.Name) && line.Name[0] == '[')
                     {
                         // ADD FINISHED SECTION
                         if (currentSection != "")
-                        {
-                            cfgSections.Add(new CfgSection(currentSection, cfgLines));
-                        }
+                            cfgSections.Add(new CfgSection(true, currentSection, cfgLines));
 
                         // PREPARE FOR NEW SECTION
-                        currentSection = line.Name.Trim().ToUpper();
+                        currentSection = line.Name.ToUpper();
                         cfgLines = new List<CfgLine>();
 
                     }
                     else if (currentSection != "")
-                    {
-                        cfgLines.Add(new CfgLine(line.Name, line.Value, line.Comment));
-                    }
+                        cfgLines.Add(line);
                 }
             }
 
-            cfgFiles.Add(new CfgFile(file, cfgSections));
+            return new CfgFile(true, file, cfgSections);
         }
 
         public void splitCfg(string aircraftDirectory)
         {
-            string content = System.IO.File.ReadAllText(aircraftDirectory + "\\aircraft.cfg");
-            content += System.Environment.NewLine + "[]"; // TO FINALIZE PARSING
-            content = content.Replace("//", ";"); // REPLACE COMMENT SYMBOLS
+            List<CfgFile> cfgFiles = new List<CfgFile>();
+            processCfgfiles(aircraftDirectory + "\\", true);
 
-            // CHECK FOR NEW LINE SYMBOLS
-            content = Regex.Replace(content, "(?<!\r)\n", "\r\n");
-
-            string currentSection = "";
-
-            // RENAME
-            File.Move(aircraftDirectory + "\\aircraft.cfg", aircraftDirectory + "\\.aircraft.cfg");
-
-            List<CfgLine> aircraftCfg = readCSV(content);
-            List<CfgLine> cfgLines = new List<CfgLine>();
-
-            foreach (var aircraftCfgLine in aircraftCfg)
+            if (cfgTemplates.Count > 0 && cfgFileExists("aircraft.cfg"))
             {
-                // SECTION START CHECK
-                if (!String.IsNullOrEmpty(aircraftCfgLine.Name))
+                foreach (var aircraftSection in cfgAircraft[0].Sections)
                 {
-                    if (aircraftCfgLine.Name.Trim()[0] == '[')
+                    CfgSection cfgTempSection = null;
+                    string cfgTemplateFile = ".unknown.cfg";
+
+                    // FIND SECTION MATCH IN TEMPLATES
+                    foreach (CfgFile tplfiles in cfgTemplates)
                     {
-                        // ADD MISSING LINES AND FINALIZE SECTION
-                        if (currentSection != "")
+                        CfgSection cfgTemplateSection = tplfiles.Sections.Find(x => x.Name == aircraftSection.Name);
+
+                        if (cfgTemplateSection == null)
+                            cfgTemplateSection = tplfiles.Sections.Find(x => x.Name.Contains(".") && aircraftSection.Name.Contains(".") && x.Name.Split('.')[0] == aircraftSection.Name.Split('.')[0]);
+
+                        if (cfgTemplateSection != null)
                         {
+                            cfgTemplateFile = tplfiles.Name;
+                            
+                            // DEEP COPY FOR COMPARISON PURPOSE
+                            cfgTempSection = new CfgSection(cfgTemplateSection.Active, cfgTemplateSection.Name, new List<CfgLine>());
+                            foreach (var cfgTempLine in cfgTemplateSection.Lines)
+                                cfgTempSection.Lines.Add(new CfgLine(cfgTempLine.Active, cfgTempLine.Name, cfgTempLine.Value, cfgTempLine.Comment));
 
-                            bool brk = false;
-                            CfgFile lastFile = null;
-                            CfgSection lastSection = null;
+                            break;
+                        }
+                    }
 
-                            foreach (var cfgFile in cfgFiles)
+                    // BUILD MIXED SECTION
+                    List<CfgLine> cfgLines = new List<CfgLine>();
+
+                    // ADD LEGACY LINES
+                    cfgLines.Add(new CfgLine(true, "", "", ""));
+                    foreach (CfgLine aircraftLine in aircraftSection.Lines)
+                    {
+                        CfgLine cfgTemplateLine = null;
+
+                        if (cfgTempSection != null)
+                        {
+                            cfgTemplateLine = cfgTempSection.Lines.Find(x => x.Name == aircraftLine.Name ||
+                            x.Name.Contains(".") && aircraftLine.Name.Contains(".") && x.Name.Split('.')[0] == aircraftLine.Name.Split('.')[0]);
+                            
+                            if (cfgTemplateLine != null) // ATTRIBUTE FOUND IN TEMPLATE
                             {
-                                lastFile = cfgFile;
-                                foreach (var cfgSection in cfgFile.Sections)
-                                {
-                                    lastSection = cfgSection;
-                                    lastSection.Name = lastSection.Name.Trim().ToUpper();
-
-                                    // MATCH CURRENT VERSION
-                                    if (lastSection.Name == currentSection || 
-                                        lastSection.Name.Contains(".") && currentSection.Contains(".") && lastSection.Name.Split('.')[0] == currentSection.Split('.')[0])
-                                    {
-                                        //Console.WriteLine("Section match: " + currentSection + " - " + lastSection.Name);
-                                        brk = true;
-                                        break;
-                                    } else
-                                    {
-                                        //Console.WriteLine("Section does not match: " + currentSection + " - " + lastSection.Name);
-                                    }
-                                }
-
-                                if (brk)
-                                    break;
+                                cfgTempSection.Lines.Remove(cfgTemplateLine);
+                                if (String.IsNullOrEmpty(aircraftLine.Comment))
+                                    aircraftLine.Comment = cfgTemplateLine.Comment;
                             }
-
-                            // COPY LINES INTO RELATIVE CFG
-                            string filename = brk && lastFile != null ? lastFile.Name + ".cfg" : ".unknown.cfg";
+                            // NOT FOUND
+                            else if (!String.IsNullOrEmpty(aircraftLine.Name) && !String.IsNullOrEmpty(aircraftLine.Value) && !aircraftLine.Name.Contains("."))
                             {
-                                FileInfo fi = new FileInfo(aircraftDirectory + "\\" + filename);
-                                
-                                if (!File.Exists(aircraftDirectory + "\\" + filename))
-                                {
-                                    using (FileStream fs = File.Create(aircraftDirectory + "\\" + filename))
-                                    {
-                                        byte[] text = new UTF8Encoding(true).GetBytes("[VERSION]" + System.Environment.NewLine + "major = 1" + System.Environment.NewLine + "minor = 0" + System.Environment.NewLine);
-                                        // Add some information to the file.
-                                        fs.Write(text, 0, text.Length);
-                                    }
-                                }
-
-                                using (FileStream fs = File.Open(aircraftDirectory + "\\" + filename, FileMode.Append, FileAccess.Write, FileShare.Write))
-                                {
-                                    byte[] text = new UTF8Encoding(true).GetBytes(System.Environment.NewLine + currentSection + System.Environment.NewLine + System.Environment.NewLine);
-                                    fs.Write(text, 0, text.Length);
-
-
-                                    foreach (var cfgLine in cfgLines) {
-                                        text = new UTF8Encoding(true).GetBytes(cfgLine.Name + " = " + cfgLine.Value + " ; " + cfgLine.Comment + System.Environment.NewLine);
-                                        fs.Write(text, 0, text.Length);
-                                    }
-                                }
+                                //aircraftLine.Active = false;
+                                aircraftLine.Comment += " ### ";
                             }
-
-                            // CLEAR LINES LIST
-                            cfgLines = new List<CfgLine>();
+                        }
+                        // SECTION NOT FOUND
+                        else
+                        {
+                            aircraftLine.Active = false;
                         }
 
-                        // PREPARE FOR NEW SECTION
-                        currentSection = aircraftCfgLine.Name.Trim().ToUpper();
-
+                        cfgLines.Add(aircraftLine);
                     }
-                    else if (currentSection != "")
+
+                    // ADD MODERN LINES
+                    if (cfgTempSection != null && cfgTempSection.Lines.Count > 0) {
+                        cfgLines[0].Comment = "LEGACY";
+                        cfgLines.Add(new CfgLine(true, "", "", "MODERN"));
+                        foreach (CfgLine cfgTemplateLine in cfgTempSection.Lines)
+                        {
+                            cfgTemplateLine.Active = false;
+                            cfgLines.Add(cfgTemplateLine);
+                        }
+                    }
+
+                    CfgSection cfgSection = new CfgSection(true, aircraftSection.Name, cfgLines);
+
+                    // ADD SECTION TO FILES LIST
+                    if (cfgFiles != null && cfgFiles.Find(x => x.Name == cfgTemplateFile) != null)
                     {
-                        cfgLines.Add(new CfgLine(aircraftCfgLine.Name, aircraftCfgLine.Value, aircraftCfgLine.Comment));
+                        cfgFiles.Find(x => x.Name == cfgTemplateFile).Sections.Add(cfgSection);
                     }
+                    else
+                    {
+                        List<CfgSection> cfgSections = new List<CfgSection>();
+                        
+                        cfgSections.Add(new CfgSection(true, "[VERSION]", new List<CfgLine>()));
+                        cfgSections[0].Lines.Add(new CfgLine(true, "major", "1", ""));
+                        cfgSections[0].Lines.Add(new CfgLine(true, "minor", "0", ""));
+
+                        cfgSections.Add(cfgSection);
+                        cfgFiles.Add(new CfgFile(true, cfgTemplateFile, cfgSections));
+                    }
+
                 }
-           }
-        }
 
+                // RENAME ORIGINAL AIRCRAFT.CFG
+                File.Move(aircraftDirectory + "\\aircraft.cfg", aircraftDirectory + "\\.aircraft.cfg");
 
-        public string[] getInstruments(string aircraftDirectory)
-        {
-            CfgFile availableCockpitSections = cfgFiles.Find(x => x.Name == "cockpit");
-            string[] availableSections = new string[100];
-            string[] installedSections = new string[100];
-            List<CfgLine> installedCockpitSections = new List<CfgLine>();
+                // SAVE FILES
+                foreach (CfgFile cfgFile in cfgFiles)
+                {
+                    saveCfgFile(aircraftDirectory, cfgFile);
+                }
 
-            if (File.Exists(aircraftDirectory + "\\cockpit.cfg"))
-            {
-                string content = System.IO.File.ReadAllText(aircraftDirectory + "\\cockpit.cfg");
-                installedCockpitSections = readCSV(content + "[]");
+                //cfgAircraft = cfgFiles;
+                processCfgfiles(aircraftDirectory + "\\", true);
             }
 
-            if (availableCockpitSections != null)
+
+        }
+
+        public bool cfgFileExists(string filename)
+        {
+            return cfgAircraft != null && cfgAircraft.Count > 0 && cfgAircraft.Find(x => x.Name == filename) != null;
+        }
+
+        public void saveCfgFiles(string aircraftDirectory, string[] files)
+        {
+            foreach (CfgFile cfgFile in cfgAircraft)
+            {
+                if (files.Length > 0 && !files.Contains(cfgFile.Name))
+                    continue;
+
+                saveCfgFile(aircraftDirectory, cfgFile);
+            }
+        }
+        void saveCfgFile(string aircraftDirectory, CfgFile cfgFile)
+        {
+            lastChangeTimestamp = DateTime.UtcNow.Ticks;
+
+            if (File.Exists(aircraftDirectory + "\\" + cfgFile.Name))
+            {
+                try { File.Delete(aircraftDirectory + "\\" + cfgFile.Name); }
+                catch (Exception)
+                {
+                    MessageBox.Show("Can't update file " + aircraftDirectory + "\\" + cfgFile.Name);
+                    return;
+                }
+            }
+
+
+            if (!File.Exists(aircraftDirectory + "\\" + cfgFile.Name))
+            {
+                using (FileStream fs = File.Create(aircraftDirectory + "\\" + cfgFile.Name))
+                {
+                    byte[] text = new UTF8Encoding(true).GetBytes("");// new UTF8Encoding(true).GetBytes("[VERSION]" + System.Environment.NewLine + "major = 1" + System.Environment.NewLine + "minor = 0" + System.Environment.NewLine);
+                    fs.Write(text, 0, text.Length);
+                }
+            }
+
+            using (FileStream fs = File.Open(aircraftDirectory + "\\" + cfgFile.Name, FileMode.Append, FileAccess.Write, FileShare.Write))
+            {
+                foreach (CfgSection cfgSection in cfgFile.Sections)
+                {
+                    byte[] text = new UTF8Encoding(true).GetBytes(System.Environment.NewLine + (!cfgSection.Active ? ";*" : "") + cfgSection.Name + System.Environment.NewLine + System.Environment.NewLine);
+                    fs.Write(text, 0, text.Length);
+
+
+                    foreach (CfgLine cfgLine in cfgSection.Lines)
+                    {
+                        if (!String.IsNullOrEmpty(cfgLine.Name) || !String.IsNullOrEmpty(cfgLine.Value) || !String.IsNullOrEmpty(cfgLine.Comment))
+                        {
+                            if (String.IsNullOrEmpty(cfgLine.Name) && String.IsNullOrEmpty(cfgLine.Value))
+                                text = new UTF8Encoding(true).GetBytes("; " + cfgLine.Comment + System.Environment.NewLine);
+                            else
+                                text = new UTF8Encoding(true).GetBytes((!cfgLine.Active ? ";-" : "") + cfgLine.Name + " = " + cfgLine.Value + " ; " + cfgLine.Comment + System.Environment.NewLine);
+                            fs.Write(text, 0, text.Length);
+                        }
+                    }
+                }
+            }
+        }
+
+        public string[] getSectionsList(string aircraftDirectory, string filename)
+        {
+            CfgFile availableSections = cfgTemplates.Find(x => x.Name == filename);
+            CfgFile installedSections = cfgAircraft.Find(x => x.Name == filename);
+            string[] sections = new string[100];
+
+            if (availableSections != null)
             {
                 int i = 0;
-                foreach (var cockpitSection in availableCockpitSections.Sections)
+                foreach (var cockpitSection in availableSections.Sections)
                 {
-                    if (installedCockpitSections.Find(x => x.Name.ToUpper() == cockpitSection.Name.ToUpper()) != null )
-                        availableSections[i] = cockpitSection.Name.ToUpper() + Environment.NewLine;
+                    if (installedSections.Sections.Find(x => x.Name == cockpitSection.Name) != null )
+                        sections[i] = cockpitSection.Name + Environment.NewLine;
                     else
-                        availableSections[i] = "-" + cockpitSection.Name.ToUpper() + Environment.NewLine;
+                        sections[i] = "-" + cockpitSection.Name.ToUpper() + Environment.NewLine;
                     i++;
                 }
             }
 
-            return availableSections;
+            return sections;
         }
 
-        public void enableGauges(string aircraftDirectory, string[] gauges, int cruiseSpeed)
+        public void insertSections(string aircraftDirectory, string filename, string[] sections, int cruiseSpeed, bool active)
         {
-            if (File.Exists(aircraftDirectory + "\\cockpit.cfg") && gauges.Length > 0)
+            if (cfgFileExists(filename) && sections.Length > 0)
             {
-                using (FileStream fs = File.Open(aircraftDirectory + "\\cockpit.cfg", FileMode.Append, FileAccess.Write, FileShare.Write))
+                CfgFile availableSections = cfgTemplates.Find(x => x.Name == filename);
+                CfgFile cfgFile = cfgAircraft.Find(x => x.Name == filename);
+
+                if (availableSections != null)
                 {
-                    CfgFile availableCockpitSections = cfgFiles.Find(x => x.Name == "cockpit");
-
-                    if (availableCockpitSections != null)
+                    foreach (var section in sections)
                     {
+                        if (String.IsNullOrEmpty(section))
+                            break;
 
-                        foreach (var gauge in gauges)
+                        foreach (var sect in availableSections.Sections)
                         {
-                            if (String.IsNullOrEmpty(gauge))
-                                break;
+                            var pattern = @"\[(.*?)\]";
 
-                            byte[] text = new UTF8Encoding(true).GetBytes(System.Environment.NewLine + gauge + System.Environment.NewLine);
-                            fs.Write(text, 0, text.Length);
-
-                            foreach (var sect in availableCockpitSections.Sections)
+                            if (Regex.Matches(sect.Name, pattern)[0].Groups[1].ToString().Trim() == Regex.Matches(section, pattern)[0].Groups[1].ToString().Trim())
                             {
-                                var pattern = @"\[(.*?)\]";
+                                //Console.WriteLine("availableGaugeLines found in section " + sect.Name + " lines " + sect.Lines.Count);
+                                List <CfgLine> newLines = new List<CfgLine>();
 
-                                if (Regex.Matches(sect.Name, pattern)[0].Groups[1].ToString().Trim() == Regex.Matches(gauge, pattern)[0].Groups[1].ToString().Trim())
+                                foreach (var cfgLine in sect.Lines)
                                 {
-                                    //Console.WriteLine("availableGaugeLines found in section " + sect.Name + " lines " + sect.Lines.Count);
-                                    foreach (var cfgLine in sect.Lines)
-                                    {
-                                        // AIRSPEED INDICATOR ADJUSTMENTS
-                                        if (cruiseSpeed > 0 && sect.Name.ToString() == "[AIRSPEED]") {
-                                            switch (cfgLine.Name.ToString())
-                                            {
-                                                case "white_start":
-                                                    cfgLine.Value = Math.Max(30, cruiseSpeed/3).ToString();
-                                                    break;
-                                                case "white_end":
-                                                case "green_start":
-                                                    cfgLine.Value = Math.Max(50, cruiseSpeed/2).ToString(); ;
-                                                    break;
-                                                case "green_end":
-                                                case "highlimit":
-                                                    cfgLine.Value = (cruiseSpeed).ToString();
-                                                    break;
-                                                case "max":
-                                                    cfgLine.Value = (1.1 * cruiseSpeed).ToString();
-                                                    break;
-                                            }
+                                    // AIRSPEED INDICATOR ADJUSTMENTS
+                                    if (cruiseSpeed > 0 && sect.Name.ToString() == "[AIRSPEED]") {
+                                        switch (cfgLine.Name.ToString())
+                                        {
+                                            case "white_start":
+                                                cfgLine.Value = Math.Max(20, cruiseSpeed/3).ToString();
+                                                break;
+                                            case "white_end":
+                                            case "green_start":
+                                                cfgLine.Value = Math.Max(30, cruiseSpeed/2).ToString(); ;
+                                                break;
+                                            case "green_end":
+                                            case "highlimit":
+                                                cfgLine.Value = (cruiseSpeed).ToString();
+                                                break;
+                                            case "max":
+                                                cfgLine.Value = (1.1 * cruiseSpeed).ToString();
+                                                break;
                                         }
-
-                                         text = new UTF8Encoding(true).GetBytes(cfgLine.Name + " = " + cfgLine.Value + " ; " + cfgLine.Comment + System.Environment.NewLine);
-                                        fs.Write(text, 0, text.Length);
                                     }
 
-                                    break;
+                                    newLines.Add(new CfgLine(active, cfgLine.Name, cfgLine.Value, cfgLine.Comment));
                                 }
+
+                                CfgSection newSection = new CfgSection(true, sect.Name, newLines);
+                                cfgFile.Sections.Add(newSection);
+                                break;
                             }
                         }
                     }
-                    else
-                    {
-                        Console.WriteLine("availableCockpitSections is null: cockpit");
-                    }
+
+                    saveCfgFile(aircraftDirectory, cfgFile);
+                }
+                else
+                {
+                    Console.WriteLine("availableSections is null: cockpit");
                 }
             }
         }
@@ -306,20 +407,16 @@ namespace msfsLegacyImporter
             string[] lightsList = new string[100];
             int i = 0;
 
-            if (File.Exists(aircraftDirectory + "\\systems.cfg"))
+            if (cfgFileExists("systems.cfg"))
             {
-                string content = System.IO.File.ReadAllText(aircraftDirectory + "\\systems.cfg");
-                foreach (string line in Regex.Split(content, "\r\n|\r|\n")) {
-                    if (line.ToLower().Trim().StartsWith("lightdef."))
-                    {
-                        lightsList[i] = line;
-                        i++;
-                    } else if (line.ToLower().Trim().StartsWith("light."))
-                    {
-                        lightsList[i] = "-" + line;
-                        i++;
-                    }
-                }
+                CfgSection section = cfgAircraft.Find(x => x.Name == "systems.cfg").Sections.Find(x => x.Name == "[LIGHTS]");
+                if (section != null)
+                    foreach (CfgLine line in section.Lines)
+                        if (line.Active && line.Name.StartsWith("light."))
+                        {
+                            lightsList[i] = line.Name + " = " + line.Value;
+                            i++;
+                        }
             }
 
             return lightsList;
@@ -330,53 +427,209 @@ namespace msfsLegacyImporter
             string[] contactPointsList = new string[100];
             int i = 0;
 
-            if (File.Exists(aircraftDirectory + "\\flight_model.cfg"))
+            if (cfgFileExists("flight_model.cfg"))
             {
-                string content = System.IO.File.ReadAllText(aircraftDirectory + "\\flight_model.cfg");
-                foreach (string line in Regex.Split(content, "\r\n|\r|\n"))
-                {
-                    if (line.ToLower().Trim().StartsWith("point."))
-                    {
-                        contactPointsList[i] = line;
-                        //Console.WriteLine(line);
-                        i++;
-                    }
-                }
+                CfgSection section = cfgAircraft.Find(x => x.Name == "flight_model.cfg").Sections.Find(x => x.Name == "[CONTACT_POINTS]");
+
+                if (section != null)
+                    foreach (CfgLine line in section.Lines)
+                        if (line.Active && line.Name.StartsWith("point."))
+                        {
+                            contactPointsList[i] = line.Name + " = " + line.Value;
+                            //Console.WriteLine(contactPointsList[i]);
+                            i++;
+                        }
             }
 
             return contactPointsList;
         }
 
+        public void adjustEnginesPower(string aircraftDirectory, double multiplier)
+        {
+            CfgFile cfgFile = cfgAircraft.Find(x => x.Name == "engines.cfg");
+
+            if (cfgFile != null)
+            {
+                string attr = "";
+                string sect = "";
+
+                string engine_type = getCfgValue("engine_type", "[GENERALENGINEDATA]", "engines.cfg");
+                if (engine_type == "1" || engine_type == "5") // JET
+                {
+                    attr = "static_thrust";
+                    sect = "[TURBINEENGINEDATA]";
+                }
+                else if (engine_type == "0") // PISTON
+                {
+                    attr = "power_scalar";
+                    sect = "[PISTON_ENGINE]";
+                } else if (engine_type == "5") // TURBOPROP
+                {
+                    attr = "power_scalar";
+                    sect = "[TURBOPROP_ENGINE]";
+                }
+
+                if (attr != "" && sect != "") {
+                    string thrust = getCfgValue(attr, sect, "engines.cfg");
+                    if (thrust != "")
+                    {
+                        double.TryParse(thrust.Replace(",", ".").Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double num);
+                        if (num > 0)
+                        {
+                            double newThrust = Math.Max((num * multiplier), 0.001);
+                            if (attr == "power_scalar")
+                                newThrust = Math.Min((num * multiplier), 1.9);
+                            string newThrustString = newThrust.ToString("0.###");
+                            MessageBoxResult messageBoxResult = MessageBox.Show("Old value: " + num + "\n" + "New value: " + newThrustString, "Engines power adjustment", System.Windows.MessageBoxButton.YesNo);
+                            if (messageBoxResult == MessageBoxResult.Yes)
+                            {
+                                setCfgValue(aircraftDirectory, attr, newThrustString, "engines.cfg", sect);
+                                saveCfgFiles(aircraftDirectory, new string[] {"engines.cfg"});
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         // MISC STUFF
+
+        // IF NO ACTIVE FLAG PROVIDED - ATTRIBUTE WILL BE SET TO 'ACTIVE'
+        // SECTION CAN BE EMPTY BUT NEW VALUE WILL BE NOT CREATED IF NOT FOUND
+
+        // FILE NAME OCNVERTED TO LOWERCASE
+        // SECTION NAME CONVERTED TO UPPERCASE
+        // ATTRIBUTE NAME CONVERTED TO LOWERCASE
+        // VALUE AND COMMENT - WHITESPACES TRIM ONLY
+        public bool setCfgValue(string aircraftDirectory, string attrname, string value, string filename, string sectionname = "", bool active = true, string comment = "")
+        {
+            // TODO: ADD MISSING SECTION
+            if (cfgAircraft.Count >= 1)
+            {
+                foreach (CfgFile cfgFile in cfgAircraft)
+                {
+                    if (!String.IsNullOrEmpty(filename) && cfgFile.Name != filename.Trim().ToLower())
+                        continue;
+
+                    foreach (CfgSection cfgSection in cfgFile.Sections)
+                    {
+                        if (!String.IsNullOrEmpty(sectionname) && cfgSection.Name != sectionname.Trim().ToUpper())
+                            continue;
+
+                        foreach (CfgLine cfgLine in cfgSection.Lines)
+                        {
+                            // UPDATE EXISTING ATTR
+                            if (cfgLine.Name == attrname.Trim().ToLower())
+                            {
+                                cfgLine.Active = active;
+                                cfgLine.Value = value.Trim();
+                                if (!String.IsNullOrEmpty(comment))
+                                    cfgLine.Comment = comment.Trim();
+
+                                Console.WriteLine("setCfgExisting: " + cfgFile.Name + "/" + cfgSection.Name + "/" + cfgLine.Name + " = " + cfgLine.Value);
+                                //saveCfgFile(aircraftDirectory, cfgFile);
+
+                                return true;
+                            }
+                        }
+
+                        // CREATE NEW ATTR
+                        if (!String.IsNullOrEmpty(filename) && !String.IsNullOrEmpty(sectionname))
+                        {
+                            CfgLine cfgLine = new CfgLine(active, attrname.Trim().ToLower(), value, comment);
+                            cfgSection.Lines.Add(cfgLine);
+
+                            Console.WriteLine("setCfgNew: " + cfgFile.Name + "/" + cfgSection.Name + "/" + cfgLine.Name + " = " + cfgLine.Value);
+
+                            //saveCfgFile(aircraftDirectory, cfgFile);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        // RETURN EMPTY IF NOT FOUND
+        public string getCfgValue(string attrname, string sectionname, string filename = "")
+        {
+            if (cfgAircraft.Count >= 1)
+            {
+                foreach (CfgFile cfgFile in cfgAircraft)
+                {
+                    if (!String.IsNullOrEmpty(filename) && cfgFile.Name != filename.Trim().ToLower())
+                        continue;
+
+                    CfgSection section = cfgFile.Sections.Find(x => x.Name == sectionname);
+                    if (section != null)
+                    {
+                        CfgLine line = section.Lines.Find(x => x.Name == attrname);
+                        if (line != null && line.Active)
+                        {
+                            Console.WriteLine("getCfgValue: " + filename + "/" + sectionname + "/" + attrname + " = " + line.Value);
+                            return line.Value; 
+                        }
+                    }
+                }
+            }
+            Console.WriteLine("getCfgValue: " + filename + "/" + sectionname + "/" + attrname + " = " + "NOT FOUND");
+            return "";
+        }
+
+        public bool setCfgValueStatus(string aircraftDirectory, string attrname, string filename, string sectionname = "", bool active = true)
+        {
+            CfgFile cfgFile = cfgAircraft.Find(x => x.Name == filename);
+            if (cfgFile != null)
+            {
+                List<CfgLine> ligtsList = cfgAircraft.Find(x => x.Name == filename).Sections.Find(x => x.Name == sectionname).Lines;
+                if (ligtsList != null)
+                {
+                    ligtsList.Find(x => x.Name == attrname).Active = active;
+                    //saveCfgFile(aircraftDirectory, cfgFile);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public class CfgFile
         {
+            public bool Active { get; set; }
             public string Name { get; set; }
             public List<CfgSection> Sections { get; set; }
-            public CfgFile(string name, List<CfgSection> sections)
+            public CfgFile(bool active, string name, List<CfgSection> sections)
             {
+                Active = active;
                 Name = name;
                 Sections = sections;
             }
         }
         public class CfgSection
         {
+            public bool Active { get; set; }
             public string Name { get; set; }
             public List<CfgLine> Lines { get; set; }
-            public CfgSection(string name, List<CfgLine> lines)
+            public CfgSection(bool active, string name, List<CfgLine> lines)
             {
+                Active = active;
                 Name = name;
                 Lines = lines;
             }
         }
         public class CfgLine
         {
+            public bool Active { get; set; }
             public string Name { get; set; }
             public string Value { get; set; }
             public string Comment { get; set; }
+            public object Sections { get; internal set; }
 
-            public CfgLine(string name, string value, string comment)
+            public CfgLine(bool active, string name, string value, string comment)
             {
+                Active = active;
                 Name = name;
                 Value = value;
                 Comment = comment;

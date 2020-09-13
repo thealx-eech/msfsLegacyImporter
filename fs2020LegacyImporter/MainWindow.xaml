@@ -8,10 +8,10 @@
         Title="MSFS Legacy Importer" Height="800" Width="640">
 
     <DockPanel>
-        <TabControl Name="fsTabControl" >
+        <TabControl Name="fsTabControl">
             <TabItem Header="Init">
                     <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
-                        <TextBlock Name="Header" TextWrapping="Wrap" Text="Load imported MSFS Legacy Aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                    <TextBlock Name="Header" TextWrapping="Wrap" Text="Load installed FSX (Legacy) or MSFS (Native) aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
                         <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" VerticalAlignment="Top">
                             <TextBlock Name="btnOpenFilePath"></TextBlock>
                         </WrapPanel>
@@ -111,7 +111,11 @@
                     </TextBlock>-->
                         <StackPanel Name="AircraftProcess"  Margin="0,0,0,0"  DockPanel.Dock="Top" VerticalAlignment="Top">
                         </StackPanel>
-                        <Button x:Name="btnAircraftProcess" Click="BtnAircraftProcess_Click">Process aircraft.cfg file</Button>
+                        <Button x:Name="btnAircraftProcess" Click="BtnAircraftProcess_Click"   DockPanel.Dock="Top" VerticalAlignment="Top">Process aircraft.cfg file</Button>
+                        <StackPanel Name="AircraftPerformance"  Margin="0,0,0,0"  DockPanel.Dock="Top" VerticalAlignment="Top">
+                        </StackPanel>
+                        <StackPanel Name="AircraftSections" Tag="aircraft.cfg" VerticalAlignment="Top">
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -122,6 +126,17 @@
                         <Button Content="Edit" Click="EnginesEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         <StackPanel Name="EnginesData" VerticalAlignment="Top">
                         </StackPanel>
+                        <TextBlock TextWrapping="Wrap" Text="Adjust engines power" Foreground="Black" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                        <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,20,0,40" VerticalAlignment="Top">
+                            <Button Width="auto" Click="BtnEnginePowerClick" Tag="0.5">-50%</Button>
+                            <Button Width="auto" Click="BtnEnginePowerClick" Tag="0.75">-25%</Button>
+                            <Button Width="auto" Click="BtnEnginePowerClick" Tag="0.9">-10%</Button>
+                            <Button Width="auto" Margin="50,0,0,0" Click="BtnEnginePowerClick" Tag="1.111111">+11%</Button>
+                            <Button Width="auto" Click="BtnEnginePowerClick" Tag="1.3333333">+33%</Button>
+                            <Button Width="auto" Click="BtnEnginePowerClick" Tag="2.0">+100%</Button>
+                        </WrapPanel>                        
+                        <StackPanel Name="EnginesSections" Tag="engines.cfg" VerticalAlignment="Top">
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -130,7 +145,7 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel VerticalAlignment="Top">
                         <Button Content="Edit" Click="CockpitEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
-                        <StackPanel Name="CockpitData" VerticalAlignment="Top">
+                        <StackPanel Name="CockpitSections" Tag="cockpit.cfg" VerticalAlignment="Top">
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
@@ -142,6 +157,8 @@
                         <Button Content="Edit" Click="SystemsEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         <StackPanel Name="SystemsData" VerticalAlignment="Top">
                         </StackPanel>
+                        <StackPanel Name="SystemsSections" Tag="systems.cfg" VerticalAlignment="Top">
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -152,14 +169,27 @@
                         <Button Content="Edit" Click="FlightModelEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         <StackPanel Name="FlightModelData" VerticalAlignment="Top">
                         </StackPanel>
+                        <StackPanel Name="FlightModelSections" Tag="flight_model.cfg" VerticalAlignment="Top">
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
-            
+
+            <TabItem Name="tabRunway" Header="Runway">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <StackPanel VerticalAlignment="Top">
+                        <Button Content="Edit" Click="RunwayEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                        <StackPanel Name="RunwayData" VerticalAlignment="Top">
+                        </StackPanel>
+                        <StackPanel Name="RunwaySections" Tag="runway.flt" VerticalAlignment="Top">
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
             <TabItem Name="tabTextures" Header="Textures">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel Name="TexturesList" VerticalAlignment="Top" >
-
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -169,38 +199,51 @@
                     <StackPanel>
                         <StackPanel Name="AboutContent" VerticalAlignment="Top">
                         </StackPanel>
-                        <TextBlock Name="Header4" TextWrapping="Wrap" Text="Useful links" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
-                        <TextBlock>
-                        <Hyperlink NavigateUri="readme.txt" RequestNavigate="Hyperlink_RequestNavigate">
-                            Readme
-                        </Hyperlink>
-                        </TextBlock>
-                        <TextBlock>
-                        <Hyperlink NavigateUri="http://eech.online/msfslegacyimporter/" RequestNavigate="Hyperlink_RequestNavigate">
-                            Releases archive
-                        </Hyperlink>
-                        </TextBlock>
-                        <TextBlock>
-                        <Hyperlink NavigateUri="https://forums.flightsimulator.com/" RequestNavigate="Hyperlink_RequestNavigate">
-                            Flight Simulator official website
-                        </Hyperlink>
-                        </TextBlock>
-                        <TextBlock>
-                        <Hyperlink NavigateUri="https://discord.com/channels/746517825413447750/747831930212581479" RequestNavigate="Hyperlink_RequestNavigate">
-                            MFS SDK Discord channel
-                        </Hyperlink>
-                        </TextBlock>
-                        <TextBlock>
-                        <Hyperlink NavigateUri="https://www.facebook.com/groups/1803376689823050" RequestNavigate="Hyperlink_RequestNavigate">
-                            MS Flight Simulator Gliders FB group
-                        </Hyperlink>
-                        </TextBlock>
-                        <TextBlock>
-                        <Hyperlink NavigateUri="https://developer.nvidia.com/legacy-texture-tools" RequestNavigate="Hyperlink_RequestNavigate">
-                            nVidia Legacy Texture Tools
-                        </Hyperlink>
-                        </TextBlock>
+                        <StackPanel Name="Howto" VerticalAlignment="Top" Margin="5,5,5,20">
+                            <TextBlock Name="Header5" TextWrapping="Wrap" Text="Howto" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,10" Background="Transparent"/>
+                            <TextBlock TextWrapping="Wrap" Width="600" HorizontalAlignment="Stretch" Margin="0,0,0,20">If you want to import FSX aircraft into MSFS, press "FSX aircraft directory" to select original FSX aircraft folder (usually inside of [FSX]\SimObjects\Airplanes\), then "MSFS Community directory" and fill in all fields below. After "Import" button pressed, files will be copied into Community folder and configs loaded into the program memory. You can proceed to aircraft configuration by clicking tabs.</TextBlock>
+                            <TextBlock TextWrapping="Wrap" Width="600" HorizontalAlignment="Stretch" Margin="0,0,0,20">To load installed legacy or native aircraft, select its folder by pressing "Browse" button</TextBlock>
+                            <TextBlock TextWrapping="Wrap" Width="600" HorizontalAlignment="Stretch">Colored labels:</TextBlock>
+                            <TextBlock TextWrapping="Wrap" Width="600" Foreground="DarkGreen" HorizontalAlignment="Stretch">enabled value/section or no issues detected in file</TextBlock>
+                            <TextBlock TextWrapping="Wrap" Width="600" Foreground="DarkOrange" HorizontalAlignment="Stretch">disabled value/section but probably not required</TextBlock>
+                            <TextBlock TextWrapping="Wrap" Width="600" Foreground="DarkRed" HorizontalAlignment="Stretch">wrong values or missing sections, some issues detected in file</TextBlock>
+                        </StackPanel>
+                        <StackPanel Name="UsefulLinks" VerticalAlignment="Top" Margin="5" Width="auto" HorizontalAlignment="Center">
+                            <TextBlock Name="Header4" TextWrapping="Wrap" Text="Useful links" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,0,0,10" Background="Transparent"/>
+                            <TextBlock>
+                                <Hyperlink NavigateUri="readme.txt" RequestNavigate="Hyperlink_RequestNavigate">
+                                    Readme
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock>
+                                <Hyperlink NavigateUri="http://eech.online/msfslegacyimporter/" RequestNavigate="Hyperlink_RequestNavigate">
+                                    Releases archive
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock>
+                                <Hyperlink NavigateUri="https://forums.flightsimulator.com/" RequestNavigate="Hyperlink_RequestNavigate">
+                                    Flight Simulator official website
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock>
+                                <Hyperlink NavigateUri="https://discord.com/channels/746517825413447750/747831930212581479" RequestNavigate="Hyperlink_RequestNavigate">
+                                    MFS SDK Discord channel
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock>
+                                <Hyperlink NavigateUri="https://www.facebook.com/groups/1803376689823050" RequestNavigate="Hyperlink_RequestNavigate">
+                                    MS Flight Simulator Gliders FB group
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock>
+                                <Hyperlink NavigateUri="https://developer.nvidia.com/legacy-texture-tools" RequestNavigate="Hyperlink_RequestNavigate">
+                                    nVidia Legacy Texture Tools
+                                </Hyperlink>
+                            </TextBlock>
 
+                            <TextBlock TextWrapping="Wrap" Margin="0,20,0,0" TextAlignment="Center">To send direct message, visit Discord channel</TextBlock>
+                            <TextBlock TextWrapping="Wrap" Margin="0,0,0,20" TextAlignment="Center">or email to info@eech.online</TextBlock>
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>

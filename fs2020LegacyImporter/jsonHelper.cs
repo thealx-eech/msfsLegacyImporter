@@ -41,7 +41,7 @@ namespace msfsLegacyImporter
         {
             if (TargetFolder != "")
             {
-                Content[] array = new Content[1000];
+                Content[] array = new Content[10000];
                 int i = 0;
 
                 // ADD MANIFEST AT THE TOP
@@ -61,7 +61,7 @@ namespace msfsLegacyImporter
                             if (Path.GetFileName(currentFile)[0] != '.' && Path.GetFileName(currentFile).ToLower() != "layout.json")
                             {
                                 FileInfo info = new System.IO.FileInfo(currentFile);
-                                array[i] = new Content(currentFile.Replace(TargetFolder, "").Replace("\\", "/"), info.Length, info.LastWriteTime.Ticks);
+                                array[i] = new Content(currentFile.Replace(TargetFolder, "").Replace("\\", "/").Trim('/'), info.Length, info.LastWriteTimeUtc.ToFileTimeUtc());
 
                                 i++;
                             }
