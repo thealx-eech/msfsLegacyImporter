@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -36,7 +35,7 @@ namespace msfsLegacyImporter
                 string path = sourcesPath + file;
 
                 if (isAircraft)
-                    Console.WriteLine(file + " file " + (File.Exists(file)? "exists" : "not exists; cfg " + (cfgFileExists(file) ? "exists" : "not exists")));
+                    Console.WriteLine(file + " file " + (File.Exists(path) ? "exists" : "not exists;") + " cfgFile " + (cfgFileExists(file) ? "exists" : "not exists"));
 
                 if (File.Exists(path))
                 {
@@ -337,10 +336,11 @@ namespace msfsLegacyImporter
             return sections;
         }
 
-        public void insertSections(string aircraftDirectory, string filename, string[] sections, int cruiseSpeed, bool active)
+        public void insertSections(string aircraftDirectory, string filename, string[] sections, bool active)
         {
             if (cfgFileExists(filename) && sections.Length > 0)
             {
+                string message = "";
                 CfgFile availableSections = cfgTemplates.Find(x => x.Name == filename);
                 CfgFile cfgFile = cfgAircraft.Find(x => x.Name == filename);
 
@@ -363,28 +363,35 @@ namespace msfsLegacyImporter
                                 foreach (var cfgLine in sect.Lines)
                                 {
                                     // AIRSPEED INDICATOR ADJUSTMENTS
-                                    if (cruiseSpeed > 0 && sect.Name.ToString() == "[AIRSPEED]") {
-                                        switch (cfgLine.Name.ToString())
+                                    if (sect.Name.ToString() == "[AIRSPEED]") {
+                                        string value = getCfgValue("cruise_speed", "flight_model.cfg");
+                                        if (value != "" && int.TryParse(value.Contains('.') ? value.Trim('"').Trim().Split('.')[0] : value.Trim('"').Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out int cruiseSpeed) && cruiseSpeed > 0)
                                         {
-                                            case "white_start":
-                                                cfgLine.Value = Math.Max(20, cruiseSpeed/3).ToString();
-                                                break;
-                                            case "white_end":
-                                            case "green_start":
-                                                cfgLine.Value = Math.Max(30, cruiseSpeed/2).ToString(); ;
-                                                break;
-                                            case "green_end":
-                                            case "highlimit":
-                                                cfgLine.Value = (cruiseSpeed).ToString();
-                                                break;
-                                            case "max":
-                                                cfgLine.Value = (1.1 * cruiseSpeed).ToString();
-                                                break;
+                                            switch (cfgLine.Name.ToString())
+                                            {
+                                                case "white_start":
+                                                    cfgLine.Value = Math.Max(20, cruiseSpeed / 3).ToString();
+                                                    break;
+                                                case "white_end":
+                                                case "green_start":
+                                                    cfgLine.Value = Math.Max(30, cruiseSpeed / 2).ToString(); ;
+                                                    break;
+                                                case "green_end":
+                                                case "highlimit":
+                                                    cfgLine.Value = (cruiseSpeed).ToString();
+                                                    break;
+                                                case "max":
+                                                    cfgLine.Value = (1.1 * cruiseSpeed).ToString();
+                                                    break;
+                                            }
                                         }
                                     }
 
                                     newLines.Add(new CfgLine(active, cfgLine.Name, cfgLine.Value, cfgLine.Comment));
                                 }
+
+                                //if (sect.Name.ToString() == "[AIRSPEED]")
+                                    //message += "AIRSPEED section values was calculated from cruise_speed, you'll need to adjust them manually";
 
                                 CfgSection newSection = new CfgSection(true, sect.Name, newLines);
                                 cfgFile.Sections.Add(newSection);
@@ -394,6 +401,9 @@ namespace msfsLegacyImporter
                     }
 
                     saveCfgFile(aircraftDirectory, cfgFile);
+                    
+                    if (message != "")
+                        MessageBox.Show(message);
                 }
                 else
                 {
@@ -453,7 +463,7 @@ namespace msfsLegacyImporter
                 string attr = "";
                 string sect = "";
 
-                string engine_type = getCfgValue("engine_type", "[GENERALENGINEDATA]", "engines.cfg");
+                string engine_type = getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]");
                 if (engine_type == "1" || engine_type == "5") // JET
                 {
                     attr = "static_thrust";
@@ -470,7 +480,7 @@ namespace msfsLegacyImporter
                 }
 
                 if (attr != "" && sect != "") {
-                    string thrust = getCfgValue(attr, sect, "engines.cfg");
+                    string thrust = getCfgValue(attr, "engines.cfg", sect);
                     if (thrust != "")
                     {
                         double.TryParse(thrust.Replace(",", ".").Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double num);
@@ -480,7 +490,7 @@ namespace msfsLegacyImporter
                             if (attr == "power_scalar")
                                 newThrust = Math.Min((num * multiplier), 1.9);
                             string newThrustString = newThrust.ToString("0.###");
-                            MessageBoxResult messageBoxResult = MessageBox.Show("Old value: " + num + "\n" + "New value: " + newThrustString, "Engines power adjustment", System.Windows.MessageBoxButton.YesNo);
+                            MessageBoxResult messageBoxResult = MessageBox.Show("Old value: " + num + Environment.NewLine + "New value: " + newThrustString, "Engines power adjustment", System.Windows.MessageBoxButton.YesNo);
                             if (messageBoxResult == MessageBoxResult.Yes)
                             {
                                 setCfgValue(aircraftDirectory, attr, newThrustString, "engines.cfg", sect);
@@ -553,7 +563,7 @@ namespace msfsLegacyImporter
         }
 
         // RETURN EMPTY IF NOT FOUND
-        public string getCfgValue(string attrname, string sectionname, string filename = "")
+        public string getCfgValue(string attrname, string filename, string sectionname = "", bool ignoreInactive = false)
         {
             if (cfgAircraft.Count >= 1)
             {
@@ -562,19 +572,21 @@ namespace msfsLegacyImporter
                     if (!String.IsNullOrEmpty(filename) && cfgFile.Name != filename.Trim().ToLower())
                         continue;
 
-                    CfgSection section = cfgFile.Sections.Find(x => x.Name == sectionname);
-                    if (section != null)
+                    foreach (CfgSection section in cfgFile.Sections)
                     {
+                        if (!String.IsNullOrEmpty(sectionname) && section.Name != sectionname.Trim().ToUpper())
+                            continue;
+
                         CfgLine line = section.Lines.Find(x => x.Name == attrname);
-                        if (line != null && line.Active)
+                        if (line != null && (line.Active || ignoreInactive))
                         {
-                            Console.WriteLine("getCfgValue: " + filename + "/" + sectionname + "/" + attrname + " = " + line.Value);
-                            return line.Value; 
+                            Console.WriteLine("getCfgValue: " + filename + " / " + (sectionname != "" ? sectionname : "ANY") + " / " + attrname + " = " + line.Value);
+                            return line.Value;
                         }
                     }
                 }
             }
-            Console.WriteLine("getCfgValue: " + filename + "/" + sectionname + "/" + attrname + " = " + "NOT FOUND");
+            Console.WriteLine("getCfgValue: " + filename + " / " + (sectionname != "" ? sectionname : "ANY") + " / " + attrname + " NOT FOUND");
             return "";
         }
 
