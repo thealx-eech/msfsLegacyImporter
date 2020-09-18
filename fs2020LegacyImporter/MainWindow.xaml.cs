@@ -131,6 +131,7 @@ namespace msfsLegacyImporter
                     fileTrackWatcher.Filter = "*.cfg";
                     fileTrackWatcher.Changed += new FileSystemEventHandler(trackCfgEdit);
                     fileTrackWatcher.NotifyFilter = NotifyFilters.LastWrite;
+                    fileTrackWatcher.IncludeSubdirectories = true;
                     fileTrackWatcher.Path = aircraftDirectory + "\\";
                     fileTrackWatcher.EnableRaisingEvents = true;
 
@@ -562,7 +563,7 @@ namespace msfsLegacyImporter
             else if (!File.Exists(airExported))
             {
                 buttonLabel = "No exported AIR table data found";
-                toolTip = "File " + airExported + " does not exists." + Environment.NewLine + "You can generate this file from AircraftAirfileManager - File - ASCII export menu item";
+                toolTip = "File " + airExported + " does not exists." + Environment.NewLine + "You can generate this file by AirUpdate - Full dump - Dump";
             }
             else
             {
@@ -1494,28 +1495,20 @@ namespace msfsLegacyImporter
 
             if (aircraftDirectory != "")
             {
-                foreach (var subdir in Directory.GetDirectories(aircraftDirectory))
-                {
-                    string folderName = subdir.Split('\\').Last().ToLower().Trim();
-                    if (folderName[0] != '.' && folderName.Contains("model"))
+                string modelFile = CfgHelper.getInteriorModel(aircraftDirectory);
+                Console.WriteLine(modelFile);
+                if (modelFile != "") {
+                    string fileName = modelFile.Replace(aircraftDirectory, "").Trim('\\');
+                    ModelBackupButton.Tag = fileName;
+
+                    if (Path.GetFileName(fileName)[0] != '.')
                     {
-                        var modelFiles = Directory.EnumerateFiles(subdir, "*_interior.mdl", SearchOption.TopDirectoryOnly);
+                        if (!File.Exists(Path.GetDirectoryName(modelFile) + "\\." + Path.GetFileName(modelFile)))
+                            modelsToConvert++;
 
-                        foreach (string currentFile in modelFiles)
-                        {
-                            string fileName = currentFile.Replace(aircraftDirectory, "").Trim('\\');
-                            ModelBackupButton.Tag = fileName;
-
-                            if (Path.GetFileName(fileName)[0] != '.')
-                            {
-                                if (!File.Exists(Path.GetDirectoryName(currentFile) + "\\." + Path.GetFileName(currentFile)))
-                                    modelsToConvert++;
-
-                                string contents = File.ReadAllText(currentFile);
-                                if (contents.Contains("MREC"))
-                                    ModelsList = AddCheckBox(ModelsList, fileName, modelsToConvert > 0 ? Colors.DarkRed : Colors.Black, modelsTotal++);
-                            }
-                        }
+                        string contents = File.ReadAllText(modelFile);
+                        if (contents.Contains("MREC"))
+                            ModelsList = AddCheckBox(ModelsList, fileName, modelsToConvert > 0 ? Colors.DarkRed : Colors.Black, modelsTotal++);
                     }
                 }
             }
@@ -1526,19 +1519,19 @@ namespace msfsLegacyImporter
             btn = SetButtonAtts(btn);
             btn.Name = "removeModelSwitches";
 
-            if (modelsToConvert > 0)
+            if (modelsTotal > 0)
             {
                 btn.Content = "Remove interior clickable switches";
                 btn.Click += RemoveSwitchesClick;
-
-                if (modelsToConvert > 0)
-                    tabModel.Foreground = new SolidColorBrush(Colors.DarkRed);
             }
             else
             {
                 btn.Content = modelsTotal > 0 ? "No models with clickable switches" : "No interior models found";
                 btn.IsEnabled = false;
             }
+
+            if (modelsToConvert > 0 || modelsTotal == 0)
+                tabModel.Foreground = new SolidColorBrush(Colors.DarkRed);
 
             myPanel2.Children.Add(btn);
             ModelsList.Children.Add(myPanel2);

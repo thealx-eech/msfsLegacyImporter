@@ -607,6 +607,20 @@ namespace msfsLegacyImporter
             return false;
         }
 
+        public string getInteriorModel(string aircraftDirectory)
+        {
+            if (File.Exists(aircraftDirectory + "\\model\\model.cfg"))
+            {
+                foreach (var modelString in readCSV(File.ReadAllText(aircraftDirectory + "\\model\\model.cfg")))
+                {
+                    if (modelString.Name == "interior")
+                        return aircraftDirectory + "\\model\\" + modelString.Value + ".mdl";
+                }
+            }
+
+            return "";
+        }
+
         public class CfgFile
         {
             public bool Active { get; set; }
