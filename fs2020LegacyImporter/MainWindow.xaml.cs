@@ -82,8 +82,7 @@ namespace msfsLegacyImporter
         private void BtnOpenFile_Click(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            string defaultPath = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath",
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            string defaultPath = HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath");
             dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
             dialog.RestoreDirectory = (String.IsNullOrEmpty(defaultPath) || defaultPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)) ? true : false;
@@ -543,7 +542,20 @@ namespace msfsLegacyImporter
         // AIR START
         private void getAirCheckboxes(StackPanel parent, string filename)
         {
-            string airFilename = Path.GetFileName(aircraftDirectory).Trim('\\') + ".air";
+            string airFilename = "";
+
+
+            var airFiles = Directory.EnumerateFiles(aircraftDirectory, "*.air", SearchOption.TopDirectoryOnly);
+
+            foreach (string currentFile in airFiles)
+            {
+                string tempName = Path.GetFileName(currentFile);
+                if (!String.IsNullOrEmpty(tempName) && tempName[0] != '.')
+                    airFilename = tempName;
+            }
+            
+            if (airFilename == "")
+                airFilename = Path.GetFileName(aircraftDirectory).Trim('\\') + ".air";
 
             int values = 0;
             StackPanel myPanel = new StackPanel();
@@ -1490,25 +1502,29 @@ namespace msfsLegacyImporter
         {
             ModelsList.Children.Clear();
 
+            int modelsWithoutBackup = 0;
             int modelsToConvert = 0;
-            int modelsTotal = 0;
+            int modelsFound = 0;
 
             if (aircraftDirectory != "")
             {
                 string modelFile = CfgHelper.getInteriorModel(aircraftDirectory);
-                Console.WriteLine(modelFile);
-                if (modelFile != "") {
+
+                if (modelFile != "" && File.Exists(modelFile)) {
                     string fileName = modelFile.Replace(aircraftDirectory, "").Trim('\\');
                     ModelBackupButton.Tag = fileName;
 
                     if (Path.GetFileName(fileName)[0] != '.')
                     {
-                        if (!File.Exists(Path.GetDirectoryName(modelFile) + "\\." + Path.GetFileName(modelFile)))
-                            modelsToConvert++;
+                        bool hasBackup = File.Exists(Path.GetDirectoryName(modelFile) + "\\." + Path.GetFileName(modelFile));
+                        if (!hasBackup)
+                            modelsWithoutBackup++;
+
+                        modelsFound++;
 
                         string contents = File.ReadAllText(modelFile);
                         if (contents.Contains("MREC"))
-                            ModelsList = AddCheckBox(ModelsList, fileName, modelsToConvert > 0 ? Colors.DarkRed : Colors.Black, modelsTotal++);
+                            ModelsList = AddCheckBox(ModelsList, fileName, hasBackup ? Colors.Black : Colors.DarkRed, modelsToConvert++);
                     }
                 }
             }
@@ -1519,18 +1535,18 @@ namespace msfsLegacyImporter
             btn = SetButtonAtts(btn);
             btn.Name = "removeModelSwitches";
 
-            if (modelsTotal > 0)
+            if (modelsToConvert > 0)
             {
                 btn.Content = "Remove interior clickable switches";
                 btn.Click += RemoveSwitchesClick;
             }
             else
             {
-                btn.Content = modelsTotal > 0 ? "No models with clickable switches" : "No interior models found";
+                btn.Content = modelsFound > 0 ? "No models with clickable switches" : "No interior models found";
                 btn.IsEnabled = false;
             }
 
-            if (modelsToConvert > 0 || modelsTotal == 0)
+            if (modelsFound == 0 || modelsToConvert > 0 && modelsWithoutBackup > 0)
                 tabModel.Foreground = new SolidColorBrush(Colors.DarkRed);
 
             myPanel2.Children.Add(btn);
@@ -1582,7 +1598,7 @@ namespace msfsLegacyImporter
                                     if (BitConverter.IsLittleEndian)
                                         Array.Reverse(cache);
                                     MDLDsizeInt = cache[3] | (cache[2] << 8) | (cache[1] << 16) | (cache[0] << 24);
-                                    Console.WriteLine(BitConverter.ToString(cache));
+                                    //Console.WriteLine(BitConverter.ToString(cache));
 
                                 }
                                 else if (MRECpos > 0 && i == MRECpos + 7) // CAPTURE MREC SIZE
@@ -1590,7 +1606,7 @@ namespace msfsLegacyImporter
                                     if (BitConverter.IsLittleEndian)
                                         Array.Reverse(cache);
                                     MRECsizeInt = cache[3] | (cache[2] << 8) | (cache[1] << 16) | (cache[0] << 24);
-                                    Console.WriteLine(BitConverter.ToString(cache));
+                                    //Console.WriteLine(BitConverter.ToString(cache));
                                 }
                                 else if (MRECpos > 0 && MRECsizeInt > 0 && i < MRECpos + MRECsizeInt + 7) // FILL MREC WITH ZEROES
                                 {
@@ -1713,8 +1729,7 @@ namespace msfsLegacyImporter
         private void BtnOpenTargetFile_Click(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            string defaultPath = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath",
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            string defaultPath = HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath");
             dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
             dialog.RestoreDirectory = (String.IsNullOrEmpty(defaultPath) || defaultPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)) ? true : false;
@@ -1736,8 +1751,7 @@ namespace msfsLegacyImporter
         private void BtnOpenSourceFile_Click(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            string defaultPath = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\microsoft games\\Flight Simulator\\10.0", "SetupPath",
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            string defaultPath = HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0\\", "SetupPath", RegistryView.Registry32);
             dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
             dialog.RestoreDirectory = (String.IsNullOrEmpty(defaultPath) || defaultPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)) ? true : false;
@@ -2044,6 +2058,32 @@ namespace msfsLegacyImporter
             }
         }
         // UPDATES END
+        public class HKLMRegistryHelper
+        {
+            public static RegistryKey GetRegistryKey(string keyPath, RegistryView view)
+            {
+                RegistryKey localMachineRegistry = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
+
+                return string.IsNullOrEmpty(keyPath) ? localMachineRegistry : localMachineRegistry.OpenSubKey(keyPath);
+            }
+
+            public static string GetRegistryValue(string keyPath, string keyName, RegistryView view = RegistryView.Registry64)
+            {
+                RegistryKey registry = GetRegistryKey(keyPath, view);
+                if (registry != null)
+                {
+                    object defaultPathObj = registry.GetValue(keyName);
+                    if (defaultPathObj != null)
+                    {
+                        string defaultPath = defaultPathObj.ToString();
+                        if (!String.IsNullOrEmpty(defaultPath) && Directory.Exists(defaultPath))
+                            return defaultPath;
+                    }
+                }
+
+                return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            }
+        }
     }
 
 }
