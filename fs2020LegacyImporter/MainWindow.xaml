@@ -98,10 +98,11 @@
                             <Button Margin="5,5,5,5" Width="auto" x:Name="btnImportSubmit" Click="BtnImportSubmit_Click">Import</Button>
                         </StackPanel>
                         <Separator Height="1" Margin="0 0 0 10" Width="auto"/>
-                        <StackPanel DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom">
-                            <TextBlock TextWrapping="Wrap" Text="Alex Marko @ 2020" DockPanel.Dock="Bottom"  HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#03FFFFFF"/>
+                        <StackPanel DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom" >
+                            <TextBlock TextWrapping="Wrap" Text="Alex Marko @ 2020" DockPanel.Dock="Bottom"  HorizontalAlignment="Center" VerticalAlignment="Bottom"  Background="#03FFFFFF"/>
                             <TextBlock TextWrapping="Wrap" Text="For personal use only"  HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#03FFFFFF"/>
-                        </StackPanel>
+                            <Button  Click="UnlockTab" Background="Transparent" BorderBrush="Transparent" Width="10" Height="10"></Button>
+                    </StackPanel>
                     </StackPanel>
             </TabItem>
 

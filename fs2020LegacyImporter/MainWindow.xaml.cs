@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Microsoft.WindowsAPICodePack.Dialogs;
 using System.IO;
 using System.Diagnostics;
 using System.Net;
@@ -34,9 +33,12 @@ namespace msfsLegacyImporter
         private csvHelper CsvHelper;
         private xmlHelper XmlHelper;
         private fsxVarHelper FsxVarHelper;
+        private fileDialogHelper FileDialogHelper;
 
         string SourceFolder = "";
         string TargetFolder = "";
+
+        bool hiddenPanel = false;
 
         FileSystemWatcher fileTrackWatcher = null;
 
@@ -78,6 +80,7 @@ namespace msfsLegacyImporter
             CsvHelper = new csvHelper();
             XmlHelper = new xmlHelper();
             FsxVarHelper = new fsxVarHelper();
+            FileDialogHelper = new fileDialogHelper();
 
             // TRY TO LOAD CFGTPL FILES
             if (!CfgHelper.processCfgfiles(AppDomain.CurrentDomain.BaseDirectory + "\\cfgTpl\\"))
@@ -88,7 +91,7 @@ namespace msfsLegacyImporter
 
         private void BtnOpenFile_Click(object sender, RoutedEventArgs e)
         {
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+/*          CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             string defaultPath = HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath");
             dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
@@ -96,7 +99,11 @@ namespace msfsLegacyImporter
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 setAircraftDirectory(dialog.FileName);
-            }
+            } */
+
+            string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath"));
+            if (!String.IsNullOrEmpty(selectedPath))
+                setAircraftDirectory(selectedPath);
         }
 
         public void setAircraftDirectory(string directory)
@@ -237,7 +244,7 @@ namespace msfsLegacyImporter
                             item.Visibility = Visibility.Collapsed;
                         break;
                     case "tabPanel":
-                        if (File.Exists(aircraftDirectory + "\\panel\\panel.cfg"))
+                        if (hiddenPanel && File.Exists(aircraftDirectory + "\\panel\\panel.cfg"))
                             item.Visibility = Visibility.Visible;
                         else
                             item.Visibility = Visibility.Collapsed;
@@ -1947,7 +1954,7 @@ namespace msfsLegacyImporter
 
         private void BtnOpenTargetFile_Click(object sender, RoutedEventArgs e)
         {
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            /*CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             string defaultPath = HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath");
             dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
@@ -1955,6 +1962,12 @@ namespace msfsLegacyImporter
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 TargetFolder = dialog.FileName + "\\";
+                btnTargetFolderPath.Text = "into " + TargetFolder + PackageDir.Text.ToLower().Trim() + "\\";
+            }*/
+            string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath"));
+            if (!String.IsNullOrEmpty(selectedPath))
+            {
+                TargetFolder = selectedPath + "\\";
                 btnTargetFolderPath.Text = "into " + TargetFolder + PackageDir.Text.ToLower().Trim() + "\\";
             }
         }
@@ -1969,22 +1982,24 @@ namespace msfsLegacyImporter
 
         private void BtnOpenSourceFile_Click(object sender, RoutedEventArgs e)
         {
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            /*CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             string defaultPath = HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0\\", "SetupPath", RegistryView.Registry32);
             dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
             dialog.RestoreDirectory = (String.IsNullOrEmpty(defaultPath) || defaultPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)) ? true : false;
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)*/
+            string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0\\", "SetupPath", RegistryView.Registry32));
+            if (!String.IsNullOrEmpty(selectedPath))
             {
-                if (File.Exists(dialog.FileName + "\\aircraft.cfg"))
+                if (File.Exists(selectedPath + "\\aircraft.cfg"))
                 {
-                    SourceFolder = dialog.FileName + "\\";
+                    SourceFolder = selectedPath + "\\";
                     btnSourceFolderPath.Text = "from " + SourceFolder;
                 }
                 else
                 {
                     SourceFolder = "";
-                    MessageBox.Show("Folder " + dialog.FileName + " does not contain aircraft.cfg");
+                    MessageBox.Show("Folder " + selectedPath + " does not contain aircraft.cfg");
                 }
             }
 
@@ -2302,6 +2317,12 @@ namespace msfsLegacyImporter
 
                 return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             }
+        }
+
+        public void UnlockTab(object sender, RoutedEventArgs e)
+        {
+            hiddenPanel = true;
+            tabPanel.Visibility = Visibility.Visible;
         }
     }
 
