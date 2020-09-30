@@ -104,7 +104,7 @@ namespace msfsLegacyImporter
             return list;
         }
 
-        private CfgFile parseCfg(string file, List<CfgLine> lines)
+        public CfgFile parseCfg(string file, List<CfgLine> lines)
         {
             List<CfgSection> cfgSections = new List<CfgSection>();
             List<CfgLine> cfgLines = new List<CfgLine>();
@@ -267,7 +267,7 @@ namespace msfsLegacyImporter
                 saveCfgFile(aircraftDirectory, cfgFile);
             }
         }
-        void saveCfgFile(string aircraftDirectory, CfgFile cfgFile)
+        public void saveCfgFile(string aircraftDirectory, CfgFile cfgFile)
         {
             lastChangeTimestamp = DateTime.UtcNow.Ticks;
 
@@ -607,18 +607,23 @@ namespace msfsLegacyImporter
             return false;
         }
 
-        public string getInteriorModel(string aircraftDirectory)
+        public List<string> getInteriorModels(string aircraftDirectory)
         {
-            if (File.Exists(aircraftDirectory + "\\model\\model.cfg"))
+            List<string> models = new List<string>();
+            var cfgFiles = Directory.EnumerateFiles(aircraftDirectory, "model.cfg", SearchOption.AllDirectories);
+            foreach (string currentFile in cfgFiles)
             {
-                foreach (var modelString in readCSV(File.ReadAllText(aircraftDirectory + "\\model\\model.cfg")))
+                if (Path.GetFileName(currentFile)[0] != '.')
                 {
-                    if (modelString.Name == "interior")
-                        return aircraftDirectory + "\\model\\" + modelString.Value + ".mdl";
+                    foreach (var modelString in readCSV(File.ReadAllText(currentFile)))
+                    {
+                        if (modelString.Name == "interior")
+                            models.Add(Path.GetDirectoryName(currentFile) + "\\" + modelString.Value + ".mdl");
+                    }
                 }
             }
 
-            return "";
+            return models;
         }
 
         public class CfgFile

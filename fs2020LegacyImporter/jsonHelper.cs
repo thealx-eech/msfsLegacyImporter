@@ -19,7 +19,7 @@ namespace msfsLegacyImporter
             Console.WriteLine(SourceFolder  + " - " + TargetFolder + "SimObjects\\AIRPLANES\\" + sourceChild + "\\");
             CloneDirectory(SourceFolder, TargetFolder + "SimObjects\\AIRPLANES\\" + sourceChild + "\\");
 
-            Manifest manifest = new Manifest(new string[] { }, data[1], data[2], data[3], data[4], data[5], data[6], new ReleaseNotes(new Neutral("", "")));
+            Manifest manifest = new Manifest(new Dependencies[] { }, data[1], data[2], data[3], data[4], data[5], data[6], new ReleaseNotes(new Neutral("", "")));
 
             string json = JsonConvert.SerializeObject(manifest, Newtonsoft.Json.Formatting.Indented);
 
@@ -35,6 +35,20 @@ namespace msfsLegacyImporter
 
             // SET CURRENT AIRCRAFT
             parent.setAircraftDirectory(TargetFolder.Remove(TargetFolder.Length - 1));
+        }
+
+        public void createInstrumentManifest(string TargetFolder, string[] data)
+        {
+            Manifest manifest = new Manifest(new Dependencies[] { new Dependencies("fs-base-ui", "0.1.10") } , data[1], data[2], data[3], data[4], data[5], data[6], new ReleaseNotes(new Neutral("", "")));
+
+            string json = JsonConvert.SerializeObject(manifest, Newtonsoft.Json.Formatting.Indented);
+
+            try { File.WriteAllText(TargetFolder + "manifest.json", json); }
+            catch (Exception)
+            {
+                MessageBox.Show("Can't write into file " + TargetFolder + "\\manifest.json");
+                return;
+            }
         }
 
         public void scanTargetFolder(string TargetFolder)
@@ -105,9 +119,20 @@ namespace msfsLegacyImporter
         }
     }
 
+    public class Dependencies
+{
+        public string name { get; set; }
+        public string package_version { get; set; }
+        public Dependencies(string Name, string Package_version)
+        {
+            name = Name;
+            package_version = Package_version;
+        }
+    }
+
     public class Manifest
     {
-        public string[] dependencies { get; set; }
+        public Dependencies[] dependencies { get; set; }
         public string content_type { get; set; }
         public string title { get; set; }
         public string manufacturer { get; set; }
@@ -115,7 +140,7 @@ namespace msfsLegacyImporter
         public string package_version { get; set; }
         public string minimum_game_version { get; set; }
         public ReleaseNotes release_notes { get; set; }
-        public Manifest(string[] Dependencies, string Content_type, string Title, string Manufacturer, string Creator,
+        public Manifest(Dependencies[] Dependencies, string Content_type, string Title, string Manufacturer, string Creator,
             string Package_version, string Minimum_game_version, ReleaseNotes Release_notes)
         {
             dependencies = Dependencies;
@@ -127,7 +152,6 @@ namespace msfsLegacyImporter
             minimum_game_version = Minimum_game_version;
             release_notes = Release_notes;
         }
-        // Other properties, methods, events...
     }
 
     public class ReleaseNotes

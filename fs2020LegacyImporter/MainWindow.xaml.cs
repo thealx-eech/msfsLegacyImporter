@@ -14,6 +14,8 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Globalization;
+using Microsoft.Deployment.Compression.Cab;
+using System.Windows.Controls.Primitives;
 
 namespace msfsLegacyImporter
 {
@@ -30,6 +32,8 @@ namespace msfsLegacyImporter
         private cfgHelper CfgHelper;
         private jsonHelper JSONHelper;
         private csvHelper CsvHelper;
+        private xmlHelper XmlHelper;
+        private fsxVarHelper FsxVarHelper;
 
         string SourceFolder = "";
         string TargetFolder = "";
@@ -38,7 +42,7 @@ namespace msfsLegacyImporter
 
         public MainWindow()
         {
-            CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            CultureInfo customCulture = (CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
@@ -72,6 +76,9 @@ namespace msfsLegacyImporter
             JSONHelper = new jsonHelper();
             CfgHelper = new cfgHelper();
             CsvHelper = new csvHelper();
+            XmlHelper = new xmlHelper();
+            FsxVarHelper = new fsxVarHelper();
+
             // TRY TO LOAD CFGTPL FILES
             if (!CfgHelper.processCfgfiles(AppDomain.CurrentDomain.BaseDirectory + "\\cfgTpl\\"))
                 Environment.Exit(1);
@@ -100,7 +107,7 @@ namespace msfsLegacyImporter
             {
                 try
                 {
-                    Registry.SetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath", System.IO.Path.GetDirectoryName(directory));
+                    Registry.SetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath", Path.GetDirectoryName(directory));
                 }
                 catch (Exception) { }
 
@@ -159,7 +166,7 @@ namespace msfsLegacyImporter
             if (DateTime.UtcNow.Ticks - CfgHelper.lastChangeTimestamp > 10000000)
             {
                 Dispatcher.Invoke(() => fsTabControl.IsEnabled = false);
-                MessageBoxResult messageBoxResult = MessageBox.Show("File " + System.IO.Path.GetFileName(e.FullPath) + " was edited outside of the program" + Environment.NewLine + "Aircraft data should be reloaded", "CFG file change detected", MessageBoxButton.YesNo);
+                MessageBoxResult messageBoxResult = MessageBox.Show("File " + Path.GetFileName(e.FullPath) + " was edited outside of the program" + Environment.NewLine + "Aircraft data should be reloaded", "CFG file change detected", MessageBoxButton.YesNo);
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
                     CfgHelper.processCfgfiles(aircraftDirectory + "\\", true);
@@ -187,6 +194,7 @@ namespace msfsLegacyImporter
             SummaryFlightModel();
             SummaryTextures();
             SummaryModels();
+            SummaryPanel();
 
             foreach (TabItem item in fsTabControl.Items)
             {
@@ -228,6 +236,12 @@ namespace msfsLegacyImporter
                         else
                             item.Visibility = Visibility.Collapsed;
                         break;
+                    case "tabPanel":
+                        if (File.Exists(aircraftDirectory + "\\panel\\panel.cfg"))
+                            item.Visibility = Visibility.Visible;
+                        else
+                            item.Visibility = Visibility.Collapsed;
+                        break;
 
                     default:
                         item.Visibility = Visibility.Visible;
@@ -236,15 +250,27 @@ namespace msfsLegacyImporter
             }
 
             // SET BACKUP BUTTONS LABEL
-            foreach (Button btn in new Button[] { AircraftBackupButton, EnginesBackupButton, CockpitBackupButton, SystemsBackupButton, FlightModelBackupButton, RunwayBackupButton, RunwayBackupButton, ModelBackupButton })
+            foreach (Button btn in new Button[] { AircraftBackupButton, EnginesBackupButton, CockpitBackupButton, SystemsBackupButton, FlightModelBackupButton, RunwayBackupButton, RunwayBackupButton, ModelBackupButton, PanelBackupButton })
                 if (!String.IsNullOrEmpty(btn.Tag.ToString())) {
-                    string mainFile = aircraftDirectory + "\\" + btn.Tag.ToString();
-                    string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
+                    string filenames = btn.Tag.ToString();
+                    if (!btn.Tag.ToString().Contains(','))
+                        filenames += ',';
 
-                    if (File.Exists(backupFile))
-                        btn.Content = "Restore Backup";
-                    else
-                        btn.Content = "Make Backup";
+                    foreach (var filename in filenames.Split(','))
+                    {
+                        if (!String.IsNullOrEmpty(filename)) {
+                            string mainFile = aircraftDirectory + "\\" + filename;
+                            string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
+
+                            if (File.Exists(backupFile))
+                            {
+                                btn.Content = "Restore Backup";
+                                break;
+                            }
+                            else
+                                btn.Content = "Make Backup";
+                        }
+                    }
                 }
         }
 
@@ -356,7 +382,7 @@ namespace msfsLegacyImporter
         {
             if (!File.Exists(aircraftDirectory + "\\aircraft.cfg"))
             {
-                MessageBoxResult messageBoxResult = MessageBox.Show("aircraft.cfg not found in aircraft directory", "", MessageBoxButton.OK);
+                MessageBox.Show("aircraft.cfg not found in aircraft directory", "", MessageBoxButton.OK);
             }
             else
             {
@@ -1385,7 +1411,7 @@ namespace msfsLegacyImporter
                         {
                             string fileName = currentFile.Replace(projectDirectory, "");
 
-                            if (System.IO.Path.GetFileName(fileName)[0] != '.')
+                            if (Path.GetFileName(fileName)[0] != '.')
                                 TexturesList = AddCheckBox(TexturesList, fileName, Colors.DarkRed, texturesToConvert++);
                         }
                     }
@@ -1396,7 +1422,7 @@ namespace msfsLegacyImporter
 
             Button btn = new Button();
             btn = SetButtonAtts(btn);
-            btn.Name = "convertTexturesButon";
+            btn.Name = "convertTexturesButton";
 
             if (texturesToConvert > 0)
             {
@@ -1474,8 +1500,8 @@ namespace msfsLegacyImporter
 
                     if (File.Exists(dds[i]))
                     {
-                        File.Move(System.IO.Path.GetDirectoryName(bmp[i]) + "\\" + System.IO.Path.GetFileName(bmp[i]),
-                            System.IO.Path.GetDirectoryName(bmp[i]) + "\\." + System.IO.Path.GetFileName(bmp[i]));
+                        File.Move(Path.GetDirectoryName(bmp[i]) + "\\" + Path.GetFileName(bmp[i]),
+                            Path.GetDirectoryName(bmp[i]) + "\\." + Path.GetFileName(bmp[i]));
                     }
 
                     converted++;
@@ -1506,27 +1532,34 @@ namespace msfsLegacyImporter
             int modelsToConvert = 0;
             int modelsFound = 0;
 
+            ModelBackupButton.Tag = "";
+
             if (aircraftDirectory != "")
             {
-                string modelFile = CfgHelper.getInteriorModel(aircraftDirectory);
-
-                if (modelFile != "" && File.Exists(modelFile)) {
-                    string fileName = modelFile.Replace(aircraftDirectory, "").Trim('\\');
-                    ModelBackupButton.Tag = fileName;
-
-                    if (Path.GetFileName(fileName)[0] != '.')
+                List<string> modelFiles = CfgHelper.getInteriorModels(aircraftDirectory);
+                foreach (string modelFile in modelFiles)
+                {
+                    if (modelFile != "" && File.Exists(modelFile))
                     {
-                        bool hasBackup = File.Exists(Path.GetDirectoryName(modelFile) + "\\." + Path.GetFileName(modelFile));
-                        if (!hasBackup)
-                            modelsWithoutBackup++;
+                        string fileName = modelFile.Replace(aircraftDirectory, "").Trim('\\');
+                        ModelBackupButton.Tag += fileName + ",";
 
-                        modelsFound++;
+                        if (Path.GetFileName(fileName)[0] != '.')
+                        {
+                            bool hasBackup = File.Exists(Path.GetDirectoryName(modelFile) + "\\." + Path.GetFileName(modelFile));
+                            if (!hasBackup)
+                                modelsWithoutBackup++;
 
-                        string contents = File.ReadAllText(modelFile);
-                        if (contents.Contains("MREC"))
-                            ModelsList = AddCheckBox(ModelsList, fileName, hasBackup ? Colors.Black : Colors.DarkRed, modelsToConvert++);
+                            modelsFound++;
+
+                            string contents = File.ReadAllText(modelFile);
+                            if (contents.Contains("MREC"))
+                                ModelsList = AddCheckBox(ModelsList, fileName, Colors.Black, modelsToConvert++);
+                        }
                     }
                 }
+
+                ModelBackupButton.Tag = ModelBackupButton.Tag.ToString().TrimEnd(',');
             }
 
             StackPanel myPanel2 = new StackPanel();
@@ -1546,7 +1579,7 @@ namespace msfsLegacyImporter
                 btn.IsEnabled = false;
             }
 
-            if (modelsFound == 0 || modelsToConvert > 0 && modelsWithoutBackup > 0)
+            if (modelsFound == 0 /*|| modelsToConvert > 0 && modelsWithoutBackup > 0*/)
                 tabModel.Foreground = new SolidColorBrush(Colors.DarkRed);
 
             myPanel2.Children.Add(btn);
@@ -1558,84 +1591,259 @@ namespace msfsLegacyImporter
             CheckBox tmp = new CheckBox();
 
             // COUNT
-            foreach (StackPanel panel in ModelsList.Children)
+            MessageBoxResult messageBoxResult = MessageBox.Show("You will be no longer able to use clickable elements inside of the cockpit. You can restore original interior model by clicking Restore Backup button.", "You are going to remove clickable switches", System.Windows.MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.Yes)
+            {
+                foreach (StackPanel panel in ModelsList.Children)
+                    if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
+                    {
+                        CheckBox a = (CheckBox)panel.Children[0];
+                        if (a.IsChecked == true && (string)a.Content != "Toggle all")
+                        {
+                            string mainFile = aircraftDirectory + "\\" + (string)a.Content;
+
+                            if (File.Exists(mainFile))
+                            {
+                                byte[] cache = new byte[4];
+                                byte[] MDLDsize = new byte[4];
+                                int MDLDsizeInt = -1;
+                                byte[] MRECsize = new byte[4];
+                                int MRECsizeInt = -1;
+                                int MDLDpos = -1;
+                                int MRECpos = -1;
+
+
+                                byte[] buf = File.ReadAllBytes(mainFile);
+                                for (int i = 0; i < buf.Length; i++)
+                                {
+                                    for (int k = 0; k < cache.Length - 1; k++)
+                                    {
+                                        cache[k] = cache[k + 1];
+                                    }
+                                    cache[cache.Length - 1] = buf[i];
+
+                                    System.Text.UTF8Encoding enc = new System.Text.UTF8Encoding();
+                                    string s = enc.GetString(cache);
+
+                                    if (s == "MDLD")
+                                        MDLDpos = i - 3;
+                                    else if (s == "MREC")
+                                        MRECpos = i - 3;
+
+                                    if (MDLDpos > 0 && i == MDLDpos + 7) // CAPTURE MDLD SIZE
+                                    {
+                                        if (BitConverter.IsLittleEndian)
+                                            Array.Reverse(cache);
+                                        MDLDsizeInt = cache[3] | (cache[2] << 8) | (cache[1] << 16) | (cache[0] << 24);
+                                        //Console.WriteLine(BitConverter.ToString(cache));
+
+                                    }
+                                    else if (MRECpos > 0 && i == MRECpos + 7) // CAPTURE MREC SIZE
+                                    {
+                                        if (BitConverter.IsLittleEndian)
+                                            Array.Reverse(cache);
+                                        MRECsizeInt = cache[3] | (cache[2] << 8) | (cache[1] << 16) | (cache[0] << 24);
+                                        //Console.WriteLine(BitConverter.ToString(cache));
+                                    }
+                                    else if (MRECpos > 0 && MRECsizeInt > 0 && i < MRECpos + MRECsizeInt + 7) // FILL MREC WITH ZEROES
+                                    {
+                                        buf[i] = 0x00;
+                                    }
+                                }
+
+                                if (MRECpos > 0 && MRECsizeInt > 0)
+                                {
+                                    // MAKE MDL BACKUP
+                                    backUpFile(mainFile);
+
+                                    // CLEAR AIRCRAFT CACHE
+                                    deleteCVCfolder();
+
+                                    Console.WriteLine("MDLD pos" + MDLDpos + " lng" + MDLDsizeInt + "; MREC pos" + MRECpos + " lng" + MRECsizeInt);
+                                    File.WriteAllBytes(mainFile, buf);
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Clickable switches removal from " + a.Content + " failed");
+                                }
+                            }
+
+                        }
+                    }
+            }
+
+            SummaryUpdate();
+        }
+        // MODELS END
+
+        // PANEL START
+        public void SummaryPanel()
+        {
+            PanelsList.Children.Clear();
+            CabsList.Children.Clear();
+
+            int panelsWithoutBackup = 0;
+            int panelsToConvert = 0;
+
+            int cabsWithoutBackup = 0;
+            int cabsToConvert = 0;
+
+            PanelBackupButton.Tag = "";
+
+            if (aircraftDirectory != "")
+            {
+                var panelFiles = Directory.EnumerateFiles(aircraftDirectory, "panel.cfg", SearchOption.AllDirectories);
+                foreach (string panelFile in panelFiles)
+                {
+                    string fileName = panelFile.Replace(aircraftDirectory, "").Trim('\\');
+                    if (panelFile != "" && fileName[0] != '.' && Path.GetFileName(panelFile)[0] != '.')
+                    {
+                        PanelBackupButton.Tag += fileName + ",";
+
+                        bool PanelHasBackup = File.Exists(Path.GetDirectoryName(panelFile) + "\\." + Path.GetFileName(panelFile));
+                        if (!PanelHasBackup)
+                            panelsWithoutBackup++;
+
+                        PanelsList = AddCheckBox(PanelsList, fileName, PanelHasBackup ? Colors.Black : Colors.DarkRed, panelsToConvert++);
+
+                        var cabFiles = Directory.EnumerateFiles(Path.GetDirectoryName(panelFile), "*.cab", SearchOption.TopDirectoryOnly);
+                        foreach (string cabFile in cabFiles)
+                        {
+                            string cabFileName = cabFile.Replace(aircraftDirectory, "").Trim('\\');
+                            if (cabFile != "" && Path.GetFileName(cabFileName)[0] != '.')
+                            {
+                                PanelBackupButton.Tag += cabFileName + ",";
+
+                                bool cabHasBackup = File.Exists(Path.GetDirectoryName(cabFile) + "\\." + Path.GetFileName(cabFile));
+                                if (!cabHasBackup)
+                                    cabsWithoutBackup++;
+
+                                CabsList = AddCheckBox(CabsList, cabFileName, cabHasBackup ? Colors.Black : Colors.DarkRed, cabsToConvert++);
+                            }
+                        }
+
+                        continue;
+                    }
+                }
+
+                PanelBackupButton.Tag = PanelBackupButton.Tag.ToString().TrimEnd(',');
+            }
+
+            StackPanel myPanel1 = new StackPanel();
+
+            Button btn1 = new Button();
+            btn1 = SetButtonAtts(btn1);
+            btn1.Name = "extractCab";
+
+            if (cabsToConvert > 0)
+            {
+                btn1.Content = "Extract panel gauges resources";
+                btn1.Click += extractCabClick;
+            }
+            else
+            {
+                btn1.Content = cabsWithoutBackup > 0 ? "No CAB files to extract" : "CAB file already extracted";
+                btn1.IsEnabled = false;
+            }
+
+            if (cabsToConvert > 0 || cabsWithoutBackup > 0)
+                tabPanel.Foreground = new SolidColorBrush(Colors.DarkRed);
+
+            myPanel1.Children.Add(btn1);
+            CabsList.Children.Add(myPanel1);
+
+
+            StackPanel myPanel2 = new StackPanel();
+
+            Button btn2 = new Button();
+            btn2 = SetButtonAtts(btn2);
+            btn2.Name = "importPanelGauges";
+
+            if (panelsToConvert > 0)
+            {
+                btn2.Content = "Import panel gauges";
+                btn2.Click += importPanelGaugeClick;
+
+                myPanel2.Children.Add(addTextBlock("Gamma correction (0 - bright; 1 - normal; 2 - dark)", HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black));
+
+                if (this.FindName("GammaSlider") != null)
+                    UnregisterName("GammaSlider");
+                Slider gammaSlider = new Slider();
+                RegisterName("GammaSlider", gammaSlider);
+                gammaSlider.Value = 1.0;
+                gammaSlider.Minimum = 0.1;
+                gammaSlider.Maximum = 2.0;
+                gammaSlider.AutoToolTipPlacement = AutoToolTipPlacement.TopLeft;
+                gammaSlider.AutoToolTipPrecision = 1;
+                myPanel2.Children.Add(gammaSlider);
+            }
+            else
+            {
+                btn2.Content = "No panels gauges found";
+                btn2.IsEnabled = false;
+            }
+
+            if (panelsToConvert > 0 && panelsWithoutBackup > 0)
+                tabPanel.Foreground = new SolidColorBrush(Colors.DarkRed);
+
+            myPanel2.Children.Add(btn2);
+            PanelsList.Children.Add(myPanel2);
+
+        }
+
+        private void extractCabClick(object sender, RoutedEventArgs e)
+        {
+            CheckBox tmp = new CheckBox();
+
+            // COUNT
+            foreach (StackPanel panel in CabsList.Children)
                 if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
                 {
                     CheckBox a = (CheckBox)panel.Children[0];
                     if (a.IsChecked == true && (string)a.Content != "Toggle all")
                     {
                         string mainFile = aircraftDirectory + "\\" + (string)a.Content;
+                        string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
 
                         if (File.Exists(mainFile))
                         {
-                            byte[] cache = new byte[4];
-                            byte[] MDLDsize = new byte[4];
-                            int MDLDsizeInt = -1;
-                            byte[] MRECsize = new byte[4];
-                            int MRECsizeInt = -1;
-                            int MDLDpos = -1;
-                            int MRECpos = -1;
+                            string extractDirectory = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileNameWithoutExtension(mainFile);
+                            if (!Directory.Exists(extractDirectory))
+                                Directory.CreateDirectory(extractDirectory);
 
+                            if (File.Exists(backupFile))
+                                File.Delete(backupFile);
 
-                            byte[] buf = File.ReadAllBytes(mainFile);
-                            for (int i = 0; i < buf.Length; i++)
-                            {
-                                for (int k = 0; k < cache.Length - 1; k++) {
-                                    cache[k] = cache[k+1];
-                                }
-                                cache[cache.Length - 1] = buf[i];
+                            CabInfo cab = new CabInfo(mainFile);
+                            cab.Unpack(extractDirectory);
 
-                                System.Text.UTF8Encoding enc = new System.Text.UTF8Encoding();
-                                string s = enc.GetString(cache);
-
-                                if (s == "MDLD")
-                                    MDLDpos = i - 3;
-                                else if (s == "MREC")
-                                    MRECpos = i - 3;
-
-                                if (MDLDpos > 0 && i == MDLDpos + 7) // CAPTURE MDLD SIZE
-                                {
-                                    if (BitConverter.IsLittleEndian)
-                                        Array.Reverse(cache);
-                                    MDLDsizeInt = cache[3] | (cache[2] << 8) | (cache[1] << 16) | (cache[0] << 24);
-                                    //Console.WriteLine(BitConverter.ToString(cache));
-
-                                }
-                                else if (MRECpos > 0 && i == MRECpos + 7) // CAPTURE MREC SIZE
-                                {
-                                    if (BitConverter.IsLittleEndian)
-                                        Array.Reverse(cache);
-                                    MRECsizeInt = cache[3] | (cache[2] << 8) | (cache[1] << 16) | (cache[0] << 24);
-                                    //Console.WriteLine(BitConverter.ToString(cache));
-                                }
-                                else if (MRECpos > 0 && MRECsizeInt > 0 && i < MRECpos + MRECsizeInt + 7) // FILL MREC WITH ZEROES
-                                {
-                                    buf[i] = 0x00;
-                                }
-                            }
-
-                            if (MRECpos > 0 && MRECsizeInt > 0)
-                            {
-                                // MAKE MDL BACKUP
-                                backUpFile(mainFile);
-
-                                // CLEAR AIRCRAFT CACHE
-                                deleteCVCfolder();
-
-                                Console.WriteLine("MDLD pos" + MDLDpos + " lng" + MDLDsizeInt + "; MREC pos" + MRECpos + " lng" + MRECsizeInt);
-                                File.WriteAllBytes(mainFile, buf);
-                            } else {
-                                MessageBox.Show("Clickable switches removal from " + a.Content + " failed");
-                            }
+                            File.Move(mainFile, backupFile);
                         }
-
                     }
                 }
 
-
             SummaryUpdate();
         }
-        // MODELS END
+
+        private void importPanelGaugeClick(object sender, RoutedEventArgs e)
+        {
+            CheckBox tmp = new CheckBox();
+
+            // COUNT
+            foreach (StackPanel panel in PanelsList.Children)
+                if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
+                {
+                    CheckBox a = (CheckBox)panel.Children[0];
+                    if (a.IsChecked == true && (string)a.Content != "Toggle all")
+                    {
+                        XmlHelper.insertFsxGauge(aircraftDirectory, projectDirectory, (string)a.Content, (Slider)this.FindName("GammaSlider"), CfgHelper, FsxVarHelper, JSONHelper);
+                    }
+                }
+
+            JSONHelper.scanTargetFolder(projectDirectory);
+            SummaryUpdate();
+        }
+        // PANEL END
 
         public string Get_aircraft_directory()
         {
@@ -1672,37 +1880,48 @@ namespace msfsLegacyImporter
         private void CfgBackupClick(object sender, RoutedEventArgs e)
         {
             Button btn = (Button)sender;
-            string filename = btn.Tag.ToString();
-            string mainFile = aircraftDirectory + "\\" + filename;
-            string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
 
-            if (File.Exists(backupFile))
+            string filenames = btn.Tag.ToString();
+            if (!btn.Tag.ToString().Contains(','))
+                filenames += ',';
+
+            foreach (var filename in filenames.Split(','))
             {
-                MessageBoxResult messageBoxResult = MessageBox.Show("All changes in " + filename + " made since backup will be erased", "You are going to restore " + filename, System.Windows.MessageBoxButton.YesNo);
-                if (messageBoxResult == MessageBoxResult.Yes)
+                if (!String.IsNullOrEmpty(filename))
                 {
-                    CfgHelper.lastChangeTimestamp = DateTime.UtcNow.Ticks;
+                    string mainFile = aircraftDirectory + "\\" + filename;
+                    string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
 
-                    try
+                    if (File.Exists(backupFile))
                     {
-                        File.Delete(mainFile);
-                        File.Copy(backupFile, mainFile);
-                    } catch(Exception)
-                    {
+                        MessageBoxResult messageBoxResult = MessageBox.Show("All changes in " + filename + " made since backup will be erased", "You are going to restore " + filename, System.Windows.MessageBoxButton.YesNo);
+                        if (messageBoxResult == MessageBoxResult.Yes)
+                        {
+                            CfgHelper.lastChangeTimestamp = DateTime.UtcNow.Ticks;
 
+                            try
+                            {
+                                File.Delete(mainFile);
+                                File.Copy(backupFile, mainFile);
+                            } catch(Exception)
+                            {
+
+                            }
+                        }
                     }
-                    CfgHelper.processCfgfiles(aircraftDirectory + "\\", true);
-                    SummaryUpdate();
-
-                    JSONHelper.scanTargetFolder(projectDirectory);
+                    else if (File.Exists(mainFile))
+                    {
+                        CfgHelper.lastChangeTimestamp = DateTime.UtcNow.Ticks;
+                        File.Copy(mainFile, backupFile);
+                        btn.Content = "Restore backup";
+                    }
                 }
             }
-            else if (File.Exists(mainFile))
-            {
-                CfgHelper.lastChangeTimestamp = DateTime.UtcNow.Ticks;
-                File.Copy(mainFile, backupFile);
-                btn.Content = "Restore backup";
-            }
+
+            CfgHelper.processCfgfiles(aircraftDirectory + "\\", true);
+            SummaryUpdate();
+
+            JSONHelper.scanTargetFolder(projectDirectory);
         }
         private void CfgEditClick(object sender, RoutedEventArgs e)
         {
@@ -1790,7 +2009,7 @@ namespace msfsLegacyImporter
             else
             {
                 string[] data = new string[] { "", "AIRCRAFT", PackageTitle.Text, PackageManufacturer.Text, PackageAuthor.Text,
-            PackageVer1.Text + "." + PackageVer2.Text + "." + PackageVer3.Text, PackageMinVer1.Text + "." + PackageMinVer2.Text + "." + PackageMinVer2.Text, "" };
+            PackageVer1.Text + "." + PackageVer2.Text + "." + PackageVer3.Text, PackageMinVer1.Text + "." + PackageMinVer2.Text + "." + PackageMinVer3.Text, "" };
 
                 JSONHelper.createManifest(this, SourceFolder, TargetFolder + PackageDir.Text.ToLower().Trim() + "\\", data);
             }
@@ -2021,7 +2240,7 @@ namespace msfsLegacyImporter
         }
         private void OnDownloadCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            if ((e == null || !e.Cancelled && e.Error == null) && File.Exists(TEMP_FILE) && new System.IO.FileInfo(TEMP_FILE).Length > 10)
+            if ((e == null || !e.Cancelled && e.Error == null) && File.Exists(TEMP_FILE) && new FileInfo(TEMP_FILE).Length > 10)
             {
                 // CHECK EXE BACKUP
                 if (File.Exists(EXE_PATH + ".BAK"))

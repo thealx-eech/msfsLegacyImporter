@@ -234,6 +234,22 @@
                 </ScrollViewer>
             </TabItem>
 
+            <TabItem Name="tabPanel" Header="Panel">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <StackPanel VerticalAlignment="Top">
+                        <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
+                            <Button Content="Make Backup" Margin="1" Name="PanelBackupButton" Tag="" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                        </WrapPanel>
+                        <StackPanel Name="CabsList" VerticalAlignment="Top" >
+                        </StackPanel>
+                        <StackPanel Name="PanelsList" VerticalAlignment="Top" >
+                        </StackPanel>
+                        <StackPanel Name="GaugesList" VerticalAlignment="Top" >
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
             <TabItem Name="tabAbout" Header="About">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
