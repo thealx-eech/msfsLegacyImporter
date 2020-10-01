@@ -94,19 +94,19 @@ namespace msfsLegacyImporter
                 case string hn when hn.Equals("(A:Vertical speed,meters per minute)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"meters per minute\"))";
                 case string hn when hn.Equals("(A:Indicated Altitude, meters)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE:2\", \"meters\")) / 180 * Math.PI";
+                    return "parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE:2\", \"meters\"))";
                 case string hn when hn.Equals("(A:Indicated Altitude, feet)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE:2\", \"feet\")) / 180 * Math.PI";
+                    return "parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE:2\", \"feet\"))";
                 case string hn when hn.Equals("(A:TURN COORDINATOR BALL,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ATTITUDE INDICATOR BANK DEGREES\", \"degree\")) / 30 * 100";
+                    return "Math.min(30, Math.max(-30 , -parseFloat(SimVar.GetSimVarValue(\"ATTITUDE INDICATOR BANK DEGREES\", \"degrees\")))) / 30 * 100";
                 case string hn when hn.Equals("(A:Delta Heading Rate, rpm)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"VELOCITY BODY X\", \"feet per second\")) / 180 * Math.PI";
+                    return "parseFloat(-SimVar.GetSimVarValue(\"TURN INDICATOR RATE\", \"degree per second\")) * 60 / 360";
                 case string hn when hn.Equals("(A:Variometer rate, knots)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"AIRCRAFT WIND Y\", \"knots\"))"; // TODO: fix rate
                 case string hn when hn.Equals("(A:Wiskey compass indication degrees,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"degree\"))";
+                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"degrees\"))";
                 case string hn when hn.Equals("(A:Magnetic compass,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"degree\")) / 180 * Math.PI";
+                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"radians\"))";
                 case string hn when hn.Equals("(A:Fuel tank total level,position)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:Fuel tank center level,position)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL QUANTITY\", \"gallons\")) / parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL CAPACITY\", \"gallons\"))";
@@ -144,21 +144,21 @@ namespace msfsLegacyImporter
                 case string hn when hn.Equals("(A:DECISION HEIGHT, meters)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"DECISION HEIGHT\", \"meters\"))";
                 case string hn when hn.Equals("(P:Local time,seconds)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"seconds\")) / 180 * Math.PI";
+                    return "parseFloat(SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"seconds\"))";
                 case string hn when hn.Equals("(P:Local time,minutes)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"minutes\")) / 180 * Math.PI";
+                    return "parseFloat(SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"minutes\"))";
                 case string hn when hn.Equals("(P:Local time,hours)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"hours\")) / 180 * Math.PI";
+                    return "parseFloat(SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"hours\"))";
                 case string hn when hn.Equals("(A:GENERAL ENG1 RPM, rpm)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG RPM: 2\", \"Rpm\"))";
                 case string hn when hn.Equals("(A:GENERAL ENG2 RPM, rpm)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG RPM: 1\", \"Rpm\"))";
                 case string hn when hn.Equals("(A:Plane heading degrees gyro,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"radians\"))";//???
+                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"degrees\"))";//???
                 case string hn when hn.Equals("(A:PLANE HEADING DEGREES GYRO, radians)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"radians\"))";
                 case string hn when hn.Equals("(A:Autopilot heading lock dir,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"radians\"))";//???
+                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"degrees\"))";//???
                 case string hn when hn.Equals("(A:RUDDER TRIM PCT, percent)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"RUDDER TRIM PCT\", \"percent\"))";
                 case string hn when hn.Equals("(A:ELEVATOR TRIM POSITION, degrees)", StringComparison.InvariantCultureIgnoreCase):
@@ -416,7 +416,25 @@ namespace msfsLegacyImporter
                                     stack.Push(new Intermediate("Math.PI", ""));
                                     break;
                                 // JUST SKIP
-                                case "dgrd":
+                                case "dgrd": // DG2RAD
+                                    if (stack.Count > 1)
+                                    {
+                                        var rightIntermediate = stack.Pop();
+                                        var leftIntermediate = stack.Pop();
+                                        newExpr = "( " + leftIntermediate.expr + rightIntermediate.expr + " ) * Math.PI/180";
+                                    }
+                                    else if (stack.Count > 0)
+                                    {
+                                        var rightIntermediate = stack.Pop();
+                                        newExpr = "( " + rightIntermediate.expr + " ) * Math.PI/180";
+                                    }
+                                    else
+                                    {
+                                        newExpr = "Math.PI/180";
+                                    }
+
+                                    stack.Push(new Intermediate(newExpr, token));
+                                    break;
                                 default:
                                     break;
                                 // FSX STACK COMMANDS

@@ -13,7 +13,7 @@ namespace msfsLegacyImporter
 {
     class xmlHelper
     {
-        public void insertFsxGauge(string aircraftDirectory, string projectDirectory, string chkContent, Slider GammaSlider, cfgHelper CfgHelper, fsxVarHelper FsxVarHelper, jsonHelper JSONHelper)
+        public void insertFsxGauge(string aircraftDirectory, string projectDirectory, string chkContent, Slider GammaSlider, CheckBox ForceBackground, cfgHelper CfgHelper, fsxVarHelper FsxVarHelper, jsonHelper JSONHelper)
         {
             string mainFile = aircraftDirectory + "\\" + (string)chkContent;
             string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
@@ -126,7 +126,7 @@ namespace msfsLegacyImporter
                                     css += materialName + "-element #Mainframe #" + gaugeName + " {" + Environment.NewLine + "		width: " + GaugeSize[0] + "px;" + Environment.NewLine + "		height: " + GaugeSize[1] + "px;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine + "		left: " + xPos + "px;" + Environment.NewLine + "		top: " + yPos + "px;" + Environment.NewLine;
 
                                     // SET BG IMAGE IF NECESSARY
-                                    //if (String.IsNullOrEmpty(Path.GetFileNameWithoutExtension(file)))
+                                    if (String.IsNullOrEmpty(Path.GetFileNameWithoutExtension(file)) || ForceBackground != null && ForceBackground.IsChecked == true)
                                     {
                                         XElement mainImage = gaugeXml.Descendants("Image").FirstOrDefault();
                                         if (mainImage != null)

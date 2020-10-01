@@ -1761,6 +1761,7 @@ namespace msfsLegacyImporter
 
 
             StackPanel myPanel2 = new StackPanel();
+            myPanel2.Margin = new Thickness(0, 10, 0, 5);
 
             Button btn2 = new Button();
             btn2 = SetButtonAtts(btn2);
@@ -1770,6 +1771,16 @@ namespace msfsLegacyImporter
             {
                 btn2.Content = "Import panel gauges";
                 btn2.Click += importPanelGaugeClick;
+
+                if (this.FindName("ForceBackground") != null)
+                    UnregisterName("ForceBackground");
+                CheckBox checkBox = new CheckBox();
+                RegisterName("ForceBackground", checkBox);
+                checkBox.Content = "Force gauge background image (check it if you get black holes on gauges places)";
+                checkBox.MaxWidth = 600;
+                checkBox.HorizontalAlignment = HorizontalAlignment.Left;
+                myPanel2.Children.Add(checkBox);
+
 
                 myPanel2.Children.Add(addTextBlock("Gamma correction (0 - bright; 1 - normal; 2 - dark)", HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black));
 
@@ -1843,7 +1854,7 @@ namespace msfsLegacyImporter
                     CheckBox a = (CheckBox)panel.Children[0];
                     if (a.IsChecked == true && (string)a.Content != "Toggle all")
                     {
-                        XmlHelper.insertFsxGauge(aircraftDirectory, projectDirectory, (string)a.Content, (Slider)this.FindName("GammaSlider"), CfgHelper, FsxVarHelper, JSONHelper);
+                        XmlHelper.insertFsxGauge(aircraftDirectory, projectDirectory, (string)a.Content, (Slider)this.FindName("GammaSlider"), (CheckBox)this.FindName("ForceBackground"), CfgHelper, FsxVarHelper, JSONHelper);
                     }
                 }
 

@@ -8,12 +8,12 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("MSFS Legacy Importer")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("FSX to MSFS aircraft importer")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Alex Marko")]
 [assembly: AssemblyProduct("msfsLegacyImporter")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyTrademark("none")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -51,7 +51,7 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.0.4.1")]
-[assembly: AssemblyFileVersion("0.0.4.1")]
+[assembly: AssemblyVersion("0.0.4.2")]
+[assembly: AssemblyFileVersion("0.0.4.2")]
 [assembly: NeutralResourcesLanguage("en")]
 [assembly: Guid("596D4399-521F-40DF-81C8-899F17BCBA4C")]
