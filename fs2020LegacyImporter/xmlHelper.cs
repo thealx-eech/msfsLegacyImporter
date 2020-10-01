@@ -63,7 +63,6 @@ namespace msfsLegacyImporter
                                 string[] gaugeData = gauge.Value.Split(',');
                                 if (gaugeData.Length >= 5 && gaugeData[0].Contains('!'))
                                 {
-                                    acSlug = gaugeData[0].Split('!')[0].Trim().ToLower();
                                     gaugesList.Add(gaugeData);
                                 }
                                 else
@@ -73,50 +72,59 @@ namespace msfsLegacyImporter
                             }
                         }
 
-                        string panelDir = Path.GetDirectoryName(mainFile) + "\\." + acSlug;
-                        string baseFolder = /*projectDirectory.TrimEnd('\\')*/ Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\";
-                        string InstrumentFolder = baseFolder + "html_ui\\Pages\\vlivery\\liveries\\Legacy\\" + acSlug + "\\";
-
                         /*if (Directory.Exists(InstrumentFolder))
                         {
-                            MessageBoxResult messageBoxResult = MessageBox.Show("Existing files will be overwritten", "Legacy instruments folder \"" + acSlug + "\" already exists", System.Windows.MessageBoxButton.YesNo);
+                            MessageBoxResult messageBoxResult = MessageBox.Show("Existing files will be overwritten", "Legacy instruments folder \"" + gaugeGroup + "\" already exists", System.Windows.MessageBoxButton.YesNo);
                             if (messageBoxResult != MessageBoxResult.Yes)
                             {
                                 continue;
                             }
                         }
                         else*/
-                        if (!Directory.Exists(InstrumentFolder))
-                            Directory.CreateDirectory(InstrumentFolder);
-
-                        if (!String.IsNullOrEmpty(file) && File.Exists(Path.GetDirectoryName(mainFile) + "\\" + file))
-                        {
-                            Bitmap bmp = new Bitmap(Path.GetDirectoryName(mainFile) + "\\" + file);
-                            bmp = setBitmapGamma(bmp, GammaSlider);
-                            bmp.Save(InstrumentFolder + Path.GetFileNameWithoutExtension(file) + ".png", ImageFormat.Png);
-                        }
-
 
                         // INSERT GAUGES
                         if (gaugesList.Count > 0)
                         {
-                            bool render = false;
-
                             string html = "";
                             string css = "";
                             string js = "";
 
+                            string baseFolder = /*projectDirectory.TrimEnd('\\')*/ Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\";
+                            string InstrumentFolder = baseFolder + "html_ui\\Pages\\vlivery\\liveries\\Legacy\\" + acSlug + "\\";
+
+                            if (!Directory.Exists(InstrumentFolder))
+                                Directory.CreateDirectory(InstrumentFolder);
+
+                            if (!String.IsNullOrEmpty(file) && File.Exists(Path.GetDirectoryName(mainFile) + "\\" + file))
+                            {
+                                Bitmap bmp = new Bitmap(Path.GetDirectoryName(mainFile) + "\\" + file);
+                                bmp = setBitmapGamma(bmp, GammaSlider);
+                                bmp.Save(InstrumentFolder + Path.GetFileNameWithoutExtension(file) + ".png", ImageFormat.Png);
+                            }
+
                             foreach (var gaugeData in gaugesList)
                             {
+                                string gaugeGroup = gaugeData[0].Split('!')[0].Trim().ToLower();
                                 string gaugeName = gaugeData[0].Split('!')[1].Trim();
                                 string xPos = gaugeData[1].Trim();
                                 string yPos = gaugeData[2].Trim();
                                 string gaugeWidth = gaugeData[3].Trim();
                                 string gaugeHeight = gaugeData[4].Trim();
 
+                                // AC CAB
+                                string panelDir = Path.GetDirectoryName(mainFile) + "\\." + gaugeGroup;
+
+                                // AC SUBFOLDER
+                                if (!Directory.Exists(panelDir) || !File.Exists(panelDir + "\\" + gaugeName + ".xml"))
+                                    panelDir = Path.GetDirectoryName(mainFile) + "\\" + gaugeGroup;
+
+                                // FSX CABS
+                                if (!Directory.Exists(panelDir) || !File.Exists(panelDir + "\\" + gaugeName + ".xml"))
+                                    panelDir = Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\" + gaugeGroup;
+
                                 if (Directory.Exists(panelDir) && File.Exists(panelDir + "\\" + gaugeName + ".xml"))
                                 {
-                                    render = true;
+                                    Console.WriteLine("Processing " + gaugeGroup + "\\" + gaugeName + ".xml");
 
                                     // SET UP GAUGE
                                     XElement gaugeXml = XElement.Load(panelDir + "\\" + gaugeName + ".xml");
@@ -138,7 +146,7 @@ namespace msfsLegacyImporter
                                                 bmp = setBitmapGamma(bmp, GammaSlider);
                                                 bmp.Save(InstrumentFolder + MainImageFilename + ".png", ImageFormat.Png);
 
-                                                css += "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + acSlug + "/" + MainImageFilename + ".png\");" + Environment.NewLine; ;
+                                                css += "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + gaugeGroup + "/" + MainImageFilename + ".png\");" + Environment.NewLine; ;
                                             }
                                         }
                                     }
@@ -175,7 +183,7 @@ namespace msfsLegacyImporter
                                                 bmp.Save(targetFile, ImageFormat.Png);
 
                                                 html += "		  <div id=\"" + slug + "_mask\">" + Environment.NewLine;
-                                                css += materialName + "-element #Mainframe #" + slug + "_mask {" + Environment.NewLine + "		background: transparent;" + Environment.NewLine + "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + acSlug + "/" + maskSlug + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine;
+                                                css += materialName + "-element #Mainframe #" + slug + "_mask {" + Environment.NewLine + "		background: transparent;" + Environment.NewLine + "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + gaugeGroup + "/" + maskSlug + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine;
                                                 css += Environment.NewLine + "		width: " + maskWidth + "px;" + Environment.NewLine + "		height: " + maskHeight + "px;" + Environment.NewLine;
                                                 css += "		left: " + FloatPositionValues[0] + "px;" + Environment.NewLine + "		top: " + FloatPositionValues[1] + "px;" + Environment.NewLine + "}" + Environment.NewLine;
                                             }
@@ -206,7 +214,7 @@ namespace msfsLegacyImporter
 
                                                 // GENERATE CODE
                                                 html += "			<div id=\"" + slug + "\"></div>" + Environment.NewLine;
-                                                css += materialName + "-element #Mainframe #" + slug + " {" + Environment.NewLine + "		background: transparent;" + Environment.NewLine + "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + acSlug + "/" + gaugeName + "-" + slug + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine;
+                                                css += materialName + "-element #Mainframe #" + slug + " {" + Environment.NewLine + "		background: transparent;" + Environment.NewLine + "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + gaugeGroup + "/" + gaugeName + "-" + slug + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine;
                                                 css += Environment.NewLine + "		width: " + imgWidth + "px;" + Environment.NewLine + "		height: " + imgHeight + "px;" + Environment.NewLine;
                                                 if (MaskImage != null && !String.IsNullOrEmpty(MaskImage.Attribute("Name").Value))
                                                     css += "		left: - " + AxisPositionValues[0] + "px;" + Environment.NewLine + "		top: - " + AxisPositionValues[1] + "px;" + Environment.NewLine;
@@ -372,10 +380,13 @@ namespace msfsLegacyImporter
 
                                     html += "		</div>" + Environment.NewLine;
 
+                                } else
+                                {
+                                    Console.WriteLine(gaugeGroup + "\\" + gaugeName + ".xml NOT FOUND!");
                                 }
                             }
 
-                            if (render)
+                            if (html != "")
                             {
                                 html = htmlTpl.Replace("[INSTRUMENTS]", html);
                                 html = html.Replace("[MATERIALNAME]", materialName);

@@ -1465,6 +1465,8 @@ namespace msfsLegacyImporter
             string[] bmp = new string[1000];
             string[] dds = new string[1000];
 
+            fsTabControl.IsEnabled = false;
+
             foreach (StackPanel panel in TexturesList.Children)
                 if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
                 {
@@ -1524,6 +1526,8 @@ namespace msfsLegacyImporter
                     });*/
                 }
             }
+
+            fsTabControl.IsEnabled = true;
 
             JSONHelper.scanTargetFolder(projectDirectory);
             SummaryUpdate();
@@ -1738,34 +1742,34 @@ namespace msfsLegacyImporter
 
             StackPanel myPanel1 = new StackPanel();
 
-            Button btn1 = new Button();
-            btn1 = SetButtonAtts(btn1);
-            btn1.Name = "extractCab";
+            if (!Directory.Exists(Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\"))
+            {
+                Button btn3 = new Button();
+                btn3 = SetButtonAtts(btn3);
+                btn3.Content = "Extract default FSX gauges";
+                btn3.Click += extractDefaultCabsClick;
+                myPanel1.Children.Add(btn3);
+            }
 
             if (cabsToConvert > 0)
             {
+                Button btn1 = new Button();
+                btn1 = SetButtonAtts(btn1);
                 btn1.Content = "Extract panel gauges resources";
                 btn1.Click += extractCabClick;
-            }
-            else
-            {
-                btn1.Content = cabsWithoutBackup > 0 ? "No CAB files to extract" : "CAB file already extracted";
-                btn1.IsEnabled = false;
+                myPanel1.Children.Add(btn1);
             }
 
             if (cabsToConvert > 0 || cabsWithoutBackup > 0)
                 tabPanel.Foreground = new SolidColorBrush(Colors.DarkRed);
 
-            myPanel1.Children.Add(btn1);
             CabsList.Children.Add(myPanel1);
-
 
             StackPanel myPanel2 = new StackPanel();
             myPanel2.Margin = new Thickness(0, 10, 0, 5);
 
             Button btn2 = new Button();
             btn2 = SetButtonAtts(btn2);
-            btn2.Name = "importPanelGauges";
 
             if (panelsToConvert > 0)
             {
@@ -1839,6 +1843,62 @@ namespace msfsLegacyImporter
                         }
                     }
                 }
+
+            SummaryUpdate();
+        }
+
+        private void extractDefaultCabsClick(object sender, RoutedEventArgs e)
+        {
+            string selectedPath = HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0\\", "SetupPath", RegistryView.Registry32);
+
+            fsTabControl.IsEnabled = false;
+
+            if (selectedPath != Environment.SpecialFolder.MyDocuments.ToString())
+            {
+                MessageBoxResult messageBoxResult = MessageBox.Show("Current FSX path is " + selectedPath + Environment.NewLine + Environment.NewLine +
+                    "Press YES to extract CAB files" + Environment.NewLine + 
+                    "Press NO to select FSX installation folder" + Environment.NewLine +
+                    "Press CANCEL to abort", "CAB files extractions", System.Windows.MessageBoxButton.YesNoCancel);
+                if (messageBoxResult == MessageBoxResult.Cancel)
+                {
+                    selectedPath = "";
+                }
+                else if (messageBoxResult == MessageBoxResult.No)
+                {
+                    selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0\\", "SetupPath", RegistryView.Registry32));
+                }
+            }
+
+            if (!String.IsNullOrEmpty(selectedPath))
+            {
+                if (Directory.Exists(selectedPath + "\\Gauges\\") && Directory.Exists(selectedPath + "\\SimObjects\\Airplanes\\"))
+                {
+                    var cabFiles = Directory.EnumerateFiles(selectedPath + "\\Gauges\\", "*.cab", SearchOption.AllDirectories);
+                    var cabFiles2 = Directory.EnumerateFiles(selectedPath + "\\SimObjects\\Airplanes\\", "*.cab", SearchOption.AllDirectories);
+
+                    IEnumerable<string> combined = cabFiles.Concat(cabFiles2);
+
+                    foreach (string cabFile in combined)
+                    {
+                        if (File.Exists(cabFile))
+                        {
+                            string extractDirectory = Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\" + Path.GetFileNameWithoutExtension(cabFile);
+
+                            if (!Directory.Exists(extractDirectory))
+                                Directory.CreateDirectory(extractDirectory);
+
+                            CabInfo cab = new CabInfo(cabFile);
+                            cab.Unpack(extractDirectory);
+                        }
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Gauges or SimObjects\\Airplanes folder not found in " + selectedPath);
+                }
+            }
+
+            fsTabControl.IsEnabled = true;
 
             SummaryUpdate();
         }
@@ -2195,6 +2255,7 @@ namespace msfsLegacyImporter
                             {
                                 updateVersion = ver.ToString();
                                 updateURL = updatedirectory + url;
+                                break;
                             }
                             //Console.WriteLine(ver + " " + pubVer);
                         }
@@ -2276,13 +2337,21 @@ namespace msfsLegacyImporter
                     }
                     catch(Exception)
                     {
-                        MessageBox.Show("Update failed");
+                        MessageBox.Show("Can't delete backup file");
                     }
                 }
 
                 if (!File.Exists(EXE_PATH + ".BAK"))
                 {
                     File.Move(EXE_PATH, EXE_PATH + ".BAK");
+
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+                    while (true) { if (sw.ElapsedMilliseconds > 1000 || !File.Exists(EXE_PATH)) break; }
+
+                    if (File.Exists(EXE_PATH))
+                        MessageBox.Show("Can't delete old EXE file");
+                    
                     Extract extract = new Extract();
                     extract.Run(TEMP_FILE, EXE_PATH);
                 }

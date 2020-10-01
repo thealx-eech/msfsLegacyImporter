@@ -7,7 +7,7 @@ namespace msfsLegacyImporter
         public string getFolderPath(string defaultPath)
         {
             FolderBrowserDialog diag = new FolderBrowserDialog();
-            diag.Description = "Select a folder in which to save your workspace...";
+            diag.Description = "Select folder";
             diag.SelectedPath = defaultPath;
 
             if (System.Windows.Forms.DialogResult.OK == diag.ShowDialog())
