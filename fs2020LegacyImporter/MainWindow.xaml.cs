@@ -258,14 +258,17 @@ namespace msfsLegacyImporter
 
             // SET BACKUP BUTTONS LABEL
             foreach (Button btn in new Button[] { AircraftBackupButton, EnginesBackupButton, CockpitBackupButton, SystemsBackupButton, FlightModelBackupButton, RunwayBackupButton, RunwayBackupButton, ModelBackupButton, PanelBackupButton })
-                if (!String.IsNullOrEmpty(btn.Tag.ToString())) {
+            {
+                if (!String.IsNullOrEmpty(btn.Tag.ToString()))
+                {
                     string filenames = btn.Tag.ToString();
                     if (!btn.Tag.ToString().Contains(','))
                         filenames += ',';
 
                     foreach (var filename in filenames.Split(','))
                     {
-                        if (!String.IsNullOrEmpty(filename)) {
+                        if (!String.IsNullOrEmpty(filename))
+                        {
                             string mainFile = aircraftDirectory + "\\" + filename;
                             string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
 
@@ -279,6 +282,14 @@ namespace msfsLegacyImporter
                         }
                     }
                 }
+
+                SetButtonAtts(btn, false);
+            }
+
+            foreach (Button btn in new Button[] { AircraftEditButton, EnginesEditButton, CockpitEditButton, CockpitEditButton, SystemsEditButton, FlightModelEditButton, RunwayEditButton })
+            {
+                SetButtonAtts(btn, false);
+            }
         }
 
         // AIRCRAFT START
@@ -383,6 +394,7 @@ namespace msfsLegacyImporter
             // FM cruise_speed
 
             AircraftPerformance.Children.Add(myPanel2);
+            AircraftPerformance.Children.Add(sectiondivider());
         }
 
         private void BtnAircraftProcess_Click(object sender, RoutedEventArgs e)
@@ -423,9 +435,15 @@ namespace msfsLegacyImporter
         public void AddDescriptionClick(object sender, RoutedEventArgs e)
         {
             int i = 0;
+            StackPanel tmpPnl = new StackPanel();
 
-            foreach (StackPanel panel in AircraftPerformance.Children)
+            foreach (var pnl in AircraftPerformance.Children)
             {
+                if (pnl.GetType() != tmpPnl.GetType())
+                    continue;
+
+                StackPanel panel = (StackPanel)pnl;
+
                 if (panel.Children.Count > 0)
                 {
                     foreach (var chkbx in panel.Children)
@@ -528,6 +546,8 @@ namespace msfsLegacyImporter
 
                 getAirCheckboxes(EnginesAir, "engines.cfg");
             }
+
+            EnginesData.Children.Add(sectiondivider());
         }
 
         private void FixengineClick(object sender, RoutedEventArgs e) {
@@ -535,8 +555,15 @@ namespace msfsLegacyImporter
 
             if (CfgHelper.cfgFileExists("engines.cfg"))
             {
-                foreach (StackPanel panel in EnginesData.Children)
+                StackPanel tmpPnl = new StackPanel();
+
+                foreach (var pnl in EnginesData.Children)
                 {
+                    if (pnl.GetType() != tmpPnl.GetType())
+                        continue;
+
+                    StackPanel panel = (StackPanel)pnl;
+
                     if (panel.Children.Count > 0)
                     {
                         CheckBox b = new CheckBox();
@@ -720,6 +747,8 @@ namespace msfsLegacyImporter
 
             myPanel.Children.Add(btn);
             parent.Children.Add(myPanel);
+
+            parent.Children.Add(sectiondivider());
         }
 
         private void InsertAirValues(object sender, RoutedEventArgs e)
@@ -830,7 +859,10 @@ namespace msfsLegacyImporter
                 SystemsData.Children.Add(myPanel2);
 
                 //SystemContent.Foreground = new SolidColorBrush(Colors.Black);
+
+                SystemsData.Children.Add(sectiondivider());
             }
+
         }
 
         private void FixLightsClick(object sender, RoutedEventArgs e)
@@ -838,9 +870,15 @@ namespace msfsLegacyImporter
             if (CfgHelper.cfgFileExists("systems.cfg"))
             {
                 int i = 0;
+                StackPanel tmpPnl = new StackPanel();
 
-                foreach (StackPanel panel in SystemsData.Children)
+                foreach (var pnl in SystemsData.Children)
                 {
+                    if (pnl.GetType() != tmpPnl.GetType())
+                        continue;
+
+                    StackPanel panel = (StackPanel)pnl;
+
                     if (panel.Children.Count > 0)
                     {
                         CheckBox b = new CheckBox();
@@ -1057,6 +1095,7 @@ namespace msfsLegacyImporter
                 }
 
                 FlightModelData.Children.Add(myPanel2);
+                FlightModelData.Children.Add(sectiondivider());
 
                 // FM ISSUES
                 FlightModelIssues.Children.Clear();
@@ -1100,10 +1139,10 @@ namespace msfsLegacyImporter
 
                 myPanel3.Children.Add(btn3);
                 FlightModelIssues.Children.Add(myPanel3);
-
-
+                FlightModelIssues.Children.Add(sectiondivider());
 
                 getAirCheckboxes(FlightModelAir, "flight_model.cfg");
+
             }
         }
 
@@ -1115,8 +1154,15 @@ namespace msfsLegacyImporter
             {
                 string message = "";
 
-                foreach (StackPanel panel in FlightModelIssues.Children)
+                StackPanel tmpPnl = new StackPanel();
+
+                foreach (var pnl in FlightModelIssues.Children)
                 {
+                    if (pnl.GetType() != tmpPnl.GetType())
+                        continue;
+
+                    StackPanel panel = (StackPanel)pnl;
+
                     if (panel.Children.Count > 0)
                     {
                         CheckBox b = new CheckBox();
@@ -1212,10 +1258,16 @@ namespace msfsLegacyImporter
             if (CfgHelper.cfgFileExists("flight_model.cfg"))
             {
                 int i = 0;
-
                 string lastPoint = null;
-                foreach (StackPanel panel in FlightModelData.Children)
+                StackPanel tmpPnl = new StackPanel();
+
+                foreach (var pnl in FlightModelData.Children)
                 {
+                    if (pnl.GetType() != tmpPnl.GetType())
+                        continue;
+
+                    StackPanel panel = (StackPanel)pnl;
+
                     if (panel.Children.Count > 0)
                     {
                         CheckBox b = new CheckBox();
@@ -1280,9 +1332,15 @@ namespace msfsLegacyImporter
             parentPanelsList.Add(SystemsSections);
             parentPanelsList.Add(FlightModelSections);
             parentPanelsList.Add(RunwaySections);
+            StackPanel tmpPnl = new StackPanel();
 
-            foreach (StackPanel parentPanel in parentPanelsList)
+            foreach (var pnl in parentPanelsList)
             {
+                if (pnl.GetType() != tmpPnl.GetType())
+                    continue;
+
+                StackPanel parentPanel = (StackPanel)pnl;
+
                 string filename = parentPanel.Tag.ToString();
 
                 parentPanel.Children.Clear();
@@ -1352,6 +1410,8 @@ namespace msfsLegacyImporter
                         }
                     }
                 }
+
+                parentPanel.Children.Add(sectiondivider());
             }
         }
 
@@ -1367,9 +1427,15 @@ namespace msfsLegacyImporter
 
                 string[] sections = new string[100];
                 int i = 0;
+                StackPanel tmpPnl = new StackPanel();
 
-                foreach (StackPanel panel in parentPanel.Children)
+                foreach (var pnl in parentPanel.Children)
                 {
+                    if (pnl.GetType() != tmpPnl.GetType())
+                        continue;
+
+                    StackPanel panel = (StackPanel)pnl;
+
                     if (panel.Children.Count > 0)
                     {
                         CheckBox b = new CheckBox();
@@ -1453,6 +1519,7 @@ namespace msfsLegacyImporter
 
             myPanel2.Children.Add(btn);
             TexturesList.Children.Add(myPanel2);
+            TexturesList.Children.Add(sectiondivider());
         }
 
         private void ConvertTexturesClick(object sender, RoutedEventArgs e)
@@ -1467,7 +1534,15 @@ namespace msfsLegacyImporter
 
             fsTabControl.IsEnabled = false;
 
-            foreach (StackPanel panel in TexturesList.Children)
+            StackPanel tmpPnl = new StackPanel();
+
+            foreach (var pnl in TexturesList.Children)
+            {
+                if (pnl.GetType() != tmpPnl.GetType())
+                    continue;
+
+                StackPanel panel = (StackPanel)pnl;
+
                 if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
                 {
                     CheckBox a = (CheckBox)panel.Children[0];
@@ -1479,6 +1554,7 @@ namespace msfsLegacyImporter
                         count++;
                     }
                 }
+            }
 
             for (int i = 0; i < count; i++)
             {
@@ -1595,6 +1671,7 @@ namespace msfsLegacyImporter
 
             myPanel2.Children.Add(btn);
             ModelsList.Children.Add(myPanel2);
+            ModelsList.Children.Add(sectiondivider());
         } 
 
         private void RemoveSwitchesClick(object sender, RoutedEventArgs e)
@@ -1605,7 +1682,15 @@ namespace msfsLegacyImporter
             MessageBoxResult messageBoxResult = MessageBox.Show("You will be no longer able to use clickable elements inside of the cockpit. You can restore original interior model by clicking Restore Backup button.", "You are going to remove clickable switches", System.Windows.MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
-                foreach (StackPanel panel in ModelsList.Children)
+                StackPanel tmpPnl = new StackPanel();
+
+                foreach (var pnl in ModelsList.Children)
+                {
+                    if (pnl.GetType() != tmpPnl.GetType())
+                        continue;
+
+                    StackPanel panel = (StackPanel)pnl;
+
                     if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
                     {
                         CheckBox a = (CheckBox)panel.Children[0];
@@ -1681,6 +1766,7 @@ namespace msfsLegacyImporter
 
                         }
                     }
+                }
             }
 
             SummaryUpdate();
@@ -1742,15 +1828,6 @@ namespace msfsLegacyImporter
 
             StackPanel myPanel1 = new StackPanel();
 
-            if (!Directory.Exists(Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\"))
-            {
-                Button btn3 = new Button();
-                btn3 = SetButtonAtts(btn3);
-                btn3.Content = "Extract default FSX gauges";
-                btn3.Click += extractDefaultCabsClick;
-                myPanel1.Children.Add(btn3);
-            }
-
             if (cabsToConvert > 0)
             {
                 Button btn1 = new Button();
@@ -1758,6 +1835,17 @@ namespace msfsLegacyImporter
                 btn1.Content = "Extract panel gauges resources";
                 btn1.Click += extractCabClick;
                 myPanel1.Children.Add(btn1);
+                myPanel1.Children.Add(sectiondivider());
+            }
+
+            if (!Directory.Exists(Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\"))
+            {
+                Button btn3 = new Button();
+                btn3 = SetButtonAtts(btn3);
+                btn3.Content = "Extract default FSX gauges resources";
+                btn3.Click += extractDefaultCabsClick;
+                myPanel1.Children.Add(btn3);
+                myPanel1.Children.Add(sectiondivider());
             }
 
             if (cabsToConvert > 0 || cabsWithoutBackup > 0)
@@ -1811,14 +1899,22 @@ namespace msfsLegacyImporter
             myPanel2.Children.Add(btn2);
             PanelsList.Children.Add(myPanel2);
 
+            PanelsList.Children.Add(sectiondivider());
         }
 
         private void extractCabClick(object sender, RoutedEventArgs e)
         {
             CheckBox tmp = new CheckBox();
+            StackPanel tmpPnl = new StackPanel();
 
             // COUNT
-            foreach (StackPanel panel in CabsList.Children)
+            foreach (var pnl in CabsList.Children)
+            {
+                if (pnl.GetType() != tmpPnl.GetType())
+                    continue;
+
+                StackPanel panel = (StackPanel)pnl;
+
                 if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
                 {
                     CheckBox a = (CheckBox)panel.Children[0];
@@ -1843,6 +1939,7 @@ namespace msfsLegacyImporter
                         }
                     }
                 }
+            }
 
             SummaryUpdate();
         }
@@ -1856,7 +1953,7 @@ namespace msfsLegacyImporter
             if (selectedPath != Environment.SpecialFolder.MyDocuments.ToString())
             {
                 MessageBoxResult messageBoxResult = MessageBox.Show("Current FSX path is " + selectedPath + Environment.NewLine + Environment.NewLine +
-                    "Press YES to extract CAB files" + Environment.NewLine + 
+                    "Press YES to extract CAB files from this folder" + Environment.NewLine + 
                     "Press NO to select FSX installation folder" + Environment.NewLine +
                     "Press CANCEL to abort", "CAB files extractions", System.Windows.MessageBoxButton.YesNoCancel);
                 if (messageBoxResult == MessageBoxResult.Cancel)
@@ -1906,9 +2003,16 @@ namespace msfsLegacyImporter
         private void importPanelGaugeClick(object sender, RoutedEventArgs e)
         {
             CheckBox tmp = new CheckBox();
+            StackPanel tmpPnl = new StackPanel();
 
             // COUNT
-            foreach (StackPanel panel in PanelsList.Children)
+            foreach (var pnl in PanelsList.Children)
+            {
+                if (pnl.GetType() != tmpPnl.GetType())
+                    continue;
+
+                StackPanel panel = (StackPanel)pnl;
+
                 if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
                 {
                     CheckBox a = (CheckBox)panel.Children[0];
@@ -1917,6 +2021,7 @@ namespace msfsLegacyImporter
                         XmlHelper.insertFsxGauge(aircraftDirectory, projectDirectory, (string)a.Content, (Slider)this.FindName("GammaSlider"), (CheckBox)this.FindName("ForceBackground"), CfgHelper, FsxVarHelper, JSONHelper);
                     }
                 }
+            }
 
             JSONHelper.scanTargetFolder(projectDirectory);
             SummaryUpdate();
@@ -1943,14 +2048,22 @@ namespace msfsLegacyImporter
             }
         }
 
-        public Button SetButtonAtts(Button btn)
+        public Button SetButtonAtts(Button btn, bool large = true)
         {
-            btn.MinHeight = 30;
-            btn.FontSize = 20;
-            btn.Margin = new Thickness(5, 20, 5, 20);
+            if (large)
+            {
+                btn.MinHeight = 30;
+                btn.FontSize = 20;
+                btn.Margin = new Thickness(5, 20, 5, 20);
+                btn.Padding = new Thickness(5, 5, 5, 5);
+                btn.HorizontalAlignment = HorizontalAlignment.Stretch;
+                btn.Width = double.NaN;
+            }
+
             btn.FontFamily = new FontFamily("Arial Black");
-            btn.HorizontalAlignment = HorizontalAlignment.Center;
             btn.VerticalAlignment = VerticalAlignment.Top;
+            btn.BorderBrush = new SolidColorBrush(Color.FromRgb(90, 90, 255));
+            btn.Background = new SolidColorBrush(Color.FromRgb(190, 221, 255));
 
             return btn;
         }
@@ -2066,6 +2179,21 @@ namespace msfsLegacyImporter
                 {
                     SourceFolder = selectedPath + "\\";
                     btnSourceFolderPath.Text = "from " + SourceFolder;
+
+                    // POPULATE INPUT FIELDS
+                    string content = File.ReadAllText(selectedPath + "\\aircraft.cfg");
+                    List<msfsLegacyImporter.cfgHelper.CfgLine> panelLines = CfgHelper.readCSV(content + "\r\n[]");
+                    var title = panelLines.Find(x => x.Name == "title");
+                    if (title != null) { PackageTitle.Text = title.Value.Trim('"').Trim(); }
+
+                    var ui_manufacturer = panelLines.Find(x => x.Name == "ui_manufacturer");
+                    if (ui_manufacturer != null) { PackageManufacturer.Text = ui_manufacturer.Value.Trim('"').Trim(); }
+
+                    var ui_createdby = panelLines.Find(x => x.Name == "ui_createdby");
+                    if (ui_createdby != null) { PackageAuthor.Text = ui_createdby.Value.Trim('"').Trim(); }
+
+                    var sim = panelLines.Find(x => x.Name == "sim");
+                    if (sim != null) { PackageDir.Text = sim.Value.Trim('"').Trim(); }
                 }
                 else
                 {
@@ -2305,6 +2433,8 @@ namespace msfsLegacyImporter
         {
             if (updateURL != "")
             {
+                fsTabControl.IsEnabled = false;
+
                 WebClient _webClient = new WebClient();
                 //_webClient.DownloadProgressChanged += OnDownloadProgressChanged;
                 _webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(OnDownloadCompleted);
@@ -2356,6 +2486,8 @@ namespace msfsLegacyImporter
                     extract.Run(TEMP_FILE, EXE_PATH);
                 }
             }
+
+            fsTabControl.IsEnabled = true;
         }
 
         public void SetUpdateReady()
@@ -2403,6 +2535,14 @@ namespace msfsLegacyImporter
         {
             hiddenPanel = true;
             tabPanel.Visibility = Visibility.Visible;
+        }
+
+        private Separator sectiondivider()
+        {
+            Separator sectn = new Separator();
+            sectn.Margin = new Thickness(0, 0, 0, 10);
+
+            return sectn;
         }
     }
 

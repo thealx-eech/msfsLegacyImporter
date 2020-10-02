@@ -25,7 +25,7 @@ namespace msfsLegacyImporter
                     BackgroundWorker bw = o as BackgroundWorker;
                     FastZip fastZip = new FastZip();
                     Console.WriteLine("Unzipping");
-                    fastZip.ExtractZip(TEMP_FILE, AppDomain.CurrentDomain.BaseDirectory + "\\", FastZip.Overwrite.Always, null, @"^(.*\.dll)", null, false);
+                    fastZip.ExtractZip(TEMP_FILE, AppDomain.CurrentDomain.BaseDirectory + "\\", FastZip.Overwrite.Always, null, @"-(ICSharpCode.SharpZipLib.dll)", null, false);
                 });
 
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(

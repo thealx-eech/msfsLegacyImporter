@@ -230,17 +230,22 @@ namespace msfsLegacyImporter
                                                 else
                                                     js += "			var ExpressionResult = 0; /* NO SCRIPT NODE FOUND!!! */" + Environment.NewLine;
 
-                                                js += "			var Minimum = 0;" + Environment.NewLine;
                                                 if (Expression.Descendants("Minimum").FirstOrDefault() != null)
                                                 {
-                                                    js += "			Minimum = " + Expression.Descendants("Minimum").FirstOrDefault().Value + ";" + Environment.NewLine;
+                                                    js += "			var Minimum = " + Expression.Descendants("Minimum").FirstOrDefault().Value + ";" + Environment.NewLine;
                                                     js += "			ExpressionResult = Math.max(ExpressionResult, Minimum);" + Environment.NewLine;
+                                                } else {
+                                                    js += "			var Minimum = 0;" + Environment.NewLine;
                                                 }
-                                                js += "			var Maximum = 999999999;" + Environment.NewLine;
+
                                                 if (Expression.Descendants("Maximum").FirstOrDefault() != null)
                                                 {
-                                                    js += "			Maximum = " + Expression.Descendants("Maximum").FirstOrDefault().Value + ";" + Environment.NewLine;
+                                                    js += "			var Maximum = " + Expression.Descendants("Maximum").FirstOrDefault().Value + ";" + Environment.NewLine;
                                                     js += "			ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
+                                                }
+                                                else
+                                                {
+                                                    js += "			var Maximum = 999999999;" + Environment.NewLine;
                                                 }
                                             }
 
@@ -281,8 +286,13 @@ namespace msfsLegacyImporter
                                                         js += "				[" + NonlinearExpressionResult + "," + NonlinearFloatPositionValues[0] + "," + NonlinearFloatPositionValues[1] + "]," + Environment.NewLine;
                                                     }
                                                     js += "			]" + Environment.NewLine + Environment.NewLine;
-                                                    js += "			if (ExpressionResult < NonlinearityTable[0][0]) { ExpressionResult = NonlinearityTable[0][0] }" + Environment.NewLine;
-                                                    js += "			if (ExpressionResult > NonlinearityTable[NonlinearityTable.length-1][0]) { ExpressionResult = NonlinearityTable[NonlinearityTable.length-1][0] }" + Environment.NewLine + Environment.NewLine;
+                                                    js += "			if (NonlinearityTable.length > 0) {" + Environment.NewLine;
+                                                    js += "			    Minimum = NonlinearityTable[0][0];" + Environment.NewLine;
+                                                    js += "			    ExpressionResult = Math.max(ExpressionResult, Minimum);" + Environment.NewLine;
+                                                    js += "			    Maximum = NonlinearityTable[NonlinearityTable.length-1][0];" + Environment.NewLine;
+                                                    js += "			    ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
+                                                    js += "			}" + Environment.NewLine + Environment.NewLine;
+
                                                     js += "			var p1 = { x: " + FloatPositionValues[0] + ", y: " + FloatPositionValues[1] + " };" + Environment.NewLine;
                                                     js += "			var prevP2 = { x: 0, y: 0 };" + Environment.NewLine;
 
@@ -330,12 +340,17 @@ namespace msfsLegacyImporter
                                                         js += "				[" + NonlinearExpressionResult + "," + NonlinearFloatPositionValues[0] + "," + NonlinearFloatPositionValues[1] + "]," + Environment.NewLine;
                                                     }
                                                     js += "			]" + Environment.NewLine + Environment.NewLine;
-                                                    js += "			if (ExpressionResult < NonlinearityTable[0][0]) { ExpressionResult = NonlinearityTable[0][0] }" + Environment.NewLine;
-                                                    js += "			if (ExpressionResult > NonlinearityTable[NonlinearityTable.length-1][0]) { ExpressionResult = NonlinearityTable[NonlinearityTable.length-1][0] }" + Environment.NewLine + Environment.NewLine;
-                                                    js += "			var prevP2 = { x: 0, y: 0 };" + Environment.NewLine;
+                                                    js += "			if (NonlinearityTable.length > 0) {" + Environment.NewLine;
+                                                    js += "			    Minimum = NonlinearityTable[0][0];" + Environment.NewLine;
+                                                    js += "			    ExpressionResult = Math.max(ExpressionResult, Minimum);" + Environment.NewLine;
+                                                    js += "			    Maximum = NonlinearityTable[NonlinearityTable.length-1][0];" + Environment.NewLine;
+                                                    js += "			    ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
+                                                    js += "			}" + Environment.NewLine + Environment.NewLine;
 
+                                                    js += "			var prevP2 = { x: 0, y: 0 };" + Environment.NewLine;
                                                     js += "			var result = { x: 0, y: 0 };" + Environment.NewLine;
-                                                    js += "			var prevVal = -1000000000;" + Environment.NewLine;
+
+                                                    js += "			var prevVal = Minimum;" + Environment.NewLine;
 
                                                     js += "			for (var i = 0; i < NonlinearityTable.length; i++) {" + Environment.NewLine;
                                                     js += "				var NonlinearityEntry = NonlinearityTable[i][0];" + Environment.NewLine;
