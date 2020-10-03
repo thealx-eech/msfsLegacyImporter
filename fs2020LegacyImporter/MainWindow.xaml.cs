@@ -116,8 +116,11 @@ namespace msfsLegacyImporter
                 {
                     Registry.SetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath", Path.GetDirectoryName(directory));
                 }
-                catch (Exception) { }
-
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+            
                 // CLEAN FIELDS
                 PackageTitle.Text = "";
                 PackageDir.Text = "";
@@ -416,7 +419,8 @@ namespace msfsLegacyImporter
                             File.Delete(aircraftDirectory + "\\.aircraft.cfg");
                             CfgHelper.splitCfg(aircraftDirectory);
                         }
-                        catch (Exception) {
+                        catch (Exception ex) {
+                            Console.WriteLine(ex.ToString());
                             MessageBox.Show("CFG split failed");
                         }
                         
@@ -1560,8 +1564,12 @@ namespace msfsLegacyImporter
             {
                 if (File.Exists(dds[i]))
                 {
-                    try { File.Delete(dds[i]); } catch (Exception) { }
-                }
+                    try { File.Delete(dds[i]); }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                    }
+            }
 
                 if (!File.Exists(dds[i]))
                 {
@@ -2094,9 +2102,10 @@ namespace msfsLegacyImporter
                             {
                                 File.Delete(mainFile);
                                 File.Copy(backupFile, mainFile);
-                            } catch(Exception)
+                            }
+                            catch (Exception ex)
                             {
-
+                                Console.WriteLine(ex.ToString());
                             }
                         }
                     }
@@ -2326,9 +2335,10 @@ namespace msfsLegacyImporter
                     {
                         Directory.Delete(projectDirectory.TrimEnd('\\') + "_CVT_", true);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        MessageBox.Show("CVT folder removal is failed");
+                        Console.WriteLine(ex.ToString());
+                        MessageBox.Show("CVT folder removal was failed");
                     }
                 }
             }
@@ -2344,8 +2354,10 @@ namespace msfsLegacyImporter
                 try
                 {
                     File.Delete(backupFile);
-                } catch (Exception)
+                }
+                catch (Exception ex)
                 {
+                    Console.WriteLine(ex.ToString());
                     MessageBox.Show("Backup creation is failed");
                 }
             }
@@ -2379,13 +2391,28 @@ namespace msfsLegacyImporter
                         if (Version.TryParse(Regex.Replace(url, "[^0-9.]", "").TrimEnd('.'), out nullVer))
                         {
                             Version ver = Version.Parse(Regex.Replace(url, "[^0-9.]", "").TrimEnd('.'));
-                            if (ver > Version.Parse(pubVer))
+                            if (ver <= Version.Parse(pubVer))
                             {
-                                updateVersion = ver.ToString();
-                                updateURL = updatedirectory + url;
                                 break;
                             }
-                            //Console.WriteLine(ver + " " + pubVer);
+                            else
+                            {
+                                Console.WriteLine("online" + ver + " curr" + pubVer);
+
+                                if (updateVersion == "")
+                                {
+                                    updateVersion = ver.ToString();
+                                    updateURL = updatedirectory + url;
+                                }
+                                
+                                if (url.Contains("_full"))
+                                {
+                                    updateVersion = ver.ToString();
+                                    updateURL = updatedirectory + url;
+                                    break;
+                                }
+                                    
+                            }
                         }
                     }
                 }
@@ -2436,7 +2463,6 @@ namespace msfsLegacyImporter
                 fsTabControl.IsEnabled = false;
 
                 WebClient _webClient = new WebClient();
-                //_webClient.DownloadProgressChanged += OnDownloadProgressChanged;
                 _webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(OnDownloadCompleted);
 
                 StackPanel myPanel = new StackPanel();
@@ -2464,9 +2490,9 @@ namespace msfsLegacyImporter
                 {
                     try {
                         File.Delete(EXE_PATH + ".BAK");
-                    }
-                    catch(Exception)
+                    } catch (Exception ex)
                     {
+                        Console.WriteLine(ex.ToString());
                         MessageBox.Show("Can't delete backup file");
                     }
                 }

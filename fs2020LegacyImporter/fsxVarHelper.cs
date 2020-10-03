@@ -10,35 +10,6 @@ namespace msfsLegacyImporter
         {
             fsxSimVar = Regex.Replace(fsxSimVar, "\r\n|\r|\n", "");
             fsxSimVar = Regex.Replace(fsxSimVar, @"\s\s+", " ");
-            /*switch (fsxSimVar.Trim())
-            {
-                case "(A:Airspeed select indicated or true,knots)":
-                    return "var ExpressionResult = parseFloat(SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"knots\"));";
-                case "(A:Vertical speed,feet per minute) 0.00988 *":
-                    return "var ExpressionResult = 0.00988 * parseFloat(SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"feet per minute\"));";
-                case "(P:Units of measure, enum) 2 == if{ (A:Indicated Altitude, meters) } els{ (A:Indicated Altitude, feet) } 100000 / 360 * dgrd":
-                    return "var ExpressionResult = parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE:2\", \"feet\")) * 360 / 100000 / 180 * Math.PI;";
-                case "(P:Units of measure, enum) 2 == if{ (A:Indicated Altitude, meters) } els{ (A:Indicated Altitude, feet) } 10000 / 360 * dgrd":
-                    return "var ExpressionResult = parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE:2\", \"feet\")) * 360 / 10000 / 180 * Math.PI;";
-                case "(P:Units of measure, enum) 2 == if{ (A:Indicated Altitude, meters) } els{ (A:Indicated Altitude, feet) } 1000 / 360 * 90 + dgrd":
-                    return "var ExpressionResult = parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE:2\", \"feet\")) * 360 / 1000 / 180 * Math.PI;";
-                case "(A:TURN COORDINATOR BALL,percent)":
-                    return "var ExpressionResult = -parseFloat(SimVar.GetSimVarValue(\"ATTITUDE INDICATOR BANK DEGREES\", \"degree\")) / 30 * 100;";
-                case "(A:Delta Heading Rate, rpm) 0.44 * (A:ELECTRICAL MASTER BATTERY,bool) *":
-                    return "var ExpressionResult = parseFloat(SimVar.GetSimVarValue(\"VELOCITY BODY X\", \"feet per second\")) / 180 * Math.PI;";
-                case "(A:Variometer rate, knots)":
-                    return "var ExpressionResult = parseFloat(SimVar.GetSimVarValue(\"AIRCRAFT WIND Y\", \"knots\"));"; // TODO: fix rate
-                case "(A:Wiskey compass indication degrees,degrees) dnor 244 * 360 / 269 -":
-                    return "var ExpressionResult = (-360 + parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"degree\")) - 30) * 244 / 360;";
-                case "(A:Magnetic compass,radians) /-/":
-                    return "var ExpressionResult = - parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"degree\")) / 180 * Math.PI;";
-                case "(A:Fuel tank center level,position)":
-                    return "var ExpressionResult = parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL QUANTITY\", \"gallons\")) / parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL CAPACITY\", \"gallons\"));";
-                case "(A:AMBIENT TEMPERATURE,Celsius) 75 / 243 * 150.5 -":
-                    return "var ExpressionResult = parseFloat(SimVar.GetSimVarValue(\"AMBIENT TEMPERATURE\", \"celsius\")) * 243 / 75 - 150.5";
-                case "(A:Kohlsman setting hg,inHg) 28.1 - -197 * 3.4 / 0.8 +":
-                    return "var ExpressionResult = - (parseFloat(SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG: 2\", \"inches of mercury\")) - 28.1) * 197 / 3.4;";
-            }*/
 
             string fsxVariable = fsxSimVar;
             List<string[]> variables = new List<string[]>();
@@ -64,9 +35,6 @@ namespace msfsLegacyImporter
                 {
                     string msfsVariable = getMsfsVariable(variable[0]);
                     infix = infix.Replace(variable[1], msfsVariable);
-
-                    if (msfsVariable == "0")
-                        Console.WriteLine("FSX variable match not found: " + variable[0]);
                 }
 
                 // REMOVE TRALING SYMBOLS
@@ -85,7 +53,9 @@ namespace msfsLegacyImporter
 
         private string getMsfsVariable(string fsxVariable)
         {
-            switch (fsxVariable.Trim().Replace("( ", "(").Replace(" )", ")").Replace(" ,", ",").Replace(", ", ",").Replace("{ ", "{").Replace(" {", "{").Replace("} ", "}").Replace(" }", "}").Replace(": ", ":").Replace(" :", ":").Replace(", ", ",").Replace(" ,", ","))
+            string fsxVar = fsxVariable.Trim().Replace("( ", "(").Replace(" )", ")").Replace(" ,", ",").Replace(", ", ",").Replace("{ ", "{").
+                Replace(" {", "{").Replace("} ", "}").Replace(" }", "}").Replace(": ", ":").Replace(" :", ":").Replace(", ", ",").Replace(" ,", ",");
+            switch (fsxVar)
             {
                 case string hn when hn.Equals("(A:Airspeed select indicated or true,knots)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"knots\"))";
@@ -255,9 +225,22 @@ namespace msfsLegacyImporter
                     return "parseFloat()";
                 case string hn when hn.Equals("", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat()";
-            }
+                // TRY TO COPY 1IN1
+                default:
+                    Console.WriteLine("FSX variable not found: " + fsxVar);
+                    fsxVar = fsxVar.Trim().Trim(')').Trim('(');
+                    if (fsxVar.Contains(":"))
+                        fsxVar = fsxVar.Split(':')[1];
 
-            return "0";
+                    if (fsxVar.Contains(",") && fsxVar.Split(',').Length >= 2)
+                    {
+                        string converted = "parseFloat(SimVar.GetSimVarValue(\"" + fsxVar.Split(',')[0].Trim() + "\", \"" + fsxVar.Split(',')[1].Trim() + "\"))";
+                        Console.WriteLine("Conversion result: " + converted);
+                        return converted;
+                    }
+
+                    return "0";
+            }
         }
 
         // POSTFIX CONVERTER BY W. Michael Perkins STARTS
@@ -543,8 +526,10 @@ namespace msfsLegacyImporter
                     return stack.Peek().expr;
                 else
                     return "";
-            } catch (Exception)
+            }
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 return "";
             }
         }

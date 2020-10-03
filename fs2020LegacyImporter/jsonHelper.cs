@@ -24,8 +24,9 @@ namespace msfsLegacyImporter
             string json = JsonConvert.SerializeObject(manifest, Newtonsoft.Json.Formatting.Indented);
 
             try { File.WriteAllText(TargetFolder + "manifest.json", json); }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 MessageBox.Show("Can't write into file " + TargetFolder + "\\manifest.json");
                 return;
             }
@@ -44,8 +45,9 @@ namespace msfsLegacyImporter
             string json = JsonConvert.SerializeObject(manifest, Newtonsoft.Json.Formatting.Indented);
 
             try { File.WriteAllText(TargetFolder + "manifest.json", json); }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 MessageBox.Show("Can't write into file " + TargetFolder + "\\manifest.json");
                 return;
             }
@@ -92,8 +94,9 @@ namespace msfsLegacyImporter
                 string json = JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
 
                 try { File.WriteAllText(TargetFolder + "\\layout.json", json); }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Console.WriteLine(ex.ToString());
                     MessageBox.Show("Can't write into file " + TargetFolder + "\\layout.json");
                     return;
                 }

@@ -274,8 +274,9 @@ namespace msfsLegacyImporter
             if (File.Exists(aircraftDirectory + "\\" + cfgFile.Name))
             {
                 try { File.Delete(aircraftDirectory + "\\" + cfgFile.Name); }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Console.WriteLine(ex.ToString());
                     MessageBox.Show("Can't update file " + aircraftDirectory + "\\" + cfgFile.Name);
                     return;
                 }
