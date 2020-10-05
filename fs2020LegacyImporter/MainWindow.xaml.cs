@@ -38,8 +38,6 @@ namespace msfsLegacyImporter
         string SourceFolder = "";
         string TargetFolder = "";
 
-        bool hiddenPanel = false;
-
         FileSystemWatcher fileTrackWatcher = null;
 
         public MainWindow()
@@ -247,7 +245,7 @@ namespace msfsLegacyImporter
                             item.Visibility = Visibility.Collapsed;
                         break;
                     case "tabPanel":
-                        if (hiddenPanel && File.Exists(aircraftDirectory + "\\panel\\panel.cfg"))
+                        if (Directory.EnumerateFiles(aircraftDirectory, "panel.cfg", SearchOption.AllDirectories).Count() > 0)
                             item.Visibility = Visibility.Visible;
                         else
                             item.Visibility = Visibility.Collapsed;
@@ -1915,6 +1913,8 @@ namespace msfsLegacyImporter
             CheckBox tmp = new CheckBox();
             StackPanel tmpPnl = new StackPanel();
 
+            fsTabControl.IsEnabled = false;
+
             // COUNT
             foreach (var pnl in CabsList.Children)
             {
@@ -1948,6 +1948,8 @@ namespace msfsLegacyImporter
                     }
                 }
             }
+
+            fsTabControl.IsEnabled = true;
 
             SummaryUpdate();
         }
@@ -2013,6 +2015,8 @@ namespace msfsLegacyImporter
             CheckBox tmp = new CheckBox();
             StackPanel tmpPnl = new StackPanel();
 
+            fsTabControl.IsEnabled = false;
+
             // COUNT
             foreach (var pnl in PanelsList.Children)
             {
@@ -2030,6 +2034,9 @@ namespace msfsLegacyImporter
                     }
                 }
             }
+
+
+            fsTabControl.IsEnabled = true;
 
             JSONHelper.scanTargetFolder(projectDirectory);
             SummaryUpdate();
@@ -2555,12 +2562,6 @@ namespace msfsLegacyImporter
 
                 return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             }
-        }
-
-        public void UnlockTab(object sender, RoutedEventArgs e)
-        {
-            hiddenPanel = true;
-            tabPanel.Visibility = Visibility.Visible;
         }
 
         private Separator sectiondivider()

@@ -262,13 +262,15 @@ namespace msfsLegacyImporter
             {
                 int ifElseState = 0;
 
-                // Assumption: the postfix expression to be processed is space-delimited.
-                // Split the individual tokens into an array for processing.
-                postfix = postfix.Replace("if {", "if{").Replace("} els", "}els").Replace("els {", "els{");
+                postfix = postfix.Replace("if {", "if{").Replace("} els", "}els").Replace("els {", "els{").Trim();
+
+                // CHECK TRAILING BRACKET
+                //if (postfix.Length > 0 && postfix[postfix.Length - 1] == '}' && postfix.Count(f => f == '{') < postfix.Count(f => f == '}'))
+                if (postfix.Length > 0 && postfix[postfix.Length - 1] == '}' && ((postfix.Split('{').Length - 1) < (postfix.Split('}').Length - 1)))
+                    postfix = postfix.TrimEnd('}').Trim();
 
                 var postfixTokens = postfix.Split(' ');
 
-                // Create stack for holding intermediate infix expressions
                 var stack = new Stack<Intermediate>();
 
                 foreach (string token in postfixTokens)
@@ -377,17 +379,11 @@ namespace msfsLegacyImporter
                             newExpr = token;
                         }
 
-                        // Push the new intermediate expression on the stack
                         stack.Push(new Intermediate(newExpr, token));
                     }
                     else if (token == "*" || token == "/" || token == "%")
                     {
                         string leftExpr, rightExpr;
-
-                        // Get the intermediate expressions from the stack.  
-                        // If an intermediate expression was constructed using a lower precedent
-                        // operator (+ or -), we must place parentheses around it to ensure 
-                        // the proper order of evaluation.
 
                         var rightIntermediate = stack.Pop();
                         if (rightIntermediate.oper == "+" || rightIntermediate.oper == "-")
@@ -416,16 +412,13 @@ namespace msfsLegacyImporter
                             leftExpr = "";
                         }
 
-                        // construct the new intermediate expression by combining the left and right 
-                        // using the operator (token).
                         newExpr = leftExpr + " " + token + " " + rightExpr;
 
-                        // Push the new intermediate expression on the stack
                         stack.Push(new Intermediate(newExpr, token));
                     }
                     else
                     {
-                        if (Regex.IsMatch(token, @"[-0-9.]+"))
+                        if (Regex.IsMatch(token, @"^[-0-9.]+$"))
                         {
                             // NUMBER
                             stack.Push(new Intermediate(token, ""));
@@ -435,10 +428,17 @@ namespace msfsLegacyImporter
                             // OPERATOR
                             switch (token)
                             {
+                                case "dnor":
+                                case "d360":
+                                case "rdeg":
+                                case "rnor":
+                                    // JUST SKIP
+                                    break;
+
                                 case "pi":
                                     stack.Push(new Intermediate("Math.PI", ""));
                                     break;
-                                case "dgrd": // DG2RAD
+                                case "dgrd":
                                     addExpression(stack, token, "* Math.PI/180", "after");
                                     break;
                                 case "rddg":
@@ -490,26 +490,15 @@ namespace msfsLegacyImporter
                                 case "near":
                                     addExpression(stack, token, "Math.round", "before");
                                     break;
-                                //case "dnor":
-                                //case "d360":
-                                //case "rdeg":
-                                //    addExpression(stack, token, "", "");
-                                //    break;
-                                //case "rnor":
-                                //    addExpression(stack, token, "", "");
-                                //    break;
 
-                                // FSX STACK COMMANDS
                                 case "b":
                                 case "c":
                                 case "d":
                                 case "p":
                                 case "r":
-                                    if (stack.Count > 0)
-                                        stack.Pop();
-                                    break;
                                 default:
-                                    break;
+                                    Console.WriteLine("Unknown operator \""+ token + "\"");
+                                    return "";
 
                             }
 
@@ -521,7 +510,6 @@ namespace msfsLegacyImporter
                 {
                     Console.WriteLine("\"" + obj.expr + "\" [" + obj.oper + "]");
                 }
-                // The loop above leaves the final expression on the top of the stack.
                 if (stack.Count > 0)
                     return stack.Peek().expr;
                 else

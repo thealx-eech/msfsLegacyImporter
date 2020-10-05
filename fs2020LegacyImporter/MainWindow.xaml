@@ -99,7 +99,6 @@
                         <TextBlock TextWrapping="Wrap" Text="Do not publish imported aircraft without author permission (really, don't)."  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>
                         <TextBlock TextWrapping="Wrap" Text="Instead, send me a link of your import process tutorial and it will be added to the program description."  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>
                         <TextBlock TextWrapping="Wrap" Text="And please mention this tool if you are sharing any kind of import result. Good luck with your experiments!"  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>
-                        <Button  Click="UnlockTab" Background="Transparent" BorderBrush="Transparent" Width="10" Height="10"></Button>
                     </StackPanel>
                     </StackPanel>
             </TabItem>
