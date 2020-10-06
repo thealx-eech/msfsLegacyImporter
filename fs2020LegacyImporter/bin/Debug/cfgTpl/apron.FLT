@@ -1,0 +1,83 @@
+[SimVars.0]
+SimOnGround=True
+
+[FuelSystem.0]
+Valve.1=True
+Valve.2=True
+Valve.3=True
+Valve.4=True
+Valve.5=True
+Valve.6=True
+Valve.7=True
+Valve.8=True
+Valve.9=True
+Pump.1=True
+Pump.2=True
+Pump.3=True
+Pump.4=True
+Pump.5=True
+Pump.6=True
+Pump.7=True
+Pump.8=True
+Pump.9=True
+
+[Controls.0]
+Gear1=100.00
+Gear2=100.00
+Gear3=100.00
+LeftBrake=100.00
+RightBrake=100.00
+ParkingBrake=100.00
+
+[Engine Parameters.1.0]
+Pct Engine RPM=0.5
+ThrottleLeverPct=1
+PropellerLeverPct=1
+MixtureLeverPct=1
+LeftMagneto=True
+RightMagneto=True
+GeneratorSwitch=True
+FuelPumpSwitch=True
+FuelPumpSwitch_EX1=-1
+EngineMasterSwitch=True
+IgnitionSwitch=1
+
+[Engine Parameters.2.0]
+Pct Engine RPM=0.5
+ThrottleLeverPct=1
+PropellerLeverPct=1
+MixtureLeverPct=1
+LeftMagneto=True
+RightMagneto=True
+GeneratorSwitch=True
+FuelPumpSwitch=True
+FuelPumpSwitch_EX1=-1
+EngineMasterSwitch=True
+IgnitionSwitch=1
+
+[Engine Parameters.3.0]
+Pct Engine RPM=0.5
+ThrottleLeverPct=1
+PropellerLeverPct=1
+MixtureLeverPct=1
+LeftMagneto=True
+RightMagneto=True
+GeneratorSwitch=True
+FuelPumpSwitch=True
+FuelPumpSwitch_EX1=-1
+EngineMasterSwitch=True
+IgnitionSwitch=1
+
+[Engine Parameters.4.0]
+Pct Engine RPM=0.5
+ThrottleLeverPct=1
+PropellerLeverPct=1
+MixtureLeverPct=1
+LeftMagneto=True
+RightMagneto=True
+GeneratorSwitch=True
+FuelPumpSwitch=True
+FuelPumpSwitch_EX1=-1
+EngineMasterSwitch=True
+IgnitionSwitch=1
+
