@@ -13,7 +13,7 @@ namespace msfsLegacyImporter
         {
         }
 
-        public void Run(string TEMP_FILE, string EXE_PATH)
+        public void Run(string TEMP_FILE, string EXE_PATH, string targetDir)
         {
             BackgroundWorker bgw = new BackgroundWorker
             {
@@ -25,20 +25,24 @@ namespace msfsLegacyImporter
                     BackgroundWorker bw = o as BackgroundWorker;
                     FastZip fastZip = new FastZip();
                     Console.WriteLine("Unzipping");
-                    fastZip.ExtractZip(TEMP_FILE, AppDomain.CurrentDomain.BaseDirectory + "\\", FastZip.Overwrite.Always, null, @"-(ICSharpCode.SharpZipLib.dll)", null, false);
+                    fastZip.ExtractZip(TEMP_FILE, targetDir, FastZip.Overwrite.Always, null, @"-(ICSharpCode.SharpZipLib.dll)", null, false);
                 });
 
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(
             delegate (object o, RunWorkerCompletedEventArgs args) {
                 //((MainWindow)System.Windows.Application.Current.MainWindow).setUpdateReady();
-                if (File.Exists(EXE_PATH))
+                if (!String.IsNullOrEmpty(EXE_PATH))
                 {
-                    Process.Start(EXE_PATH);
-                    Environment.Exit(0);
-                } else
-                {
-                    MessageBox.Show("Update failed, but you can extract temp.zip manually");
-                    File.Move(EXE_PATH + ".BAK", EXE_PATH);
+                    if (File.Exists(EXE_PATH))
+                    {
+                        Process.Start(EXE_PATH);
+                        Environment.Exit(0);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Update failed, but you can extract temp.zip manually");
+                        File.Move(EXE_PATH + ".BAK", EXE_PATH);
+                    }
                 }
             });
 

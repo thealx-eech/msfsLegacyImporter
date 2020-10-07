@@ -30,18 +30,19 @@ Table/Record,Asobo,AAM Description
 1505,corrected_n2_from_ff_table,CN2 vs. Turbine Corrected Fuel Flow.
 1506,n1_and_mach_on_thrust_table,Turbine Corrected Thrust Factor vs. CN1 and Mach
 1507,corrected_airflow_table,Turbine Corrected Air Flow Factor vs. CN1 and Mach
+1508,n1_to_shaft_torque_table,Turboprop Torque vs CN1
 1512,,Vacuum System
-1521,,Turbine Variable Intake/Exhause related
-1522,,Thrust Reverser Available
-,,Exhaust Nozzle Bias
-1523,,Turbine Variable Intake Area
+1521,primary_nozzle_available,Turbine Variable Intake/Exhause related
+1522,reverser_available,Thrust Reverser Available
+,reverser_mach_controlled,Exhaust Nozzle Bias
+1523,variable_inlet,Turbine Variable Intake Area
 1524,primary_nozzle_n1_mach_to_nozzle_pos,Turbine Afterburner Thrust factor vs Mach
-1526,,ITT Scale Factor
-,,ITT Limit (deg R)
-,,ITT *Rate of Change
-1532,,EPR Scale Factor
-,,EPR Calibrate
-,,EPR Rate of Change (?)
+1526,itt_tuning_constant,ITT Scale Factor
+,itt_peak_temperature,ITT Limit (deg R)
+,itt_tc,ITT *Rate of Change
+1532,epr_tuning_constant,EPR Scale Factor
+,epr_max,EPR Calibrate
+,epr_tc,EPR Rate of Change (?)
 ,,
 ,,1556
 ,,1531

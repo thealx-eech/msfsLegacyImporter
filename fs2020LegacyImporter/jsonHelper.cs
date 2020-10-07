@@ -10,18 +10,34 @@ namespace msfsLegacyImporter
     {
         public void createManifest(MainWindow parent, string SourceFolder, string TargetFolder, string[] data)
         {
-            if (!Directory.Exists(TargetFolder)) { Directory.CreateDirectory(TargetFolder); }
-            if (!Directory.Exists(TargetFolder + "SimObjects")) { Directory.CreateDirectory(TargetFolder + "SimObjects"); }
-            if (!Directory.Exists(TargetFolder + "SimObjects\\AIRPLANES\\")) { Directory.CreateDirectory(TargetFolder + "SimObjects\\AIRPLANES\\"); }
+            try
+            {
+                if (!Directory.Exists(TargetFolder + "SimObjects\\AIRPLANES\\")) { Directory.CreateDirectory(TargetFolder + "SimObjects\\AIRPLANES\\"); }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to create target folder." + Environment.NewLine + "Error message: " + Environment.NewLine + ex.ToString());
+                return;
+            }
 
             // COPY FSX FILES TO MSFS
-            string sourceChild = new DirectoryInfo(SourceFolder).Name;
-            Console.WriteLine(SourceFolder  + " - " + TargetFolder + "SimObjects\\AIRPLANES\\" + sourceChild + "\\");
-            CloneDirectory(SourceFolder, TargetFolder + "SimObjects\\AIRPLANES\\" + sourceChild + "\\");
+            string json = "";
 
-            Manifest manifest = new Manifest(new Dependencies[] { }, data[1], data[2], data[3], data[4], data[5], data[6], new ReleaseNotes(new Neutral("", "")));
+            try
+            {
+                string sourceChild = new DirectoryInfo(SourceFolder).Name;
+                Console.WriteLine(SourceFolder  + " - " + TargetFolder + "SimObjects\\AIRPLANES\\" + sourceChild + "\\");
+                CloneDirectory(SourceFolder, TargetFolder + "SimObjects\\AIRPLANES\\" + sourceChild + "\\");
 
-            string json = JsonConvert.SerializeObject(manifest, Newtonsoft.Json.Formatting.Indented);
+                Manifest manifest = new Manifest(new Dependencies[] { }, data[1], data[2], data[3], data[4], data[5], data[6], new ReleaseNotes(new Neutral("", "")));
+
+                json = JsonConvert.SerializeObject(manifest, Newtonsoft.Json.Formatting.Indented);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to copy FSX files." + Environment.NewLine + "Error message: " + Environment.NewLine + ex.ToString());
+                return;
+            }
 
             try { File.WriteAllText(TargetFolder + "manifest.json", json); }
             catch (Exception ex)

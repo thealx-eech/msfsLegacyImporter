@@ -45,9 +45,10 @@ namespace msfsLegacyImporter
                 Console.WriteLine("Orig: " + fsxSimVar + " / Final: " + infix);
 
                 if (!String.IsNullOrEmpty(infix) && infix.Length > 1)
-                    return "var ExpressionResult = " + infix + ";";
+                    return "var ExpressionResult = " + infix + "; /* PARSED FROM \"" + fsxSimVar + "\" */";
             }
 
+            Console.WriteLine("NOT PARSED " + fsxSimVar);
             return "var ExpressionResult = 0; /* SIM VAR \"" + fsxSimVar + "\" NOT PARSED! */";
         }
 
@@ -57,6 +58,26 @@ namespace msfsLegacyImporter
                 Replace(" {", "{").Replace("} ", "}").Replace(" }", "}").Replace(": ", ":").Replace(" :", ":").Replace(", ", ",").Replace(" ,", ",");
             switch (fsxVar)
             {
+                // 0 = ok, 1 = fail, 2 = blank.
+                case string ha when ha.Equals("(A:PARTIAL PANEL ADF,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hb when hb.Equals("(A:PARTIAL PANEL AIRSPEED,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hc when hc.Equals("(A:PARTIAL PANEL ALTIMETER,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hd when hd.Equals("(A:PARTIAL PANEL ATTITUDE,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string he when he.Equals("(A:PARTIAL PANEL COMM,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hf when hf.Equals("(A:PARTIAL PANEL COMPASS,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hg when hg.Equals("(A:PARTIAL PANEL ELECTRICAL,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hh when hh.Equals("(A:PARTIAL PANEL AVIONICS,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hi when hi.Equals("(A:PARTIAL PANEL ENGINE,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hj when hj.Equals("(A:PARTIAL PANEL FUEL INDICATOR,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hk when hk.Equals("(A:PARTIAL PANEL HEADING,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hl when hl.Equals("(A:PARTIAL PANEL VERTICAL VELOCITY,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hm when hm.Equals("(A:PARTIAL PANEL TRANSPONDER,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hn when hn.Equals("(A:PARTIAL PANEL NAV,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:PARTIAL PANEL PITOT,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hp when hp.Equals("(A:PARTIAL PANEL TURN COORDINATOR,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hq when hq.Equals("(A:PARTIAL PANEL VACUUM,enum)", StringComparison.InvariantCultureIgnoreCase):
+                    return "0";
+
                 case string hn when hn.Equals("(A:Airspeed select indicated or true,knots)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"knots\"))";
                 case string hn when hn.Equals("(A:Vertical speed,feet per minute)", StringComparison.InvariantCultureIgnoreCase):
@@ -85,9 +106,7 @@ namespace msfsLegacyImporter
                 case string hn when hn.Equals("(A:Kohlsman setting hg,inHg)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG\", \"inches of mercury\"))";
                 case string hn when hn.Equals("(A:ELECTRICAL MASTER BATTERY,bool)", StringComparison.InvariantCultureIgnoreCase):
-                case string hk when hk.Equals("(A:PARTIAL PANEL ELECTRICAL,enum)", StringComparison.InvariantCultureIgnoreCase):
-                    return "1";
-                case string hn when hn.Equals("(P:Units of measure,enum)", StringComparison.InvariantCultureIgnoreCase):
+                case string hk when hk.Equals("(P:Units of measure,enum)", StringComparison.InvariantCultureIgnoreCase):
                     return "1";
                 case string hn when hn.Equals("(A:AIRSPEED INDICATED,mph)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED INDICATED\", \"mph\"))";//???
@@ -141,10 +160,6 @@ namespace msfsLegacyImporter
                     return "parseFloat(SimVar.GetSimVarValue(\"NAV GSI:1\", \"percent\"))";
                 case string hn when hn.Equals("(A:NAV GSI:2,percent)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"NAV GSI:2\", \"percent\"))";
-                case string hn when hn.Equals("(A:PARTIAL PANEL HEADING,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PARTIAL PANEL HEADING\", \"bool\"))";
-                case string hn when hn.Equals("(A:PARTIAL PANEL ELECTRICAL,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PARTIAL PANEL ELECTRICAL\", \"bool\"))";
                 case string hn when hn.Equals("(A:TRAILING EDGE FLAPS LEFT ANGLE,radians)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS RIGHT ANGLE\", \"radians\"))";
                 case string hn when hn.Equals("(A:ENG1 MANIFOLD PRESSURE,inHg)", StringComparison.InvariantCultureIgnoreCase):
@@ -228,11 +243,9 @@ namespace msfsLegacyImporter
                 // TRY TO COPY 1IN1
                 default:
                     Console.WriteLine("FSX variable not found: " + fsxVar);
-                    fsxVar = fsxVar.Trim().Trim(')').Trim('(');
-                    if (fsxVar.Contains(":"))
-                        fsxVar = fsxVar.Split(':')[1];
+                    fsxVar = Regex.Replace(fsxVar, @"(\([A-Za-z]:)|\(|\)", "");
 
-                    if (fsxVar.Contains(",") && fsxVar.Split(',').Length >= 2)
+                    if (fsxVar.Contains(",") && fsxVar.Split(',').Length == 2)
                     {
                         string converted = "parseFloat(SimVar.GetSimVarValue(\"" + fsxVar.Split(',')[0].Trim() + "\", \"" + fsxVar.Split(',')[1].Trim() + "\"))";
                         Console.WriteLine("Conversion result: " + converted);
@@ -271,10 +284,14 @@ namespace msfsLegacyImporter
 
                 var postfixTokens = postfix.Split(' ');
 
+                string lastToken = "";
+
                 var stack = new Stack<Intermediate>();
 
                 foreach (string token in postfixTokens)
                 {
+                    lastToken = token;
+
                     string newExpr;
 
                     Console.WriteLine("Token: " + token);
@@ -334,6 +351,13 @@ namespace msfsLegacyImporter
                         }
 
                         ifElseState = 0;
+                    }
+                    else if (token == "&&" || token.ToLower() == "AND")
+                    {
+                        var rightIntermediate = stack.Pop();
+                        var leftIntermediate = stack.Pop();
+                        newExpr = leftIntermediate.expr + " && " + rightIntermediate.expr;
+                        stack.Push(new Intermediate(newExpr, token));
                     }
                     else if (token == "||" || token.ToLower() == "or")
                     {
@@ -490,6 +514,22 @@ namespace msfsLegacyImporter
                                 case "near":
                                     addExpression(stack, token, "Math.round", "before");
                                     break;
+                                case "min":
+                                    addExpression(stack, token, "Math.min", "before");
+                                    break;
+                                case "max":
+                                    addExpression(stack, token, "Math.max", "before");
+                                    break;
+                                //case "log":
+                                    //addExpression(stack, token, "Math.log(val) / Math.log(10)", "before");
+                                    //break;
+                                case "pow":
+                                    addExpression(stack, token, "Math.pow", "before");
+                                    break;
+                                //case "div":
+                                    //addExpression(stack, token, "Math.floor(y / x)", "before");
+                                    //break;
+
 
                                 case "b":
                                 case "c":
@@ -522,7 +562,7 @@ namespace msfsLegacyImporter
             }
         }
 
-        private void addExpression(Stack<Intermediate> stack, string token, string modifier, string position)
+        private void addExpression(Stack<Intermediate> stack, string token, string modifier, string position, string lastToken = "")
         {
             string newExpr = "";
 
@@ -530,7 +570,7 @@ namespace msfsLegacyImporter
             {
                 var rightIntermediate = stack.Pop();
                 var leftIntermediate = stack.Pop();
-                newExpr = (position == "before" ? modifier : "") + " ( " + leftIntermediate.expr + rightIntermediate.expr + " ) " + (position == "after" ? modifier : "");
+                newExpr = (position == "before" ? modifier : "") + " ( " + leftIntermediate.expr + ", " + rightIntermediate.expr + " ) " + (position == "after" ? modifier : "");
             }
             else if (stack.Count > 0)
             {

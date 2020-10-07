@@ -223,7 +223,7 @@ namespace msfsLegacyImporter
                                             }
                                             else {
                                                 string slug = gaugeName + "_" + Path.GetFileNameWithoutExtension(Image.Attribute("Name").Value).Trim();
-                                                string sanitizedSlug = Regex.Replace(slug, @"[^0-9A-Za-z ,]", "").Replace(" ", "_") + "_" + index;
+                                                string sanitizedSlug = Regex.Replace(slug, @"[^0-9A-Za-z ,_\-]", "").Replace(" ", "_") + "_" + index;
                                                 XElement Expression = null;
                                                 string[] FloatPositionValues = getXYvalue(FloatPosition);
 

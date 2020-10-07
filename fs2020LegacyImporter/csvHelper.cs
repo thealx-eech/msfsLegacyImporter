@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Windows;
 
 namespace msfsLegacyImporter
 {
@@ -14,50 +15,55 @@ namespace msfsLegacyImporter
         {
             if (File.Exists(path))
             {
-                List<string[]> result = new List<string[]>();
-                using (var reader = new StreamReader(path))
+                try
                 {
-                    string prev_id = "";
-                    int sub_counter = 0;
-
-                    var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-                    csv.Configuration.HasHeaderRecord = true;
-                    csv.Configuration.IgnoreQuotes = true;
-                    csv.Configuration.Delimiter = ",";
-
-                    while (csv.Read())
+                    List<string[]> result = new List<string[]>();
+                    using (var reader = new StreamReader(path))
                     {
-                        if (csv.Context.Row == 1)
+                        string prev_id = "";
+                        int sub_counter = 0;
+
+                        var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+                        csv.Configuration.HasHeaderRecord = true;
+                        csv.Configuration.IgnoreQuotes = true;
+                        csv.Configuration.Delimiter = ",";
+
+                        while (csv.Read())
                         {
-                            csv.ReadHeader();
-                            continue;
+                            if (csv.Context.Row == 1)
+                            {
+                                csv.ReadHeader();
+                                continue;
+                            }
+
+                            csv.TryGetField(header[0], out string field1);
+                            csv.TryGetField(header[1], out string field2);
+
+                            if (!String.IsNullOrEmpty(field1))
+                                field1 = field1.Trim().TrimStart('0');
+                            if (!String.IsNullOrEmpty(field2))
+                                field2 = field2.Trim();
+
+                            if (!String.IsNullOrEmpty(field1) && field1 != prev_id)
+                            {
+                                sub_counter = 0;
+                                prev_id = field1;
+                                result.Add(new string[] { prev_id + "-" + sub_counter, field2 });
+                                sub_counter++;
+                            }
+                            else //if (!String.IsNullOrEmpty(field2))
+                            {
+                                result.Add(new string[] { prev_id + "-" + sub_counter, field2 });
+                                sub_counter++;
+                            }
+
+                            Console.WriteLine("AIR TABLE " + result.Last()[0] + " / " + result.Last()[1]);
                         }
-
-                        csv.TryGetField(header[0], out string field1);
-                        csv.TryGetField(header[1], out string field2);
-
-                        if (!String.IsNullOrEmpty(field1))
-                            field1 = field1.Trim().TrimStart('0');
-                        if (!String.IsNullOrEmpty(field2))
-                            field2 = field2.Trim();
-
-                        if (!String.IsNullOrEmpty(field1) && field1 != prev_id)
-                        {
-                            sub_counter = 0;
-                            prev_id = field1;
-                            result.Add(new string[] { prev_id + "-" + sub_counter, field2 });
-                            sub_counter++;
-                        }
-                        else //if (!String.IsNullOrEmpty(field2))
-                        {
-                            result.Add(new string[] { prev_id + "-" + sub_counter, field2 });
-                            sub_counter++;
-                        }
-
-                        Console.WriteLine("AIR TABLE " + result.Last()[0] + " / " + result.Last()[1]);
                     }
+                    return result;
+                } catch (Exception e) {
+                    MessageBox.Show("File " + path + " is locked");
                 }
-                return result;
             }
 
             return null;

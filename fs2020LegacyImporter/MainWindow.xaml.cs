@@ -15,6 +15,7 @@ using System.Net.Http;
 using System.Globalization;
 using Microsoft.Deployment.Compression.Cab;
 using System.Windows.Controls.Primitives;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace msfsLegacyImporter
 {
@@ -28,12 +29,15 @@ namespace msfsLegacyImporter
         public string updateURL = "";
         public string projectDirectory = "";
         public string aircraftDirectory = "";
+        public string airFilename = "";
         private cfgHelper CfgHelper;
         private jsonHelper JSONHelper;
         private csvHelper CsvHelper;
         private xmlHelper XmlHelper;
         private fsxVarHelper FsxVarHelper;
         private fileDialogHelper FileDialogHelper;
+
+        private string communityPath = "";
 
         string SourceFolder = "";
         string TargetFolder = "";
@@ -53,6 +57,36 @@ namespace msfsLegacyImporter
                 File.Delete(AppDomain.CurrentDomain.BaseDirectory + "\\" + TEMP_FILE);
             }
             catch { /*MessageBox.Show("Can't delete temporary files");*/ }
+
+            // GET COMMUNITY PATH
+            // MSFS 2020 Windows Store version: C: \Users\*USERNAME *\AppData\Local\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\LocalCache\UserCfg.opt
+            // MSFS 2020 Steam version: C: \Users\*USERNAME *\AppData\Roaming\Microsoft Flight Simulator\UserCfg.opt
+            try
+            {
+                string optPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\Packages\Microsoft.FlightSimulator_8wekyb3d8bbwe\LocalCache\UserCfg.opt";
+
+                if (!File.Exists(optPath))
+                    optPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Microsoft Flight Simulator\UserCfg.opt";
+
+                if (File.Exists(optPath))
+                {
+                    string content = File.ReadAllText(optPath);
+
+                    Regex regex = new Regex("InstalledPackagesPath\\s+\"(.*)\"");
+                    Match match = regex.Match(content);
+
+                    if (match.Success && match.Groups.Count > 1 && Directory.Exists(match.Groups[1].Value + "\\Community\\"))
+                    {
+                        communityPath = match.Groups[1].Value + "\\Community\\";
+                        Console.WriteLine("Community path found: " + communityPath);
+                    }
+                }
+
+                if (String.IsNullOrEmpty(communityPath))
+                    Console.WriteLine("Community path NOT found");
+            }
+            catch { 
+            }
 
             InitializeComponent();
 
@@ -89,19 +123,19 @@ namespace msfsLegacyImporter
 
         private void BtnOpenFile_Click(object sender, RoutedEventArgs e)
         {
-/*          CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            string defaultPath = HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath");
+          CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            string defaultPath = !String.IsNullOrEmpty(communityPath) ? communityPath : HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath");
             dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
             dialog.RestoreDirectory = (String.IsNullOrEmpty(defaultPath) || defaultPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)) ? true : false;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 setAircraftDirectory(dialog.FileName);
-            } */
+            }
 
-            string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath"));
+            /*string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath"));
             if (!String.IsNullOrEmpty(selectedPath))
-                setAircraftDirectory(selectedPath);
+                setAircraftDirectory(selectedPath);*/
         }
 
         public void setAircraftDirectory(string directory)
@@ -110,13 +144,10 @@ namespace msfsLegacyImporter
                 File.Exists(directory + "\\manifest.json") &&
                 Directory.Exists(directory + "\\SimObjects"))
             {
-                try
+                if (String.IsNullOrEmpty(communityPath))
                 {
-                    Registry.SetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath", Path.GetDirectoryName(directory));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
+                    try { Registry.SetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath", Path.GetDirectoryName(directory)); }
+                    catch (Exception ex) {  Console.WriteLine(ex.ToString()); }
                 }
             
                 // CLEAN FIELDS
@@ -604,15 +635,13 @@ namespace msfsLegacyImporter
         // AIR START
         private void getAirCheckboxes(StackPanel parent, string filename)
         {
-            string airFilename = "";
-
-
+            airFilename = "";
             var airFiles = Directory.EnumerateFiles(aircraftDirectory, "*.air", SearchOption.TopDirectoryOnly);
 
             foreach (string currentFile in airFiles)
             {
                 string tempName = Path.GetFileName(currentFile);
-                if (!String.IsNullOrEmpty(tempName) && tempName[0] != '.')
+                if (!String.IsNullOrEmpty(tempName) /*&& tempName[0] != '.'*/)
                     airFilename = tempName;
             }
             
@@ -622,22 +651,37 @@ namespace msfsLegacyImporter
             int values = 0;
             StackPanel myPanel = new StackPanel();
 
-            string airExported = AppDomain.CurrentDomain.BaseDirectory + "airTbls\\" + airFilename.Replace(".air", ".txt");
+            string airExported = aircraftDirectory + "\\" + airFilename.Replace(".air", ".txt");
             string conversionTable = AppDomain.CurrentDomain.BaseDirectory + "\\airTbls\\AIR to CFG Master Sheet - " + filename + ".csv";
             string buttonLabel = "";
             string toolTip = "";
+            bool download = false;
+            bool launch = false;
 
             parent.Children.Clear();
 
             if (!File.Exists(conversionTable))
             {
-                buttonLabel = "No AIR conversion table found";
+                buttonLabel = "No AIR conversion tables found";
                 toolTip = "File " + conversionTable + " does not exists." + Environment.NewLine + "Extract folder \"airTbls\" from program archive into same directory, where EXE is stored.";
+            }
+            else if (!File.Exists(AppDomain.CurrentDomain.BaseDirectory + "AirDat\\AirUpdate.exe"))
+            {
+                buttonLabel = "AirUpdate.exe not found";
+                toolTip = "AirUpdate not found in Importer folder." + Environment.NewLine + "Cick this button to download and unpack archive from www.mudpond.org";
+                download = true;
             }
             else if (!File.Exists(airExported))
             {
                 buttonLabel = "No exported AIR table data found";
-                toolTip = "File " + airExported + " does not exists." + Environment.NewLine + "You can generate this file by AirUpdate - Full dump - Dump";
+                toolTip = "File " + airExported + " does not exists." + Environment.NewLine + "Click this button to launch AirUpdate and follow these steps:" + Environment.NewLine +
+                    "1. \"Select Air File\"" + Environment.NewLine + 
+                    "2. Navigate to \"" + aircraftDirectory+ "\"" + Environment.NewLine + "" +
+                    "3. Select AIR file" + Environment.NewLine +
+                    "4. Check \"Full dump\" option" + Environment.NewLine +
+                    "5. Press \"Dump\" button" + Environment.NewLine +
+                    "6. Close AirUpdate";
+                launch = true;
             }
             else
             {
@@ -743,14 +787,72 @@ namespace msfsLegacyImporter
             else
             {
                 btn.Content = buttonLabel + "*";
-                btn.IsEnabled = false;
                 myPanel.ToolTip = toolTip;
+
+                if (download)
+                    btn.Click += GetAirUpdate;
+                else if (launch)
+                    btn.Click += LaunchAirUpdate;
+                else
+                    btn.IsEnabled = false;
             }
 
             myPanel.Children.Add(btn);
             parent.Children.Add(myPanel);
 
             parent.Children.Add(sectiondivider());
+        }
+
+        private void LaunchAirUpdate(object sender, RoutedEventArgs e)
+        {
+            Process prcs = new Process();
+            
+            try
+            {
+                prcs.StartInfo.FileName = AppDomain.CurrentDomain.BaseDirectory + "AirDat\\AirUpdate.exe";
+                prcs.StartInfo.CreateNoWindow = true;
+                prcs.StartInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory + "AirDat\\";
+                prcs.EnableRaisingEvents = true;
+                prcs.Exited += new EventHandler(AirUpdateClosed);
+                prcs.Start();
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.Invoke(() => SummaryUpdate());
+                return;
+            }
+        }
+        private void AirUpdateClosed(object sender, System.EventArgs e)
+        {
+            Dispatcher.Invoke(() => SummaryUpdate());
+        }
+
+        private void GetAirUpdate(object sender, RoutedEventArgs e)
+        {
+            if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\AirDat\\"))
+                Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "\\AirDat\\");
+
+            fsTabControl.IsEnabled = false;
+
+            WebClient _webClient = new WebClient();
+            _webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(OnAirDownloadCompleted);
+            _webClient.DownloadFileAsync(new Uri("http://www.mudpond.org/AirDat.ZIP"), AppDomain.CurrentDomain.BaseDirectory + "\\AirDat\\" + TEMP_FILE);
+        }
+
+        private void OnAirDownloadCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            if ((e == null || !e.Cancelled && e.Error == null) && File.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\AirDat\\" + TEMP_FILE) && new FileInfo(AppDomain.CurrentDomain.BaseDirectory + "\\AirDat\\" + TEMP_FILE).Length > 10)
+            {
+                Extract extract = new Extract();
+                extract.Run(AppDomain.CurrentDomain.BaseDirectory + "\\AirDat\\" + TEMP_FILE, "", AppDomain.CurrentDomain.BaseDirectory + "\\AirDat\\");
+            }
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            while (true) { if (sw.ElapsedMilliseconds > 1000 || File.Exists(AppDomain.CurrentDomain.BaseDirectory + "AirDat\\AirUpdate.exe")) break; }
+
+            fsTabControl.IsEnabled = true;
+            SummaryUpdate();
         }
 
         private void InsertAirValues(object sender, RoutedEventArgs e)
@@ -793,21 +895,21 @@ namespace msfsLegacyImporter
 
                     if (i > 0)
                     {
-                        // TRY TO MAKE BACKUP
+                        // CFG BACKUP
                         if (File.Exists(aircraftDirectory + "\\" + filename) && !File.Exists(aircraftDirectory + "\\." + filename))
                         {
                             CfgHelper.lastChangeTimestamp = DateTime.UtcNow.Ticks;
                             File.Copy(aircraftDirectory + "\\" + filename, aircraftDirectory + "\\." + filename);
+                        }
 
-                            string airFilename = Path.GetFileName(aircraftDirectory).Trim('\\') + ".air";
-                            if (File.Exists(aircraftDirectory + "\\.flight_model.cfg") && File.Exists(aircraftDirectory + "\\.engines.cfg") &&
-                                File.Exists(aircraftDirectory + "\\" + airFilename) && !File.Exists(aircraftDirectory + "\\." + airFilename))
-                            {
-                                File.Move(aircraftDirectory + "\\" + airFilename, aircraftDirectory + "\\." + airFilename);
-                                JSONHelper.scanTargetFolder(projectDirectory);
-                            }
-
-
+                        // AIR BACKUP
+                        if (airFilename.Length > 1 && airFilename[0] != '.' &&
+                            File.Exists(aircraftDirectory + "\\.flight_model.cfg") && File.Exists(aircraftDirectory + "\\.engines.cfg") &&
+                            File.Exists(aircraftDirectory + "\\" + airFilename) && !File.Exists(aircraftDirectory + "\\." + airFilename))
+                        {
+                            File.Move(aircraftDirectory + "\\" + airFilename, aircraftDirectory + "\\." + airFilename);
+                            File.Move(aircraftDirectory + "\\" + airFilename.Replace(".air", ".txt"), aircraftDirectory + "\\." + airFilename.Replace(".air", ".txt"));
+                            JSONHelper.scanTargetFolder(projectDirectory);
                         }
 
                         for (int k = 0; k < i; k++)
@@ -1107,7 +1209,7 @@ namespace msfsLegacyImporter
                 foreach (string attr in new string[] { "compute_aero_center", "fuselage_length", "fuselage_diameter" })
                 {
                     string value = CfgHelper.getCfgValue(attr, "flight_model.cfg");
-                    if (value == "")
+                    if (value == "" && !String.IsNullOrEmpty(CfgHelper.getCfgValue(attr, "flight_model.cfg", "", true)))
                         FlightModelIssues = AddCheckBox(FlightModelIssues, attr + " = " + (value != "" ? value : "missing"), Colors.DarkRed, criticalIssues++);
                 }
 
@@ -1115,7 +1217,7 @@ namespace msfsLegacyImporter
                 {
                     string value = CfgHelper.getCfgValue(attr, "flight_model.cfg");
                     string result = Regex.Replace(value, @"[0-9-.]+:([1][.0]+)[,]*", "");
-                    if (String.IsNullOrEmpty(value) || String.IsNullOrEmpty(result.Trim()))
+                    if ((String.IsNullOrEmpty(value) || String.IsNullOrEmpty(result.Trim())) && !String.IsNullOrEmpty(CfgHelper.getCfgValue(attr, "flight_model.cfg", "", true)))
                     {
                         FlightModelIssues = AddCheckBox(FlightModelIssues, attr + " = " + (value != "" ? value : "missing"), Colors.DarkRed, criticalIssues++);
                     }
@@ -1183,8 +1285,10 @@ namespace msfsLegacyImporter
                                 {
                                     string length = CfgHelper.getCfgValue("wing_span", "flight_model.cfg", "[AIRPLANE_GEOMETRY]");
                                     double num;
-                                    CfgHelper.setCfgValue(aircraftDirectory, val, (Double.TryParse(length, out num) ? 1.1 * num : 50).ToString(), "flight_model.cfg");
-                                    message += val + " value was calculated from wing_span, you'll need to adjust it manually" + Environment.NewLine;
+                                    string stringNewVal = (Double.TryParse(length, out num) ? 1.1 * num : 50).ToString();
+                                    CfgHelper.setCfgValue(aircraftDirectory, val, stringNewVal, "flight_model.cfg");
+                                    message += val + " value was calculated as "+ stringNewVal + " from wing_span, you'll need to adjust it manually." + Environment.NewLine +
+                                        "If after " + val + " insertion center of gravity will be broken, adjust first (longitudinal) value of empty_weight_cg_position (increase to move CG forward, decrease - backwad)" + Environment.NewLine + Environment.NewLine;
                                 }
                                 else if (val == "fuselage_diameter")
                                 {
@@ -1192,8 +1296,9 @@ namespace msfsLegacyImporter
                                     double num;
                                     string weight = CfgHelper.getCfgValue("max_gross_weight", "flight_model.cfg", "[WEIGHT_AND_BALANCE]");
                                     double num2;
-                                    CfgHelper.setCfgValue(aircraftDirectory, val, Math.Max(5, (Double.TryParse(length, out num) && Double.TryParse(length, out num2) ? num * num2 / 666 : 5)).ToString(), "flight_model.cfg");
-                                    message += val + " value was calculated from wing_span and max_gross_weight, you'll need to adjust it manually" + Environment.NewLine;
+                                    string stringNewVal = Math.Max(5, (Double.TryParse(length, out num) && Double.TryParse(length, out num2) ? num * num2 / 666 : 5)).ToString();
+                                    CfgHelper.setCfgValue(aircraftDirectory, val, stringNewVal, "flight_model.cfg");
+                                    message += val + " value was calculated as "+ stringNewVal + " from wing_span and max_gross_weight, you'll need to adjust it manually" + Environment.NewLine + Environment.NewLine;
                                 }
 
                                 i++;
@@ -1302,8 +1407,8 @@ namespace msfsLegacyImporter
                                             int index = value.IndexOf(",");
                                             value = index >= 0 ? value.Substring(index + 1) : value;
 
-                                            CfgHelper.setCfgValueStatus(aircraftDirectory, "point." + testOne[0], "flight_model.cfg", "[CONTACT_POINTS]", false);
-                                            CfgHelper.setCfgValue(aircraftDirectory, "point." + testTwo[0], value, "flight_model.cfg", "[CONTACT_POINTS]");
+                                            CfgHelper.setCfgValueStatus(aircraftDirectory, "point." + testTwo[0], "flight_model.cfg", "[CONTACT_POINTS]", false);
+                                            CfgHelper.setCfgValue(aircraftDirectory, "point." + testOne[0], value, "flight_model.cfg", "[CONTACT_POINTS]");
 
                                             i++;
                                         }
@@ -1363,7 +1468,8 @@ namespace msfsLegacyImporter
                                     secton.Contains("[CONTROLS.") /*|| secton.Contains("[FUELSYSTEM.")*/ || secton.Contains("[SIMVARS.") ||
                                     (secton.Contains("[PROPELLER]") || secton.Contains("[PISTON_ENGINE]")) && CfgHelper.getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]") == "0" ||
                                     (secton.Contains("[PROPELLER]") || secton.Contains("[TURBOPROP_ENGINE]") || secton.Contains("[TURBINEENGINEDATA]")) && CfgHelper.getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]") == "5" ||
-                                    (secton.Contains("[TURBINEENGINEDATA]") || secton.Contains("[JET_ENGINE]")) && CfgHelper.getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]") == "1"
+                                    (secton.Contains("[TURBINEENGINEDATA]") || secton.Contains("[JET_ENGINE]")) && CfgHelper.getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]") == "1" ||
+                                    !String.IsNullOrEmpty(airFilename) && File.Exists(aircraftDirectory + "\\" + airFilename.Replace(".air", ".txt")) && secton.Contains("[AERODYNAMICS]")
                                     /*|| secton.Contains("ENGINE PARAMETERS.")*/
                                     )
                                 {
@@ -1497,35 +1603,39 @@ namespace msfsLegacyImporter
 
             Button btn = new Button();
             btn = SetButtonAtts(btn);
-            btn.Name = "convertTexturesButton";
+            btn.Name = "ImageTools";
+
+            Button btn2 = new Button();
+            btn2 = SetButtonAtts(btn2);
+            btn2.Name = "nvdxt";
 
             if (texturesToConvert > 0)
             {
                 btn.Content = "BMP to DDS by ImageTools";
                 btn.Click += ConvertTexturesClick;
 
-                Button btn2 = new Button();
-                btn2 = SetButtonAtts(btn2);
                 btn2.Content = "BMP to DDS by nvdxt";
                 btn2.Click += ConvertTexturesClick;
 
                 tabTextures.Foreground = new SolidColorBrush(Colors.DarkRed);
-                myPanel2.Children.Add(btn2);
+                myPanel2.Children.Add(btn);
             }
             else
             {
-                btn.Content = "No textures issues";
-                btn.IsEnabled = false;
+                btn2.Content = "No textures issues";
+                btn2.IsEnabled = false;
                 tabTextures.Foreground = new SolidColorBrush(Colors.DarkGreen);
             }
 
-            myPanel2.Children.Add(btn);
+            myPanel2.Children.Add(btn2);
             TexturesList.Children.Add(myPanel2);
             TexturesList.Children.Add(sectiondivider());
         }
 
         private void ConvertTexturesClick(object sender, RoutedEventArgs e)
         {
+            fsTabControl.IsEnabled = false;
+
             CheckBox tmp = new CheckBox();
 
             // COUNT
@@ -1533,8 +1643,6 @@ namespace msfsLegacyImporter
             int converted = 0;
             string[] bmp = new string[1000];
             string[] dds = new string[1000];
-
-            fsTabControl.IsEnabled = false;
 
             StackPanel tmpPnl = new StackPanel();
 
@@ -1567,7 +1675,7 @@ namespace msfsLegacyImporter
                     {
                         Console.WriteLine(ex.ToString());
                     }
-            }
+                }
 
                 if (!File.Exists(dds[i]))
                 {
@@ -1576,7 +1684,7 @@ namespace msfsLegacyImporter
 
                     Button button = (Button)sender;
 
-                    if (button.Content.ToString().Contains("ImageTool"))
+                    if (button.Name.ToString().Contains("ImageTool"))
                         Process.Start(AppDomain.CurrentDomain.BaseDirectory + "ImageTool.exe", "-nogui -dds -dxt5 -32 -nostop -o \"" + dds[i] + "\" \"" + bmp[i] + "\"");
                     else
                         Process.Start(AppDomain.CurrentDomain.BaseDirectory + "nvdxt.exe", "-dxt5 -quality_highest -flip -file \"" + bmp[i] + "\" -output \"" + dds[i] + "\"");
@@ -2154,8 +2262,8 @@ namespace msfsLegacyImporter
 
         private void BtnOpenTargetFile_Click(object sender, RoutedEventArgs e)
         {
-            /*CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            string defaultPath = HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath");
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            string defaultPath = !String.IsNullOrEmpty(communityPath) ? communityPath : HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath");
             dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
             dialog.RestoreDirectory = (String.IsNullOrEmpty(defaultPath) || defaultPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)) ? true : false;
@@ -2163,13 +2271,14 @@ namespace msfsLegacyImporter
             {
                 TargetFolder = dialog.FileName + "\\";
                 btnTargetFolderPath.Text = "into " + TargetFolder + PackageDir.Text.ToLower().Trim() + "\\";
-            }*/
-            string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath"));
+            }
+            
+            /*string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath"));
             if (!String.IsNullOrEmpty(selectedPath))
             {
                 TargetFolder = selectedPath + "\\";
                 btnTargetFolderPath.Text = "into " + TargetFolder + PackageDir.Text.ToLower().Trim() + "\\";
-            }
+            }*/
         }
 
         private void TextBlockTargetFile_Input(object sender, RoutedEventArgs e)
@@ -2182,15 +2291,17 @@ namespace msfsLegacyImporter
 
         private void BtnOpenSourceFile_Click(object sender, RoutedEventArgs e)
         {
-            /*CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             string defaultPath = HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0\\", "SetupPath", RegistryView.Registry32);
             dialog.InitialDirectory = defaultPath;
             dialog.IsFolderPicker = true;
             dialog.RestoreDirectory = (String.IsNullOrEmpty(defaultPath) || defaultPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)) ? true : false;
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)*/
-            string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0\\", "SetupPath", RegistryView.Registry32));
-            if (!String.IsNullOrEmpty(selectedPath))
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            //string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0\\", "SetupPath", RegistryView.Registry32));
+            //if (!String.IsNullOrEmpty(selectedPath))
             {
+                string selectedPath = dialog.FileName;
+
                 if (File.Exists(selectedPath + "\\aircraft.cfg"))
                 {
                     SourceFolder = selectedPath + "\\";
@@ -2516,7 +2627,7 @@ namespace msfsLegacyImporter
                         MessageBox.Show("Can't delete old EXE file");
                     
                     Extract extract = new Extract();
-                    extract.Run(TEMP_FILE, EXE_PATH);
+                    extract.Run(TEMP_FILE, EXE_PATH, AppDomain.CurrentDomain.BaseDirectory + "\\");
                 }
             }
 
