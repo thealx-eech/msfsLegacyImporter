@@ -246,6 +246,11 @@
                         </StackPanel>
                         <StackPanel Name="GaugesList" VerticalAlignment="Top" >
                         </StackPanel>
+                        <StackPanel Name="ExpressionTest" VerticalAlignment="Top" Width="600">
+                            <TextBox Name="TextExpressionField" Visibility="Collapsed" Height="100" HorizontalAlignment="Stretch"></TextBox>
+                            <TextBlock Name="TextExpressionResult"  Visibility="Collapsed" Height="100" HorizontalAlignment="Stretch" TextWrapping="Wrap" ></TextBlock>
+                            <Button Name="TextExpressionButton" Click="TextExpressionClick">Test FSX Expressions converter</Button>
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>

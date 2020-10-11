@@ -13,15 +13,29 @@ namespace msfsLegacyImporter
 {
     class xmlHelper
     {
+        private double[] prevPoint;
+        private double prevAngle;
+        private int rotationDirection;
+        string logfile;
+
         public void insertFsxGauge(string aircraftDirectory, string projectDirectory, string chkContent, Slider GammaSlider, CheckBox ForceBackground, cfgHelper CfgHelper, fsxVarHelper FsxVarHelper, jsonHelper JSONHelper)
         {
             string mainFile = aircraftDirectory + "\\" + (string)chkContent;
             string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
 
+            logfile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileNameWithoutExtension(mainFile) + "_log.txt";
+
             if (!File.Exists(mainFile))
             {
                 return;
             }
+
+            // PREPARE LOG FILE
+            string errors = "";
+            try {
+                File.WriteAllLines(logfile, new string[0]);
+            }
+            catch (Exception e) { }
 
             string htmlTpl = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "panelTpl\\panel.html");
             string cssTpl = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "panelTpl\\panel.css");
@@ -55,15 +69,15 @@ namespace msfsLegacyImporter
                         size_mm = pixel_size;
                     string file = panelSection.Lines.Find(x => x.Name == "file") != null ? panelSection.Lines.Find(x => x.Name == "file").Value.Trim() : "";
                     string texture = panelSection.Lines.Find(x => x.Name == "texture") != null ? panelSection.Lines.Find(x => x.Name == "texture").Value : "";
-                        
+
                     if (String.IsNullOrEmpty(pixel_size) || String.IsNullOrEmpty(texture))
                     {
-                        MessageBox.Show("Panel " + panelSection.Name + " does not have enough parameters");
+                        errors += "Panel " + panelSection.Name + " does not have enough parameters" + Environment.NewLine + Environment.NewLine;
                         continue;
                     }
-                        
+
                     string acSlug = Regex.Replace(Path.GetFileName(aircraftDirectory).Replace("\\", "").Trim().ToLower(), @"[^0-9A-Za-z ,\.\-_]", "").Replace(" ", "_");
-                    string materialName = texture.Replace("$", "").ToLower();
+                    string materialName = "gauges_" + texture.Replace("$", "").ToLower();
                     int[] size = pixel_size != null && pixel_size.Contains(',') &&
                         int.TryParse(pixel_size.Split(',')[0].Trim(), out int num1) && int.TryParse(pixel_size.Split(',')[1].Trim(), out int num2) ?
                         new int[] { num1, num2 } : new int[] { 0, 0 };
@@ -82,7 +96,7 @@ namespace msfsLegacyImporter
                             }
                             else
                             {
-                                MessageBox.Show("Unrecognized gauge string: " + gauge.Value);
+                                errors += "Unrecognized gauge string: " + gauge.Value + Environment.NewLine + Environment.NewLine;
                             }
                         }
                     }
@@ -119,7 +133,7 @@ namespace msfsLegacyImporter
                                 bmp.Save(InstrumentFolder + Path.GetFileNameWithoutExtension(file) + ".png", ImageFormat.Png);
                             }
                             else
-                                MessageBox.Show("Background image " + Path.GetDirectoryName(mainFile) + "\\" + file + " not found. You can try to copy it from FSX install directory.");
+                                errors += "Background image " + Path.GetDirectoryName(mainFile) + "\\" + file + " not found" + Environment.NewLine + Environment.NewLine;
                         }
 
                         foreach (var gaugeData in gaugesList)
@@ -145,332 +159,364 @@ namespace msfsLegacyImporter
                                 panelDir = Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\" + gaugeGroup;
 
                             if (!Directory.Exists(panelDir) || !File.Exists(panelDir + "\\" + gaugeName + ".xml")) {
-                                MessageBox.Show("Gauge file " + gaugeName + ".xml" + " not found. You can try to unpack default FSX gauges first.");
+                                errors += "Gauge file " + gaugeGroup + "\\" + gaugeName + ".xml not found" + Environment.NewLine + Environment.NewLine;
+                                continue;
                             }
-                            else
+
+                            // SET UP GAUGE
+                            try
                             {
-                                // SET UP GAUGE
-                                try
+                                writeLog("Processing " + gaugeGroup + "\\" + gaugeName + ".xml");
+
+                                XElement gaugeXml = XElement.Load(panelDir + "\\" + gaugeName + ".xml");
+                                var Size = gaugeXml.Descendants("Size").FirstOrDefault();
+                                string[] GaugeSize = getXYvalue(Size);
+                                html += "		<div id=\"" + gaugeName + "\">" + Environment.NewLine;
+                                css += materialName + "-element #Mainframe #" + gaugeName + " {" + Environment.NewLine + "		width: " + GaugeSize[0] + "px;" + Environment.NewLine + "		height: " + GaugeSize[1] + "px;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine + "		left: " + xPos + "px;" + Environment.NewLine + "		top: " + yPos + "px;" + Environment.NewLine;
+
+                                // SET BG IMAGE IF NECESSARY
+                                if (String.IsNullOrEmpty(Path.GetFileNameWithoutExtension(file)) || ForceBackground != null && ForceBackground.IsChecked == true)
                                 {
-                                    Console.WriteLine("Processing " + gaugeGroup + "\\" + gaugeName + ".xml");
-
-                                    XElement gaugeXml = XElement.Load(panelDir + "\\" + gaugeName + ".xml");
-                                    var Size = gaugeXml.Descendants("Size").FirstOrDefault();
-                                    string[] GaugeSize = getXYvalue(Size);
-                                    html += "		<div id=\"" + gaugeName + "\">" + Environment.NewLine;
-                                    css += materialName + "-element #Mainframe #" + gaugeName + " {" + Environment.NewLine + "		width: " + GaugeSize[0] + "px;" + Environment.NewLine + "		height: " + GaugeSize[1] + "px;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine + "		left: " + xPos + "px;" + Environment.NewLine + "		top: " + yPos + "px;" + Environment.NewLine;
-
-                                    // SET BG IMAGE IF NECESSARY
-                                    if (String.IsNullOrEmpty(Path.GetFileNameWithoutExtension(file)) || ForceBackground != null && ForceBackground.IsChecked == true)
+                                    XElement mainImage = gaugeXml.Descendants("Image").FirstOrDefault();
+                                    if (mainImage != null && mainImage.Attribute("Name") != null)
                                     {
-                                        XElement mainImage = gaugeXml.Descendants("Image").FirstOrDefault();
-                                        if (mainImage != null)
+                                        string MainImageFilename = gaugeName + "_" + Path.GetFileNameWithoutExtension(mainImage.Attribute("Name").Value).Trim();
+                                        if (!String.IsNullOrEmpty(MainImageFilename))
                                         {
-                                            string MainImageFilename = gaugeName + "_" + Path.GetFileNameWithoutExtension(mainImage.Attribute("Name").Value).Trim();
-                                            if (!String.IsNullOrEmpty(MainImageFilename))
+                                            string sourceFile = panelDir + "\\" + mainImage.Attribute("Name").Value;
+                                            if (!File.Exists(sourceFile)) // TRY 1024 SUBFOLDER
+                                                sourceFile = panelDir + "\\1024\\" + mainImage.Attribute("Name").Value;
+
+                                            if (File.Exists(sourceFile))
                                             {
-                                                if (File.Exists(panelDir + "\\" + mainImage.Attribute("Name").Value))
-                                                {
-                                                    Bitmap bmp = new Bitmap(panelDir + "\\" + mainImage.Attribute("Name").Value);
-                                                    bmp = setBitmapGamma(bmp, GammaSlider);
-                                                    bmp.Save(InstrumentFolder + MainImageFilename + ".png", ImageFormat.Png);
+                                                Bitmap bmp = new Bitmap(sourceFile);
+                                                bmp = setBitmapGamma(bmp, GammaSlider);
+                                                bmp.Save(InstrumentFolder + MainImageFilename + ".png", ImageFormat.Png);
 
-                                                    css += "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + gaugeGroup + "/" + MainImageFilename + ".png\");" + Environment.NewLine; ;
-                                                }
-                                                else
-                                                    MessageBox.Show("Background image " + panelDir + "\\" + mainImage.Attribute("Name").Value + " not found. You can try to copy it from FSX install directory.");
+                                                css += "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + gaugeGroup + "/" + MainImageFilename + ".png\");" + Environment.NewLine; ;
                                             }
-                                        }
-                                    }
-                                    css += "}" + Environment.NewLine;
-
-                                    // SET UP GAUGE ELEMENTS
-                                    var gaugeElements = gaugeXml.Descendants("Element");
-                                    if (gaugeElements.Count() < 0)
-                                    {
-                                        MessageBox.Show("No elements in " + gaugeGroup + "\\" + gaugeName + ".xml found!");
-                                    }
-                                    else
-                                    {
-                                        int index = -1;
-                                        foreach (var gaugeElement in gaugeElements)
-                                        {
-                                            index++;
-
-                                            XElement Image = gaugeElement.Descendants("Image").FirstOrDefault();
-                                            XElement FloatPosition = gaugeElement.Descendants("FloatPosition").FirstOrDefault();
-                                            if (FloatPosition == null)
-                                                FloatPosition = gaugeElement.Descendants("Position").FirstOrDefault();
-                                            XElement Rotation = gaugeElement.Descendants("Rotation").FirstOrDefault();
-                                            if (Rotation == null)
-                                                Rotation = gaugeElement.Descendants("Rotate").FirstOrDefault();
-                                            XElement Shift = gaugeElement.Descendants("Shift").FirstOrDefault();
-                                            XElement MaskImage = gaugeElement.Descendants("MaskImage").FirstOrDefault();
-                                            int imgWidth = 0;
-                                            int imgHeight = 0;
-
-                                            if (FloatPosition == null)
-                                            {
-                                                Console.WriteLine("Child of " + gaugeGroup + "\\" + gaugeName + ".xml does not have position element");
-                                            }
-                                            else if (Rotation == null && Shift == null)
-                                            {
-                                                Console.WriteLine("Child of " + gaugeGroup + "\\" + gaugeName + ".xml does not have rotation or shift element");
-                                            }
-                                            else if (Image == null || FloatPosition == null)
-                                            {
-                                                Console.WriteLine("Child of " + gaugeGroup + "\\" + gaugeName + ".xml does not have image or position");
-                                            }
-                                            else {
-                                                string slug = gaugeName + "_" + Path.GetFileNameWithoutExtension(Image.Attribute("Name").Value).Trim();
-                                                string sanitizedSlug = Regex.Replace(slug, @"[^0-9A-Za-z ,_\-]", "").Replace(" ", "_") + "_" + index;
-                                                XElement Expression = null;
-                                                string[] FloatPositionValues = getXYvalue(FloatPosition);
-
-                                                // RENDER MASK FIRST
-                                                if (MaskImage != null && !String.IsNullOrEmpty(MaskImage.Attribute("Name").Value))
-                                                {
-                                                    string maskSlug = slug + "_" + Path.GetFileNameWithoutExtension(MaskImage.Attribute("Name").Value).Trim();
-                                                    string sourceFile = panelDir + "\\" + MaskImage.Attribute("Name").Value;
-                                                    string targetFile = InstrumentFolder + maskSlug + ".png";
-
-                                                    Bitmap bmp = new Bitmap(sourceFile);
-                                                    int maskWidth = bmp.Width;
-                                                    int maskHeight = bmp.Height;
-                                                    bmp.Save(targetFile, ImageFormat.Png);
-
-                                                    html += "		  <div id=\"" + sanitizedSlug + "_mask\">" + Environment.NewLine;
-                                                    css += materialName + "-element #Mainframe #" + sanitizedSlug + "_mask {" + Environment.NewLine + "		background: transparent;" + Environment.NewLine + "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + gaugeGroup + "/" + maskSlug + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine;
-                                                    css += Environment.NewLine + "		width: " + maskWidth + "px;" + Environment.NewLine + "		height: " + maskHeight + "px;" + Environment.NewLine;
-                                                    css += "		left: " + FloatPositionValues[0] + "px;" + Environment.NewLine + "		top: " + FloatPositionValues[1] + "px;" + Environment.NewLine + "}" + Environment.NewLine;
-                                                }
-
-                                                if (Rotation != null)
-                                                {
-                                                    Expression = Rotation.Descendants("Expression").FirstOrDefault();
-                                                    if (Expression == null)
-                                                        Expression = Rotation.Descendants("Value").FirstOrDefault();
-                                                }
-                                                else if (Shift != null)
-                                                {
-                                                    Expression = Shift.Descendants("Expression").FirstOrDefault();
-                                                    if (Expression == null)
-                                                        Expression = Shift.Descendants("Value").FirstOrDefault();
-                                                }
-
-                                                // RENDER MOVING ELEMENT
-                                                if (Expression != null)
-                                                {
-                                                    XElement Axis = Image.Descendants("Axis").FirstOrDefault();
-                                                    string[] AxisPositionValues = getXYvalue(Axis);
-                                                    XElement Transparent = Image.Descendants("Transparent").FirstOrDefault();
-
-                                                    // GENERATE IMAGE
-                                                    string sourceFile = panelDir + "\\" + Image.Attribute("Name").Value;
-                                                    string targetFile = InstrumentFolder + slug + ".png";
-
-                                                    Bitmap bmp = new Bitmap(sourceFile);
-                                                    bmp = setBitmapGamma(bmp, GammaSlider);
-                                                    imgWidth = bmp.Width;
-                                                    imgHeight = bmp.Height;
-
-                                                    bmp.MakeTransparent(System.Drawing.Color.FromArgb(255, 0, 0, 0));
-                                                    bmp.Save(targetFile, ImageFormat.Png);
-
-                                                    // GENERATE CODE
-                                                    html += "			<div id=\"" + sanitizedSlug + "\"></div>" + Environment.NewLine;
-                                                    css += materialName + "-element #Mainframe #" + sanitizedSlug + " {" + Environment.NewLine + "		background: transparent;" + Environment.NewLine + "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + gaugeGroup + "/" + slug + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine;
-                                                    css += Environment.NewLine + "		width: " + imgWidth + "px;" + Environment.NewLine + "		height: " + imgHeight + "px;" + Environment.NewLine;
-                                                    if (MaskImage != null && !String.IsNullOrEmpty(MaskImage.Attribute("Name").Value))
-                                                        css += "		left: - " + AxisPositionValues[0] + "px;" + Environment.NewLine + "		top: - " + AxisPositionValues[1] + "px;" + Environment.NewLine;
-                                                    else
-                                                        css += "		left: calc(" + FloatPositionValues[0] + "px - " + AxisPositionValues[0] + "px);" + Environment.NewLine + "		top: calc(" + FloatPositionValues[1] + "px - " + AxisPositionValues[1] + "px);" + Environment.NewLine;
-                                                    css += "		transform-origin: " + AxisPositionValues[0] + "px " + AxisPositionValues[1] + "px;" + Environment.NewLine + "	}" + Environment.NewLine;
-                                                    js += Environment.NewLine + "		/* " + slug.ToUpper() + " */" + Environment.NewLine;
-                                                    js += "		var " + sanitizedSlug + " = this.querySelector(\"#" + sanitizedSlug + "\");" + Environment.NewLine;
-                                                    js += "		if (typeof " + sanitizedSlug + " !== \"undefined\") {" + Environment.NewLine;
-
-                                                    if (Expression.Descendants("Script").FirstOrDefault() != null)
-                                                        js += "			" + FsxVarHelper.fsx2msfsSimVar(Expression.Descendants("Script").FirstOrDefault().Value) + Environment.NewLine;
-                                                    else if (Expression.Value.Length > 0 && Expression.Value[0] != '<' && Expression.Value.Contains(')') && Expression.Value.Contains('('))
-                                                        js += "			" + FsxVarHelper.fsx2msfsSimVar(Expression.Value) + Environment.NewLine;
-                                                    else
-                                                        js += "			var ExpressionResult = 0; /* NO SCRIPT NODE FOUND!!! */" + Environment.NewLine;
-
-                                                    if (Expression.Descendants("Minimum").FirstOrDefault() != null)
-                                                    {
-                                                        js += "			var Minimum = " + Expression.Descendants("Minimum").FirstOrDefault().Value + ";" + Environment.NewLine;
-                                                        js += "			ExpressionResult = Math.max(ExpressionResult, Minimum);" + Environment.NewLine;
-                                                    }
-                                                    else if (Expression.Attribute("Minimum") != null)
-                                                    {
-                                                        js += "			var Minimum = " + Expression.Attribute("Minimum").Value + ";" + Environment.NewLine;
-                                                        js += "			ExpressionResult = Math.max(ExpressionResult, Minimum);" + Environment.NewLine;
-                                                    }
-                                                    else
-                                                    {
-                                                        js += "			var Minimum = 0;" + Environment.NewLine;
-                                                    }
-
-                                                    if (Expression.Descendants("Maximum").FirstOrDefault() != null)
-                                                    {
-                                                        js += "			var Maximum = " + Expression.Descendants("Maximum").FirstOrDefault().Value + ";" + Environment.NewLine;
-                                                        js += "			ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
-                                                    }
-                                                    else if (Expression.Attribute("Maximum") != null)
-                                                    {
-                                                        js += "			var Maximum = " + Expression.Attribute("Maximum").Value + ";" + Environment.NewLine;
-                                                        js += "			ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
-                                                    }
-                                                    else
-                                                    {
-                                                        js += "			var Maximum = 999999999;" + Environment.NewLine;
-                                                    }
-                                                }
-
-                                                // PERFORM ROTATION
-                                                if (Rotation != null)
-                                                {
-                                                    XElement PointsTo = Rotation.Descendants("PointsTo").FirstOrDefault();
-                                                    XElement DegreesPointsTo = Rotation.Descendants("DegreesPointsTo").FirstOrDefault();
-                                                    if (PointsTo != null)
-                                                        switch (PointsTo.Value)
-                                                        {
-                                                            case "SOUTH":
-                                                                js += "			var PointsTo = 180;" + Environment.NewLine;
-                                                                break;
-                                                            case "WEST":
-                                                                js += "			var PointsTo = 90;" + Environment.NewLine;
-                                                                break;
-                                                            case "EAST":
-                                                                js += "			var PointsTo = (-90);" + Environment.NewLine;
-                                                                break;
-                                                            case "NORTH":
-                                                                js += "			var PointsTo = 0;" + Environment.NewLine;
-                                                                break;
-                                                            default:
-                                                                js += "			var PointsTo = 0;" + Environment.NewLine;
-                                                                break;
-                                                        }
-                                                    else if (DegreesPointsTo != null && Double.TryParse(DegreesPointsTo.Value, out double num))
-                                                        js += "			var PointsTo = " + (num - 90.0) + "; " + Environment.NewLine;
-                                                    else
-                                                        js += "			var PointsTo = 0;" + Environment.NewLine;
-
-                                                    // NONLINEAR
-                                                    if (Rotation.Descendants("NonlinearityTable").FirstOrDefault() != null || Rotation.Descendants("Nonlinearity").FirstOrDefault() != null)
-                                                    {
-                                                        js += getNonlinearityTable(Rotation, FloatPositionValues[0], FloatPositionValues[1]);
-
-                                                        js += "			if (NonlinearityTable.length > 0) {" + Environment.NewLine;
-                                                        js += "			    Minimum = NonlinearityTable[0][0];" + Environment.NewLine;
-                                                        js += "			    ExpressionResult = Math.max(ExpressionResult, Minimum);" + Environment.NewLine;
-                                                        js += "			    Maximum = NonlinearityTable[NonlinearityTable.length-1][0];" + Environment.NewLine;
-                                                        js += "			    ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
-
-                                                        js += "				var p1 = { x: " + FloatPositionValues[0] + ", y: " + FloatPositionValues[1] + " };" + Environment.NewLine;
-                                                        js += "				var prevP2 = { x: 0, y: 0 };" + Environment.NewLine;
-
-                                                        js += "				var result = 0;" + Environment.NewLine;
-                                                        js += "				var prevVal = Minimum;" + Environment.NewLine;
-
-                                                        js += "				for (var i = 0; i < NonlinearityTable.length; i++) {" + Environment.NewLine;
-                                                        js += "					var NonlinearityEntry = NonlinearityTable[i][0];" + Environment.NewLine;
-                                                        js += "					var p2 = { x: NonlinearityTable[i][1], y: NonlinearityTable[i][2] };" + Environment.NewLine;
-                                                        js += "					if (ExpressionResult == NonlinearityEntry) {" + Environment.NewLine;
-                                                        js += "						result = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI + 90;" + Environment.NewLine;
-                                                        js += "						break;" + Environment.NewLine;
-                                                        js += "					}" + Environment.NewLine;
-                                                        js += "					else if (ExpressionResult > prevVal && ExpressionResult < NonlinearityEntry ) {" + Environment.NewLine;
-                                                        js += "						var coef = 1 - (NonlinearityEntry - ExpressionResult) / (NonlinearityEntry - prevVal);" + Environment.NewLine + Environment.NewLine;
-                                                        js += "						result = Math.atan2(prevP2.y + coef * (p2.y - prevP2.y) - p1.y, prevP2.x + coef * (p2.x - prevP2.x) - p1.x) * 180 / Math.PI + 90;" + Environment.NewLine;
-                                                        js += "						break;" + Environment.NewLine;
-                                                        js += "					}" + Environment.NewLine;
-                                                        js += "					prevVal = NonlinearityEntry;" + Environment.NewLine;
-                                                        js += "					prevP2 = p2;" + Environment.NewLine;
-                                                        js += "				}" + Environment.NewLine + Environment.NewLine;
-                                                        js += "				if (Minimum >= 0)" + Environment.NewLine;
-                                                        js += "					while (result < 0)" + Environment.NewLine;
-                                                        js += "						result += 360;" + Environment.NewLine + Environment.NewLine;
-
-                                                        js += "				" + sanitizedSlug + ".style.transform = 'rotate(' + (result + PointsTo) + 'deg)';" + Environment.NewLine;
-                                                        js += "			}" + Environment.NewLine + Environment.NewLine;
-                                                    }
-                                                    // LINEAR
-                                                    else
-                                                    {
-                                                        js += "			" + sanitizedSlug + ".style.transform = 'rotate(' + (ExpressionResult * 180 / Math.PI + PointsTo) + 'deg)';" + Environment.NewLine;
-                                                    }
-                                                }
-                                                // PERFORM SHIFT
-                                                else if (Image != null && FloatPosition != null && Shift != null)
-                                                {
-                                                    // NONLINEAR
-                                                    if (Shift.Descendants("NonlinearityTable").FirstOrDefault() != null || Shift.Descendants("Nonlinearity").FirstOrDefault() != null)
-                                                    {
-                                                        js += getNonlinearityTable(Shift, "0", "0");
-
-                                                        js += "			if (NonlinearityTable.length > 0) {" + Environment.NewLine;
-                                                        js += "			    Minimum = NonlinearityTable[0][0];" + Environment.NewLine;
-                                                        js += "			    ExpressionResult = Math.max(ExpressionResult, Minimum);" + Environment.NewLine;
-                                                        js += "			    Maximum = NonlinearityTable[NonlinearityTable.length-1][0];" + Environment.NewLine;
-                                                        js += "			    ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
-
-                                                        js += "				var prevP2 = { x: 0, y: 0 };" + Environment.NewLine;
-                                                        js += "				var result = { x: 0, y: 0 };" + Environment.NewLine;
-
-                                                        js += "				var prevVal = Minimum;" + Environment.NewLine;
-
-                                                        js += "				for (var i = 0; i < NonlinearityTable.length; i++) {" + Environment.NewLine;
-                                                        js += "					var NonlinearityEntry = NonlinearityTable[i][0];" + Environment.NewLine;
-                                                        js += "					var p2 = { x: NonlinearityTable[i][1], y: NonlinearityTable[i][2] };" + Environment.NewLine;
-                                                        js += "					if (ExpressionResult == NonlinearityEntry) {" + Environment.NewLine;
-                                                        js += "						result = p2;" + Environment.NewLine;
-                                                        js += "						break;" + Environment.NewLine;
-                                                        js += "					}" + Environment.NewLine;
-                                                        js += "					else if (ExpressionResult > prevVal && ExpressionResult < NonlinearityEntry ) {" + Environment.NewLine;
-                                                        js += "						var coef = 1 - (NonlinearityEntry - ExpressionResult) / (NonlinearityEntry - prevVal);" + Environment.NewLine + Environment.NewLine;
-                                                        js += "						result = { y: prevP2.y + coef * (p2.y - prevP2.y), x: prevP2.x + coef * (p2.x - prevP2.x) };" + Environment.NewLine;
-                                                        js += "						break;" + Environment.NewLine;
-                                                        js += "					}" + Environment.NewLine;
-                                                        js += "					prevVal = NonlinearityEntry;" + Environment.NewLine;
-                                                        js += "					prevP2 = p2;" + Environment.NewLine;
-                                                        js += "				}" + Environment.NewLine + Environment.NewLine;
-
-                                                        js += "				" + sanitizedSlug + ".style.left = result.x + 'px';" + Environment.NewLine;
-                                                        js += "				" + sanitizedSlug + ".style.top = result.y +'px';" + Environment.NewLine;
-                                                        js += "			}" + Environment.NewLine + Environment.NewLine;
-                                                    }
-                                                    // LINEAR
-                                                    else
-                                                    {
-                                                        // GET SCALE
-                                                        double[] scale = new double[] { 1.0, 0.0 };
-                                                        XElement Scale = Shift.Descendants("Scale").FirstOrDefault();
-                                                        string[] ScaleValues = getXYvalue(Scale);
-                                                        if (Scale != null && Double.TryParse(ScaleValues[0], out double scaleX) && Double.TryParse(ScaleValues[1], out double scaleY))
-                                                            scale = new double[] { scaleX, scaleY };
-
-                                                        js += "			" + sanitizedSlug + ".style.transform = 'translate(' + (ExpressionResult * " + scale[0] + ") + 'px, ' + (ExpressionResult * " + scale[1] + ") + 'px)';" + Environment.NewLine;
-                                                    }
-                                                }
-
-                                                if (MaskImage != null && !String.IsNullOrEmpty(MaskImage.Attribute("Name").Value))
-                                                    html += "		  </div>" + Environment.NewLine;
-
-                                                if (Expression != null)
-                                                    js += "		}" + Environment.NewLine;
-                                            }
+                                            else
+                                                errors += "Background image " + panelDir + "\\" + mainImage.Attribute("Name").Value + " not found" + Environment.NewLine + Environment.NewLine;
                                         }
                                     }
                                 }
-                                catch (Exception ex)
+                                css += "}" + Environment.NewLine;
+
+                                // SET UP GAUGE ELEMENTS
+                                var gaugeElements = gaugeXml.Descendants("Element");
+                                if (gaugeElements.Count() < 0)
                                 {
-                                    MessageBox.Show("Failed to process " + gaugeGroup + "\\" + gaugeName + ".xml! You can report it to program author (links in About tab)");
-                                    Console.WriteLine(ex.ToString());
+                                    errors += "No elements in " + gaugeGroup + "\\" + gaugeName + ".xml found!" + Environment.NewLine + Environment.NewLine;
+                                }
+                                else
+                                {
+                                    int index = -1;
+                                    foreach (var gaugeElement in gaugeElements)
+                                    {
+                                        index++;
+
+                                        XElement Image = gaugeElement.Descendants("Image").FirstOrDefault();
+                                        XElement FloatPosition = gaugeElement.Descendants("FloatPosition").FirstOrDefault();
+                                        if (FloatPosition == null)
+                                            FloatPosition = gaugeElement.Descendants("Position").FirstOrDefault();
+                                        XElement Rotation = gaugeElement.Descendants("Rotation").FirstOrDefault();
+                                        if (Rotation == null)
+                                            Rotation = gaugeElement.Descendants("Rotate").FirstOrDefault();
+                                        XElement Shift = gaugeElement.Descendants("Shift").FirstOrDefault();
+                                        XElement MaskImage = gaugeElement.Descendants("MaskImage").FirstOrDefault();
+                                        int imgWidth = 0;
+                                        int imgHeight = 0;
+
+                                        if (FloatPosition == null)
+                                        {
+                                            writeLog("Child of " + gaugeGroup + "\\" + gaugeName + ".xml does not have position element");
+                                            continue;
+                                        }
+                                        else if (Rotation == null && Shift == null)
+                                        {
+                                            writeLog("Child of " + gaugeGroup + "\\" + gaugeName + ".xml does not have rotation or shift element");
+                                            continue;
+                                        }
+                                        else if (Image == null)
+                                        {
+                                            writeLog("Child of " + gaugeGroup + "\\" + gaugeName + ".xml does not have image");
+                                            continue;
+                                        }
+
+                                        string slug = gaugeName + "_" + Path.GetFileNameWithoutExtension(Image.Attribute("Name").Value).Trim();
+                                        string sanitizedSlug = Regex.Replace(slug, @"[^0-9A-Za-z ,_\-]", "").Replace(" ", "_") + "_" + index;
+                                        XElement Expression = null;
+                                        string[] FloatPositionValues = getXYvalue(FloatPosition);
+
+                                        if (Rotation != null)
+                                        {
+                                            Expression = Rotation.Descendants("Expression").FirstOrDefault();
+                                            if (Expression == null)
+                                                Expression = Rotation.Descendants("Value").FirstOrDefault();
+                                        }
+                                        else if (Shift != null)
+                                        {
+                                            Expression = Shift.Descendants("Expression").FirstOrDefault();
+                                            if (Expression == null)
+                                                Expression = Shift.Descendants("Value").FirstOrDefault();
+                                        }
+
+                                        if (Expression == null)
+                                        {
+                                            writeLog("Child of " + gaugeGroup + "\\" + gaugeName + ".xml does not have expression");
+                                            continue;
+                                        }
+
+                                        // RENDER MASK FIRST
+                                        if (MaskImage != null && !String.IsNullOrEmpty(MaskImage.Attribute("Name").Value))
+                                        {
+                                            string maskSlug = slug + "_" + Path.GetFileNameWithoutExtension(MaskImage.Attribute("Name").Value).Trim();
+                                            string sourceFile1 = panelDir + "\\" + MaskImage.Attribute("Name").Value;
+                                            if (!File.Exists(sourceFile1)) // TRY 1024 SUBFOLDER
+                                                sourceFile1 = panelDir + "\\1024\\" + MaskImage.Attribute("Name").Value;
+                                            string targetFile1 = InstrumentFolder + maskSlug + ".png";
+
+                                            if (File.Exists(sourceFile1))
+                                            {
+                                                Bitmap bmp = new Bitmap(sourceFile1);
+                                                int maskWidth = bmp.Width;
+                                                int maskHeight = bmp.Height;
+                                                bmp.Save(targetFile1, ImageFormat.Png);
+
+                                                html += "		  <div id=\"" + sanitizedSlug + "_mask\">" + Environment.NewLine;
+                                                css += materialName + "-element #Mainframe #" + sanitizedSlug + "_mask {" + Environment.NewLine + "		background: transparent;" + Environment.NewLine + "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + gaugeGroup + "/" + maskSlug + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine;
+                                                css += Environment.NewLine + "		width: " + maskWidth + "px;" + Environment.NewLine + "		height: " + maskHeight + "px;" + Environment.NewLine;
+                                                css += "		left: " + FloatPositionValues[0] + "px;" + Environment.NewLine + "		top: " + FloatPositionValues[1] + "px;" + Environment.NewLine + "}" + Environment.NewLine;
+                                            }
+                                            else
+                                            {
+                                                errors += "Mask image " + panelDir + "\\" + MaskImage.Attribute("Name").Value + " not found" + Environment.NewLine + Environment.NewLine;
+                                                MaskImage = null;
+                                            }
+                                        }
+
+                                        // RENDER MOVING ELEMENT
+                                        XElement Axis = Image.Descendants("Axis").FirstOrDefault();
+                                        string[] AxisPositionValues = getXYvalue(Axis);
+                                        XElement Transparent = Image.Descendants("Transparent").FirstOrDefault();
+
+                                        // GENERATE IMAGE
+                                        string sourceFile = panelDir + "\\" + Image.Attribute("Name").Value;
+                                        if (!File.Exists(sourceFile)) // TRY 1024 SUBFOLDER
+                                            sourceFile = panelDir + "\\1024\\" + Image.Attribute("Name").Value;
+                                        string targetFile = InstrumentFolder + slug + ".png";
+
+                                        if (File.Exists(sourceFile))
+                                        {
+                                            Bitmap bmp = new Bitmap(sourceFile);
+                                            bmp = setBitmapGamma(bmp, GammaSlider);
+                                            imgWidth = bmp.Width;
+                                            imgHeight = bmp.Height;
+
+                                            bmp.MakeTransparent(System.Drawing.Color.FromArgb(255, 0, 0, 0));
+                                            bmp.Save(targetFile, ImageFormat.Png);
+
+                                            // GENERATE CODE
+                                            html += "			<div id=\"" + sanitizedSlug + "\"></div>" + Environment.NewLine;
+                                            css += materialName + "-element #Mainframe #" + sanitizedSlug + " {" + Environment.NewLine + "		background: transparent;" + Environment.NewLine + "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + gaugeGroup + "/" + slug + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine;
+                                            css += Environment.NewLine + "		width: " + imgWidth + "px;" + Environment.NewLine + "		height: " + imgHeight + "px;" + Environment.NewLine;
+                                            if (MaskImage != null)
+                                                css += "		left: - " + AxisPositionValues[0] + "px;" + Environment.NewLine + "		top: - " + AxisPositionValues[1] + "px;" + Environment.NewLine;
+                                            else
+                                                css += "		left: calc(" + FloatPositionValues[0] + "px - " + AxisPositionValues[0] + "px);" + Environment.NewLine + "		top: calc(" + FloatPositionValues[1] + "px - " + AxisPositionValues[1] + "px);" + Environment.NewLine;
+                                            css += "		transform-origin: " + AxisPositionValues[0] + "px " + AxisPositionValues[1] + "px;" + Environment.NewLine + "	}" + Environment.NewLine;
+                                            js += Environment.NewLine + "		/* " + slug.ToUpper() + " */" + Environment.NewLine;
+                                            js += "		var " + sanitizedSlug + " = this.querySelector(\"#" + sanitizedSlug + "\");" + Environment.NewLine;
+                                            js += "		if (typeof " + sanitizedSlug + " !== \"undefined\") {" + Environment.NewLine;
+
+                                            if (Expression.Descendants("Script").FirstOrDefault() != null)
+                                                js += "			" + FsxVarHelper.fsx2msfsSimVar(Expression.Descendants("Script").FirstOrDefault().Value, this) + Environment.NewLine;
+                                            else if (Expression.Value.Length > 0 && Expression.Value[0] != '<' && Expression.Value.Contains(')') && Expression.Value.Contains('('))
+                                                js += "			" + FsxVarHelper.fsx2msfsSimVar(Expression.Value, this) + Environment.NewLine;
+                                            else
+                                                js += "			var ExpressionResult = 0; /* NO SCRIPT NODE FOUND!!! */" + Environment.NewLine;
+
+                                            if (Expression.Descendants("Minimum").FirstOrDefault() != null)
+                                            {
+                                                js += "			var Minimum = " + Expression.Descendants("Minimum").FirstOrDefault().Value + ";" + Environment.NewLine;
+                                                js += "			ExpressionResult = Math.max(ExpressionResult, Minimum);" + Environment.NewLine;
+                                            }
+                                            else if (Expression.Attribute("Minimum") != null)
+                                            {
+                                                js += "			var Minimum = " + Expression.Attribute("Minimum").Value + ";" + Environment.NewLine;
+                                                js += "			ExpressionResult = Math.max(ExpressionResult, Minimum);" + Environment.NewLine;
+                                            }
+                                            else
+                                            {
+                                                js += "			var Minimum = 0;" + Environment.NewLine;
+                                            }
+
+                                            if (Expression.Descendants("Maximum").FirstOrDefault() != null)
+                                            {
+                                                js += "			var Maximum = " + Expression.Descendants("Maximum").FirstOrDefault().Value + ";" + Environment.NewLine;
+                                                js += "			ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
+                                            }
+                                            else if (Expression.Attribute("Maximum") != null)
+                                            {
+                                                js += "			var Maximum = " + Expression.Attribute("Maximum").Value + ";" + Environment.NewLine;
+                                                js += "			ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
+                                            }
+                                            else
+                                            {
+                                                js += "			var Maximum = 999999999;" + Environment.NewLine;
+                                            }
+
+                                            // PERFORM ROTATION
+                                            if (Rotation != null)
+                                            {
+                                                XElement PointsTo = Rotation.Descendants("PointsTo").FirstOrDefault();
+                                                XElement DegreesPointsTo = Rotation.Descendants("DegreesPointsTo").FirstOrDefault();
+                                                if (PointsTo != null)
+                                                    switch (PointsTo.Value)
+                                                    {
+                                                        case "SOUTH":
+                                                            js += "			var PointsTo = 180;" + Environment.NewLine;
+                                                            break;
+                                                        case "WEST":
+                                                            js += "			var PointsTo = 90;" + Environment.NewLine;
+                                                            break;
+                                                        case "EAST":
+                                                            js += "			var PointsTo = (-90);" + Environment.NewLine;
+                                                            break;
+                                                        case "NORTH":
+                                                            js += "			var PointsTo = 0;" + Environment.NewLine;
+                                                            break;
+                                                        default:
+                                                            js += "			var PointsTo = 0;" + Environment.NewLine;
+                                                            break;
+                                                    }
+                                                else if (DegreesPointsTo != null && Double.TryParse(DegreesPointsTo.Value, out double num))
+                                                    js += "			var PointsTo = " + (num - 90.0) + "; " + Environment.NewLine;
+                                                else
+                                                    js += "			var PointsTo = 0;" + Environment.NewLine;
+
+                                                // NONLINEAR
+                                                if (Rotation.Descendants("NonlinearityTable").FirstOrDefault() != null || Rotation.Descendants("Nonlinearity").FirstOrDefault() != null)
+                                                {
+                                                    js += getNonlinearityTable(Rotation, FloatPositionValues[0], FloatPositionValues[1], true);
+
+                                                    js += "			if (NonlinearityTable.length > 0) {" + Environment.NewLine;
+                                                    js += "			    Minimum = NonlinearityTable[0][0];" + Environment.NewLine;
+                                                    js += "			    ExpressionResult = Math.max(ExpressionResult, Minimum);" + Environment.NewLine;
+                                                    js += "			    Maximum = NonlinearityTable[NonlinearityTable.length-1][0];" + Environment.NewLine;
+                                                    js += "			    ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
+
+                                                    //js += "				var p1 = { x: " + FloatPositionValues[0] + ", y: " + FloatPositionValues[1] + " };" + Environment.NewLine;
+                                                    //js += "				var prevAngle = { x: 0, y: 0 };" + Environment.NewLine;
+                                                    js += "				var prevAngle = 0;" + Environment.NewLine;
+
+                                                    js += "				var result = 0;" + Environment.NewLine;
+                                                    js += "				var prevVal = Minimum;" + Environment.NewLine;
+
+                                                    js += "				for (var i = 0; i < NonlinearityTable.length; i++) {" + Environment.NewLine;
+                                                    js += "					var NonlinearityEntry = NonlinearityTable[i][0];" + Environment.NewLine;
+                                                    //js += "					var NonlinearityAngle = { x: NonlinearityTable[i][1], y: NonlinearityTable[i][2] };" + Environment.NewLine;
+                                                    js += "					var NonlinearityAngle = NonlinearityTable[i][1];" + Environment.NewLine;
+                                                    js += "					if (NonlinearityAngle < 0) { NonlinearityAngle += 360 };" + Environment.NewLine;
+                                                    js += "					if (ExpressionResult == NonlinearityEntry || prevAngle == NonlinearityAngle && ExpressionResult > prevVal && ExpressionResult < NonlinearityEntry) {" + Environment.NewLine;
+                                                    //js += "						result = Math.atan2(NonlinearityAngle.y - p1.y, NonlinearityAngle.x - p1.x) * 180 / Math.PI + 90;" + Environment.NewLine;
+                                                    js += "						result = NonlinearityAngle;" + Environment.NewLine;
+                                                    js += "						break;" + Environment.NewLine;
+                                                    js += "					}" + Environment.NewLine;
+                                                    js += "					else if (ExpressionResult > prevVal && ExpressionResult < NonlinearityEntry ) {" + Environment.NewLine;
+                                                    js += "						var coef = 1 - (NonlinearityEntry - ExpressionResult) / (NonlinearityEntry - prevVal);" + Environment.NewLine + Environment.NewLine;
+                                                    //js += "						result = Math.atan2(prevAngle.y + coef * (NonlinearityAngle.y - prevAngle.y) - p1.y, prevAngle.x + coef * (NonlinearityAngle.x - prevAngle.x) - p1.x) * 180 / Math.PI + 90;" + Environment.NewLine;
+                                                    js += "						result = prevAngle + coef * (NonlinearityAngle - prevAngle);" + Environment.NewLine;
+                                                    js += "						break;" + Environment.NewLine;
+                                                    js += "					}" + Environment.NewLine;
+                                                    js += "					prevVal = NonlinearityEntry;" + Environment.NewLine;
+                                                    js += "					prevAngle = NonlinearityAngle;" + Environment.NewLine;
+                                                    js += "				}" + Environment.NewLine + Environment.NewLine;
+                                                    js += "				if (Minimum >= 0)" + Environment.NewLine;
+                                                    js += "					while (result < 0)" + Environment.NewLine;
+                                                    js += "						result += 360;" + Environment.NewLine + Environment.NewLine;
+
+                                                    js += "				" + sanitizedSlug + ".style.transform = 'rotate(' + (result + PointsTo) + 'deg)';" + Environment.NewLine;
+                                                    js += "			}" + Environment.NewLine + Environment.NewLine;
+                                                }
+                                                // LINEAR
+                                                else
+                                                {
+                                                    js += "			" + sanitizedSlug + ".style.transform = 'rotate(' + (ExpressionResult * 180 / Math.PI + PointsTo) + 'deg)';" + Environment.NewLine;
+                                                }
+                                            }
+                                            // PERFORM SHIFT
+                                            else if (Shift != null)
+                                            {
+                                                // NONLINEAR
+                                                if (Shift.Descendants("NonlinearityTable").FirstOrDefault() != null || Shift.Descendants("Nonlinearity").FirstOrDefault() != null)
+                                                {
+                                                    js += getNonlinearityTable(Shift, "0", "0", false);
+
+                                                    js += "			if (NonlinearityTable.length > 0) {" + Environment.NewLine;
+                                                    js += "			    Minimum = NonlinearityTable[0][0];" + Environment.NewLine;
+                                                    js += "			    ExpressionResult = Math.max(ExpressionResult, Minimum);" + Environment.NewLine;
+                                                    js += "			    Maximum = NonlinearityTable[NonlinearityTable.length-1][0];" + Environment.NewLine;
+                                                    js += "			    ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
+
+                                                    js += "				var prevP2 = { x: 0, y: 0 };" + Environment.NewLine;
+                                                    js += "				var result = { x: 0, y: 0 };" + Environment.NewLine;
+
+                                                    js += "				var prevVal = Minimum;" + Environment.NewLine;
+
+                                                    js += "				for (var i = 0; i < NonlinearityTable.length; i++) {" + Environment.NewLine;
+                                                    js += "					var NonlinearityEntry = NonlinearityTable[i][0];" + Environment.NewLine;
+                                                    js += "					var p2 = { x: NonlinearityTable[i][1], y: NonlinearityTable[i][2] };" + Environment.NewLine;
+                                                    js += "					if (ExpressionResult == NonlinearityEntry) {" + Environment.NewLine;
+                                                    js += "						result = p2;" + Environment.NewLine;
+                                                    js += "						break;" + Environment.NewLine;
+                                                    js += "					}" + Environment.NewLine;
+                                                    js += "					else if (ExpressionResult > prevVal && ExpressionResult < NonlinearityEntry ) {" + Environment.NewLine;
+                                                    js += "						var coef = 1 - (NonlinearityEntry - ExpressionResult) / (NonlinearityEntry - prevVal);" + Environment.NewLine + Environment.NewLine;
+                                                    js += "						result = { y: prevP2.y + coef * (p2.y - prevP2.y), x: prevP2.x + coef * (p2.x - prevP2.x) };" + Environment.NewLine;
+                                                    js += "						break;" + Environment.NewLine;
+                                                    js += "					}" + Environment.NewLine;
+                                                    js += "					prevVal = NonlinearityEntry;" + Environment.NewLine;
+                                                    js += "					prevP2 = p2;" + Environment.NewLine;
+                                                    js += "				}" + Environment.NewLine + Environment.NewLine;
+
+                                                    js += "				" + sanitizedSlug + ".style.left = result.x + 'px';" + Environment.NewLine;
+                                                    js += "				" + sanitizedSlug + ".style.top = result.y +'px';" + Environment.NewLine;
+                                                    js += "			}" + Environment.NewLine + Environment.NewLine;
+                                                }
+                                                // LINEAR
+                                                else
+                                                {
+                                                    // GET SCALE
+                                                    double[] scale = new double[] { 1.0, 0.0 };
+                                                    XElement Scale = Shift.Descendants("Scale").FirstOrDefault();
+                                                    string[] ScaleValues = getXYvalue(Scale);
+                                                    if (Scale != null && Double.TryParse(ScaleValues[0], out double scaleX) && Double.TryParse(ScaleValues[1], out double scaleY))
+                                                        scale = new double[] { scaleX, scaleY };
+
+                                                    js += "			" + sanitizedSlug + ".style.transform = 'translate(' + (ExpressionResult * " + scale[0] + ") + 'px, ' + (ExpressionResult * " + scale[1] + ") + 'px)';" + Environment.NewLine;
+                                                }
+
+                                            }
+
+                                            if (MaskImage != null)
+                                                html += "		  </div>" + Environment.NewLine;
+
+                                            js += "		}" + Environment.NewLine;
+                                        }
+                                        else
+                                        {
+                                            errors += "Gauge image " + panelDir + "\\" + Image.Attribute("Name").Value + " not found" + Environment.NewLine + Environment.NewLine;
+                                        }
+                                    }
                                 }
 
                                 html += "		</div>" + Environment.NewLine;
+                            }
+                            catch (Exception ex)
+                            {
+                                errors += "Failed to process " + gaugeGroup + "\\" + gaugeName + ".xml" + Environment.NewLine + Environment.NewLine;
+                                writeLog(ex.ToString());
                             }
                         }
 
@@ -497,50 +543,82 @@ namespace msfsLegacyImporter
 
                             string[] data = new string[] { "", "CORE", "MSFS Legacy Importer Instruments", "MSFS Legacy Importer", "Alex Marko", "1.0.0", "1.0.0", "" };
                             JSONHelper.createInstrumentManifest(baseFolder, data);
-                        }
-                    }
 
-                    // INSERT NEW PANEL.CFG DATA
-                    newPanelSection.Lines.Add(new msfsLegacyImporter.cfgHelper.CfgLine(true, "size_mm", size_mm, ""));
-                    newPanelSection.Lines.Add(new msfsLegacyImporter.cfgHelper.CfgLine(true, "pixel_size", pixel_size, ""));
-                    newPanelSection.Lines.Add(new msfsLegacyImporter.cfgHelper.CfgLine(true, "texture", texture, ""));
-                    newPanelSection.Lines.Add(new msfsLegacyImporter.cfgHelper.CfgLine(true, "location", "interior", ""));
-                    newPanelSection.Lines.Add(new msfsLegacyImporter.cfgHelper.CfgLine(true, "painting00", "legacy/" + acSlug + "/" + materialName + ".html?font_color=white,0,0," + (size[0] - 1) + "," + (size[1] - 1), ""));
-                    newPanelFile.Sections.Add(newPanelSection);
+                            // INSERT NEW PANEL.CFG DATA
+                            newPanelSection.Lines.Add(new msfsLegacyImporter.cfgHelper.CfgLine(true, "size_mm", size_mm, ""));
+                            newPanelSection.Lines.Add(new msfsLegacyImporter.cfgHelper.CfgLine(true, "pixel_size", pixel_size, ""));
+                            newPanelSection.Lines.Add(new msfsLegacyImporter.cfgHelper.CfgLine(true, "texture", texture, ""));
+                            newPanelSection.Lines.Add(new msfsLegacyImporter.cfgHelper.CfgLine(true, "location", "interior", ""));
+                            newPanelSection.Lines.Add(new msfsLegacyImporter.cfgHelper.CfgLine(true, "painting00", "legacy/" + acSlug + "/" + materialName + ".html?font_color=white,0,0," + (size[0] - 1) + "," + (size[1] - 1), ""));
+                            newPanelFile.Sections.Add(newPanelSection);
+                        }
+
+                        if (errors != "")
+                            MessageBox.Show(errors + "You can try to unpack FSX gauges resources first or report it to program author (links in About tab)", materialName + " conversion errors");
+                    }
                 }
             }
 
             CfgHelper.saveCfgFile(aircraftDirectory, newPanelFile);
         }
 
-        public string getNonlinearityTable(XElement parent, string centerX, string centerY)
+        public string getNonlinearityTable(XElement parent, string centerX, string centerY, bool isAngle)
         {
             string js = "";
+            prevPoint = new double[2];
+            prevAngle = -9999;
+            rotationDirection = 0;
 
             js += "			var NonlinearityTable = [" + Environment.NewLine;
+
             if (parent.Descendants("NonlinearityTable").FirstOrDefault() != null)
+
                 foreach (var NonlinearityEntry in parent.Descendants("NonlinearityTable").FirstOrDefault().Descendants("NonlinearityEntry"))
                 {
                     string NonlinearExpressionResult = NonlinearityEntry.Descendants("ExpressionResult").FirstOrDefault().Value;
                     string[] NonlinearFloatPositionValues = getXYvalue(NonlinearityEntry.Descendants("FloatPosition").FirstOrDefault());
-                    js += "				[" + NonlinearExpressionResult + "," + NonlinearFloatPositionValues[0] + "," + NonlinearFloatPositionValues[1] + "]," + Environment.NewLine;
+                    if (isAngle)
+                    {
+                        if (double.TryParse(NonlinearFloatPositionValues[0], out double xVal) && double.TryParse(NonlinearFloatPositionValues[1], out double yVal) && double.TryParse(centerX, out double xCen) && double.TryParse(centerY, out double yCen))
+                        {
+                            js += getNonlinearityAngle(NonlinearExpressionResult, xVal, xCen, yVal, yCen);
+                        }
+                    }
+                    else
+                        js += "				[" + NonlinearExpressionResult + "," + NonlinearFloatPositionValues[0] + "," + NonlinearFloatPositionValues[1] + "]," + Environment.NewLine;
                 }
             else if (parent.Descendants("Nonlinearity").FirstOrDefault() != null)
                 foreach (var NonlinearityEntry in parent.Descendants("Nonlinearity").FirstOrDefault().Descendants("Item"))
                 {
-                    // TODO: ADD Degrees ATTRIBUTE
+                    // XY
                     if (NonlinearityEntry.Attribute("Value") != null && NonlinearityEntry.Attribute("X") != null && NonlinearityEntry.Attribute("Y") != null)
                     {
                         string NonlinearExpressionResult = NonlinearityEntry.Attribute("Value").Value;
-                        js += "				[" + NonlinearExpressionResult + "," + NonlinearityEntry.Attribute("X").Value + "," + NonlinearityEntry.Attribute("Y").Value + "]," + Environment.NewLine;
+                        string X = NonlinearityEntry.Attribute("X").Value;
+                        string Y = NonlinearityEntry.Attribute("Y").Value;
+
+                        if (isAngle)
+                        {
+                            if (double.TryParse(X, out double xVal) && double.TryParse(Y, out double yVal) && double.TryParse(centerX, out double xCen) && double.TryParse(centerY, out double yCen))
+                                js += getNonlinearityAngle(NonlinearExpressionResult, xVal, xCen, yVal, yCen);
+                        } else
+                            js += "				[" + NonlinearExpressionResult + "," + NonlinearityEntry.Attribute("X").Value + "," + NonlinearityEntry.Attribute("Y").Value + "]," + Environment.NewLine;
                     }
+                    // DEGREES
                     else if (NonlinearityEntry.Attribute("Value") != null && NonlinearityEntry.Attribute("Degrees") != null)
                     {
                         string NonlinearExpressionResult = NonlinearityEntry.Attribute("Value").Value;
                         string Degrees = NonlinearityEntry.Attribute("Degrees").Value;
-                        if (double.TryParse(Degrees, out double angle) && int.TryParse(centerX, out int intX) && int.TryParse(centerY, out int intY))
+                        if (isAngle)
                         {
-                            js += "				[" + NonlinearExpressionResult + "," + (intX + 10 * Math.Sin(angle*Math.PI/180)) + "," + (intY + 10 * Math.Cos(angle * Math.PI / 180)) + "]," + Environment.NewLine;
+                            js += "				[" + NonlinearExpressionResult + ", " + Degrees + "]," + Environment.NewLine;
+                        }
+                        else
+                        {
+                            if (double.TryParse(Degrees, out double angle) && int.TryParse(centerX, out int intX) && int.TryParse(centerY, out int intY))
+                            {
+                                js += "				[" + NonlinearExpressionResult + "," + (intX + 10 * Math.Sin(angle * Math.PI / 180)) + "," + (intY + 10 * Math.Cos(angle * Math.PI / 180)) + "]," + Environment.NewLine;
+                            }
                         }
                     }
                 }
@@ -549,6 +627,38 @@ namespace msfsLegacyImporter
 
             return js;
         }
+
+        private string getNonlinearityAngle(string NonlinearExpressionResult, double xVal, double xCen, double yVal, double yCen) {
+            string js = "";
+
+            double currAngle = Math.Atan2(yVal - yCen, xVal - xCen) * 180 / Math.PI + 90;
+            currAngle += 360;
+
+            // FIND OUT DIRECTION
+            if (prevAngle != -9999 && prevAngle != currAngle && rotationDirection == 0)
+            {
+                double transformedX = (xVal - xCen) * Math.Cos(prevAngle / 180 * Math.PI) + (yVal - yCen) * Math.Sin(prevAngle / 180 * Math.PI);
+                double transformedY = (yVal - yCen) * Math.Cos(prevAngle / 180 * Math.PI) + (xVal - xCen) * Math.Sin(prevAngle / 180 * Math.PI);
+                rotationDirection = transformedX >= 0 ? 1 : -1;
+            }
+
+            if (rotationDirection != 0)
+            {
+                while (currAngle > prevAngle && rotationDirection == -1)
+                    currAngle -= 360;
+
+                while (currAngle < prevAngle && rotationDirection == 1)
+                    currAngle += 360;
+            }
+
+            js += "				[" + NonlinearExpressionResult + ", " + currAngle + "]," + Environment.NewLine;
+
+            prevAngle = currAngle;
+            prevPoint = new double[] { xVal, yVal };
+
+            return js;
+        }
+
         public string[] getXYvalue(XElement Size)
         {
             if (Size != null)
@@ -584,6 +694,21 @@ namespace msfsLegacyImporter
             }
 
             return newBmp;
+        }
+
+        public void writeLog(string lines)
+        {
+            if (File.Exists(logfile))
+            {
+                try
+                {
+                    using (StreamWriter sw = File.AppendText(logfile))
+                    {
+                        sw.WriteLine(lines);
+                    }
+                }
+                catch (Exception e) { }
+            }
         }
     }
 }

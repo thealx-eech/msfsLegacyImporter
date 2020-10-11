@@ -6,10 +6,11 @@ namespace msfsLegacyImporter
 {
     class fsxVarHelper
     {
-        public string fsx2msfsSimVar(string fsxSimVar)
+        public string fsx2msfsSimVar(string fsxSimVar, xmlHelper XmlHelper)
         {
             fsxSimVar = Regex.Replace(fsxSimVar, "\r\n|\r|\n", "");
             fsxSimVar = Regex.Replace(fsxSimVar, @"\s\s+", " ");
+            fsxSimVar = fsxSimVar.Replace(")!", ") !").Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
 
             string fsxVariable = fsxSimVar;
             List<string[]> variables = new List<string[]>();
@@ -26,14 +27,14 @@ namespace msfsLegacyImporter
             }
 
             // PARSE FSX FORMULA
-            string infix = PostfixToInfix(fsxVariable);
+            string infix = PostfixToInfix(fsxVariable, XmlHelper);
 
             // INSERT VARIABLES
             if (!String.IsNullOrEmpty(infix))
             {
                 foreach (string[] variable in variables)
                 {
-                    string msfsVariable = getMsfsVariable(variable[0]);
+                    string msfsVariable = getMsfsVariable(variable[0], XmlHelper);
                     infix = infix.Replace(variable[1], msfsVariable);
                 }
 
@@ -42,17 +43,18 @@ namespace msfsLegacyImporter
                 if (infix[infix.Length - 1] == '+' || infix[infix.Length - 1] == '*' || infix[infix.Length - 1] == '/' || infix[infix.Length - 1] == '-')
                     infix = infix.Substring(infix.Length - 1).Trim();
 
-                Console.WriteLine("Orig: " + fsxSimVar + " / Final: " + infix);
+                XmlHelper.writeLog("Orig: " + fsxSimVar);
+                XmlHelper.writeLog("Final: " + infix);
 
                 if (!String.IsNullOrEmpty(infix) && infix.Length > 1)
                     return "var ExpressionResult = " + infix + "; /* PARSED FROM \"" + fsxSimVar + "\" */";
             }
 
-            Console.WriteLine("NOT PARSED " + fsxSimVar);
+            XmlHelper.writeLog("NOT PARSED " + fsxSimVar);
             return "var ExpressionResult = 0; /* SIM VAR \"" + fsxSimVar + "\" NOT PARSED! */";
         }
 
-        private string getMsfsVariable(string fsxVariable)
+        private string getMsfsVariable(string fsxVariable, xmlHelper XmlHelper)
         {
             string fsxVar = fsxVariable.Trim().Replace("( ", "(").Replace(" )", ")").Replace(" ,", ",").Replace(", ", ",").Replace("{ ", "{").
                 Replace(" {", "{").Replace("} ", "}").Replace(" }", "}").Replace(": ", ":").Replace(" :", ":").Replace(", ", ",").Replace(" ,", ",");
@@ -78,22 +80,49 @@ namespace msfsLegacyImporter
                 case string hq when hq.Equals("(A:PARTIAL PANEL VACUUM,enum)", StringComparison.InvariantCultureIgnoreCase):
                     return "0";
 
+                case string hr when hr.Equals("(A:PARTIAL PANEL ADF,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string hs when hs.Equals("(A:PARTIAL PANEL AIRSPEED,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string ht when ht.Equals("(A:PARTIAL PANEL ALTIMETER,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string hu when hu.Equals("(A:PARTIAL PANEL ATTITUDE,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string hv when hv.Equals("(A:PARTIAL PANEL COMM,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string hw when hw.Equals("(A:PARTIAL PANEL COMPASS,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string hx when hx.Equals("(A:PARTIAL PANEL ELECTRICAL,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string hy when hy.Equals("(A:PARTIAL PANEL AVIONICS,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string hz when hz.Equals("(A:PARTIAL PANEL ENGINE,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string fa when fa.Equals("(A:PARTIAL PANEL FUEL INDICATOR,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string fb when fb.Equals("(A:PARTIAL PANEL HEADING,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string fc when fc.Equals("(A:PARTIAL PANEL VERTICAL VELOCITY,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string fd when fd.Equals("(A:PARTIAL PANEL TRANSPONDER,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string fe when fe.Equals("(A:PARTIAL PANEL NAV,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string ff when ff.Equals("(A:PARTIAL PANEL PITOT,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string fg when fg.Equals("(A:PARTIAL PANEL TURN COORDINATOR,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string fh when fh.Equals("(A:PARTIAL PANEL VACUUM,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string fi when fi.Equals("(A:Avionics master switch,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "1";
+
                 case string hn when hn.Equals("(A:Airspeed select indicated or true,knots)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Airspeed select indicated or true:1,knots)", StringComparison.InvariantCultureIgnoreCase):
+                case string hp when hp.Equals("(A:Airspeed select indicated or true:2,knots)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"knots\"))";
                 case string hn when hn.Equals("(A:Vertical speed,feet per minute)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"feet per minute\"))";
                 case string hn when hn.Equals("(A:Vertical speed,meters per minute)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"meters per minute\"))";
                 case string hn when hn.Equals("(A:Indicated Altitude,meters)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Indicated Altitude:1,meters)", StringComparison.InvariantCultureIgnoreCase):
+                case string hp when hp.Equals("(A:Indicated Altitude:2,meters)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE\", \"meters\"))";
                 case string hn when hn.Equals("(A:Indicated Altitude,feet)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Indicated Altitude:1,feet)", StringComparison.InvariantCultureIgnoreCase):
+                case string hp when hp.Equals("(A:Indicated Altitude:2,feet)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE\", \"feet\"))";
                 case string hn when hn.Equals("(A:TURN COORDINATOR BALL,percent)", StringComparison.InvariantCultureIgnoreCase):
                     return "Math.min(30, Math.max(-30 , -parseFloat(SimVar.GetSimVarValue(\"ATTITUDE INDICATOR BANK DEGREES\", \"degree\")))) / 30 * 100";
                 case string hn when hn.Equals("(A:Delta Heading Rate,rpm)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(-SimVar.GetSimVarValue(\"TURN INDICATOR RATE\", \"degree per second\")) * 60 / 360";
                 case string hn when hn.Equals("(A:Variometer rate,knots)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AIRCRAFT WIND Y\", \"knots\"))"; // TODO: fix rate
+                    //return "parseFloat(SimVar.GetSimVarValue(\"AIRCRAFT WIND Y\", \"knots\"))"; // TODO: fix rate
+                    return "- parseFloat(SimVar.GetSimVarValue(\"VELOCITY BODY Y\", \"knots\"), 0);";
                 case string hn when hn.Equals("(A:Wiskey compass indication degrees,degrees)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"degrees\"))";
                 case string hn when hn.Equals("(A:Magnetic compass,radians)", StringComparison.InvariantCultureIgnoreCase):
@@ -101,6 +130,8 @@ namespace msfsLegacyImporter
                 case string hn when hn.Equals("(A:Fuel tank total level,position)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:Fuel tank center level,position)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL QUANTITY\", \"gallons\")) / parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL CAPACITY\", \"gallons\"))";
+                case string hk when hk.Equals("(A:Fuel total quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL QUANTITY\", \"gallons\"))";
                 case string hn when hn.Equals("(A:AMBIENT TEMPERATURE,Celsius)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"AMBIENT TEMPERATURE\", \"celsius\"))";
                 case string hn when hn.Equals("(A:Kohlsman setting hg,inHg)", StringComparison.InvariantCultureIgnoreCase):
@@ -145,13 +176,13 @@ namespace msfsLegacyImporter
                 case string hn when hn.Equals("(A:Plane heading degrees gyro,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:heading indicator:1,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:heading indicator:2,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"degrees\"))";//???
+                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"degrees\"))";
                 case string hn when hn.Equals("(A:PLANE HEADING DEGREES GYRO,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:heading indicator:1,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:heading indicator:2,radians)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"radians\"))";
                 case string hn when hn.Equals("(A:Autopilot heading lock dir,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"degrees\"))";//???
+                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"degrees\"))";
                 case string hn when hn.Equals("(A:RUDDER TRIM PCT,percent)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"RUDDER TRIM PCT\", \"percent\"))";
                 case string hn when hn.Equals("(A:ELEVATOR TRIM POSITION,degrees)", StringComparison.InvariantCultureIgnoreCase):
@@ -232,6 +263,131 @@ namespace msfsLegacyImporter
                     return "parseFloat(SimVar.GetSimVarValue(\"ENG EXHAUST GAS TEMPERATURE:1\", \"celsius\"))";
                 case string hn when hn.Equals("(A:General eng2 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"ENG EXHAUST GAS TEMPERATURE:2\", \"celsius\"))";
+                case string hn when hn.Equals("(A:INCIDENCE ALPHA,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"INCIDENCE ALPHA\", \"degrees\"))";
+                case string hn when hn.Equals("(A:Airspeed mach,machs)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"mach\"))";
+                case string hn when hn.Equals("(L:Zulu,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "0";
+                case string hn when hn.Equals("(P:ZULU TIME,hours)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetGlobalVarValue(\"ZULU TIME\", \"hours\"))";
+                case string hn when hn.Equals("(P:ZULU TIME,minutes)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetGlobalVarValue(\"ZULU TIME\", \"minutes\"))";
+                case string hn when hn.Equals("(A:GPS WP TRUE BEARING,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GPS WP BEARING\", \"degree\"))";
+                case string hn when hn.Equals("(A:GPS MAGVAR,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"MAGVAR\", \"degrees\"))";
+                case string hn when hn.Equals("(A:NAV1 DME,nmiles)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV DME\", \"nautical miles\"))";
+                case string hn when hn.Equals("(A:GPS WP DISTANCE,nmiles)", StringComparison.InvariantCultureIgnoreCase):
+                case string hk when hk.Equals("(A:GPS WP DISTANCE)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GPS WP DISTANCE\", \"nautical mile\"))";
+                case string hn when hn.Equals("(A:Autopilot heading lock dir,radians)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"Radians\"))";
+                case string hn when hn.Equals("(A:Autopilot heading lock dir,degree)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"Degree\"))";
+                case string hn when hn.Equals("(A:AUTOPILOT FLIGHT DIRECTOR ACTIVE,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR ACTIVE\", \"Bool\"))";
+                case string hn when hn.Equals("(A:Autopilot flight director bank,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"degree\"))";
+                case string hn when hn.Equals("(A:Autopilot flight director bank,radians)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"radians\"))";
+                case string hn when hn.Equals("(A:Autopilot flight director pitch,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"degree\"))";
+                case string hn when hn.Equals("(A:Autopilot flight director pitch,radians)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"radians\"))";
+                case string hn when hn.Equals("(A:Attitude indicator bank degrees,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ATTITUDE INDICATOR BANK DEGREES\", \"degree\"))";
+                case string hn when hn.Equals("(A:Attitude indicator bank degrees:1,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ATTITUDE INDICATOR BANK DEGREES\", \"degree\"))";
+                case string hn when hn.Equals("(A:Attitude indicator bank degrees,radians)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Attitude indicator bank degrees:1,radians)", StringComparison.InvariantCultureIgnoreCase):
+                case string hp when hp.Equals("(A:Attitude indicator bank degrees:2,radians)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ATTITUDE INDICATOR BANK DEGREES\", \"radians\"))";
+                case string hn when hn.Equals("(A:Attitude indicator pitch degrees,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Attitude indicator pitch degrees:1,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                case string hp when hp.Equals("(A:Attitude indicator pitch degrees:2,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ATTITUDE INDICATOR PITCH DEGREES\", \"degree\"))";
+                case string hn when hn.Equals("(A:Turb Eng1 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:1\", \"Pounds per hour\"))";
+                case string hn when hn.Equals("(A:Turb Eng2 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:2\", \"Pounds per hour\"))";
+                case string hn when hn.Equals("(A:Turb Eng3 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:3\", \"Pounds per hour\"))";
+                case string hn when hn.Equals("(A:Turb Eng4 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:4\", \"Pounds per hour\"))";
+                case string hn when hn.Equals("(A:TURB ENG1 N1,Percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:1\", \"percent\"))";
+                case string hn when hn.Equals("(A:TURB ENG2 N1,Percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:2\", \"percent\"))";
+                case string hn when hn.Equals("(A:TURB ENG3 N1,Percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:3\", \"percent\"))";
+                case string hn when hn.Equals("(A:TURB ENG4 N1,Percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:4\", \"percent\"))";
+                case string hn when hn.Equals("(A:TURB ENG1 N1,part)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:1\", \"part\"))";
+                case string hn when hn.Equals("(A:TURB ENG2 N1,part)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:2\", \"part\"))";
+                case string hn when hn.Equals("(A:TURB ENG3 N1,part)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:3\", \"part\"))";
+                case string hn when hn.Equals("(A:TURB ENG4 N1,part)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:4\", \"part\"))";
+                case string hn when hn.Equals("(A:CG Percent,percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"CG PERCENT\", \"percent\"))";
+                case string hn when hn.Equals("(A:general eng1 throttle lever position,percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:1\", \"percent\"))";
+                case string hn when hn.Equals("(A:general eng2 throttle lever position,percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:2\", \"percent\"))";
+                case string hn when hn.Equals("(A:general eng3 throttle lever position,percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:3\", \"percent\"))";
+                case string hn when hn.Equals("(A:general eng4 throttle lever position,percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:4\", \"percent\"))";
+                case string hn when hn.Equals("(A:TURB ENG1 corrected N2,Percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM: 1\", \"percent\"))";
+                case string hn when hn.Equals("(A:TURB ENG2 corrected N2,Percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM: 2\", \"percent\"))";
+                case string hn when hn.Equals("(A:TURB ENG3 corrected N2,Percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM: 3\", \"percent\"))";
+                case string hn when hn.Equals("(A:TURB ENG4 corrected N2,Percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM: 4\", \"percent\"))";
+                case string hn when hn.Equals("(A:Hydraulic1 Pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 1\", \"psi\"))";
+                case string hn when hn.Equals("(A:Hydraulic2 Pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 2\", \"psi\"))";
+                case string hn when hn.Equals("(A:Hydraulic3 Pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 3\", \"psi\"))";
+                case string hn when hn.Equals("(A:Hydraulic4 Pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 4\", \"psi\"))";
+                case string hn when hn.Equals("(A:General eng1 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 1\", \"celsius\"))";
+                case string hn when hn.Equals("(A:General eng2 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 2\", \"celsius\"))";
+                case string hn when hn.Equals("(A:General eng3 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 3\", \"celsius\"))";
+                case string hn when hn.Equals("(A:General eng4 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 4\", \"celsius\"))";
+                case string hn when hn.Equals("(A:Pressurization Pressure Differential,psi)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"PRESSURIZATION PRESSURE DIFFERENTIAL\", \"psi\"))";
+                case string hn when hn.Equals("(A:Pressurization Cabin Altitude,feet)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"PRESSURIZATION CABIN ALTITUDE\", \"feet\"))";
+                case string hn when hn.Equals("(A:Pressurization Cabin Altitude Rate,feet per minute)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"PRESSURIZATION CABIN ALTITUDE RATE\", \"feet per minute\"))";
+                case string hn when hn.Equals("(A:Aileron trim pct,percent)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"AILERON TRIM PCT\", \"percent\"))";
+                case string hn when hn.Equals("(A:Ambient Wind Direction,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"AMBIENT WIND DIRECTION\", \"degree\"))";
+                case string hn when hn.Equals("(A:MAGVAR,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"MAGVAR\", \"degree\"))";
+                case string hn when hn.Equals("(A:GPS GROUND MAGNETIC TRACK,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GPS GROUND MAGNETIC TRACK\", \"degree\"))";
+                case string hn when hn.Equals("(A:Trailing edge flaps0 left angle,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Trailing edge flaps1 left angle,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS LEFT ANGLE\", \"degrees\"))";
+                case string hn when hn.Equals("(A:Trailing edge flaps0 right angle,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Trailing edge flaps1 right angle,degrees)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS RIGHT ANGLE\", \"degrees\"))";
+                case string hn when hn.Equals("(P:Absolute time,seconds)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"E: ABSOLUTE TIME\", \"seconds\"))";
                 case string hn when hn.Equals("", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat()";
                 case string hn when hn.Equals("", StringComparison.InvariantCultureIgnoreCase):
@@ -242,13 +398,13 @@ namespace msfsLegacyImporter
                     return "parseFloat()";
                 // TRY TO COPY 1IN1
                 default:
-                    Console.WriteLine("FSX variable not found: " + fsxVar);
+                    XmlHelper.writeLog("FSX variable not found: " + fsxVar);
                     fsxVar = Regex.Replace(fsxVar, @"(\([A-Za-z]:)|\(|\)", "");
 
                     if (fsxVar.Contains(",") && fsxVar.Split(',').Length == 2)
                     {
                         string converted = "parseFloat(SimVar.GetSimVarValue(\"" + fsxVar.Split(',')[0].Trim() + "\", \"" + fsxVar.Split(',')[1].Trim() + "\"))";
-                        Console.WriteLine("Conversion result: " + converted);
+                        XmlHelper.writeLog("Conversion result: " + converted);
                         return converted;
                     }
 
@@ -269,24 +425,29 @@ namespace msfsLegacyImporter
             }
         }
 
-        public string PostfixToInfix(string postfix)
+        public string PostfixToInfix(string postfix, xmlHelper XmlHelper)
         {
             try
             {
-                int ifElseState = 0;
+                Stack<int> elseCounter = new Stack<int>();
+                Stack<Intermediate> ifCond = new Stack<Intermediate>();
+
+                Intermediate[] stackRegister = new Intermediate[50];
 
                 postfix = postfix.Replace("if {", "if{").Replace("} els", "}els").Replace("els {", "els{").Trim();
 
-                // CHECK TRAILING BRACKET
+                // CHECK TRAILING BRACKET BUG
                 //if (postfix.Length > 0 && postfix[postfix.Length - 1] == '}' && postfix.Count(f => f == '{') < postfix.Count(f => f == '}'))
                 if (postfix.Length > 0 && postfix[postfix.Length - 1] == '}' && ((postfix.Split('{').Length - 1) < (postfix.Split('}').Length - 1)))
                     postfix = postfix.TrimEnd('}').Trim();
 
+                // PROCESS STACKS
                 var postfixTokens = postfix.Split(' ');
 
                 string lastToken = "";
 
                 var stack = new Stack<Intermediate>();
+                var backupStack = new Stack<Intermediate>();
 
                 foreach (string token in postfixTokens)
                 {
@@ -294,96 +455,227 @@ namespace msfsLegacyImporter
 
                     string newExpr;
 
-                    Console.WriteLine("Token: " + token);
+                    XmlHelper.writeLog("Token: " + token);
 
-                    if (token == "==" || token == "!=" || token == ">" || token == "<" || token == ">=" || token == "<=")
+                    // s0 - Stores the top value in an internal register, but does not pop it from the stack.
+                    if (Regex.IsMatch(token, @"^s[-0-9.]+$"))
                     {
-                        var rightIntermediate = stack.Pop();
-                        var leftIntermediate = stack.Pop();
-                        newExpr = "( " + leftIntermediate.expr + " " + token + " " + rightIntermediate.expr + " )";
-                        stack.Push(new Intermediate(newExpr, token));
-                    }
-                    else if (token.ToLower() == "if{")
-                    {
-                        ifElseState = 1;
-
-                        if (stack.Count > 1)
+                        if (int.TryParse(token.Replace("s", ""), out int num))
                         {
-                            var rightIntermediate = stack.Pop();
-                            var leftIntermediate = stack.Pop();
-                            newExpr = leftIntermediate.expr + " ( " + rightIntermediate.expr + " ? ";
-                        }
-                        else if (stack.Count > 0)
-                        {
-                            var rightIntermediate = stack.Pop();
-                            newExpr = "( " + rightIntermediate.expr + " ? ";
+                            stackRegister[num] = stack.Peek();
                         }
                         else
                         {
-                            newExpr = "";
+                            XmlHelper.writeLog("Failed to save stack " + token);
+                            return "";
                         }
-
-                        stack.Push(new Intermediate(newExpr, token));
                     }
-                    else if (token.ToLower() == "}els{")
+                    // l0 - Loads a value from a register to the top of the stack
+                    else if (Regex.IsMatch(token, @"^l[-0-9.]+$"))
                     {
-                        var rightIntermediate = stack.Pop();
-                        var leftIntermediate = stack.Pop();
-                        newExpr = leftIntermediate.expr + " " + rightIntermediate.expr + " : ";
-                        stack.Push(new Intermediate(newExpr, token));
-
-                        ifElseState = 0;
+                        if (int.TryParse(token.Replace("l", ""), out int num) && stackRegister[num] != null)
+                        {
+                            stack.Push(stackRegister[num]);
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to load stack " + token);
+                            return "";
+                        }
                     }
-                    else if (token == "}")
+                    // sp0 - Loads a value from a register to the top of the stack
+                    else if (Regex.IsMatch(token, @"^sp[-0-9.]+$"))
+                    {
+                        if (int.TryParse(token.Replace("sp", ""), out int num) && stackRegister[num] != null)
+                        {
+                            stackRegister[num] = stack.Pop();
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to popsave stack " + token);
+                            return "";
+                        }
+                    }
+                    // Pops and discards the top value on the stack
+                    else if (token.ToLower() == "p")
+                        if (stack.Count > 0)
+                        {
+                            stack.Pop();
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    // Backup the stack
+                    else if (token.ToLower() == "b")
+                        stack = backupStack;
+                    // Clears the stack
+                    else if (token.ToLower() == "c")
+                        stack = new Stack<Intermediate>();
+                    // Duplicates the value that is on the top of the stack
+                    else if (token.ToLower() == "d")
+                        if (stack.Count > 0)
+                        {
+                            stack.Push(stack.Peek());
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    // Reverses the top and second values on the stack
+                    else if (token.ToLower() == "r")
+                    {
+                        if (stack.Count > 1)
+                        {
+                            Intermediate first = stack.Pop();
+                            Intermediate second = stack.Pop();
+                            stack.Push(first);
+                            stack.Push(second);
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token == "==" || token == "!=" || token == ">" || token == "<" || token == ">=" || token == "<=")
                     {
                         if (stack.Count > 1)
                         {
                             var rightIntermediate = stack.Pop();
                             var leftIntermediate = stack.Pop();
-                            newExpr = leftIntermediate.expr + " " + rightIntermediate.expr + (ifElseState == 1 ? " : \"\"" : "") + " )";
+                            newExpr = "( " + leftIntermediate.expr + " " + token + " " + rightIntermediate.expr + " )";
                             stack.Push(new Intermediate(newExpr, token));
                         }
-                        else if (stack.Count > 0)
+                        else
                         {
-                            var leftIntermediate = stack.Pop();
-                            newExpr = leftIntermediate.expr + (ifElseState == 1 ? " : \"\"" : "") + " )";
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token == "?")
+                    {
+                        if (stack.Count > 2)
+                        {
+                            var check = stack.Pop();
+                            var opt2 = stack.Pop();
+                            var opt1 = stack.Pop();
+                            newExpr = " ( " + check.expr + " ? " + opt1.expr + " : " + opt2.expr + " ) ";
                             stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token.ToLower() == "if{")
+                    {
+                        elseCounter.Push(0);
+
+                        if (stack.Count > 0)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            newExpr = "( " + rightIntermediate.expr + " ? ";
+                            //stack.Push(new Intermediate(newExpr, token));
+                            ifCond.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token.ToLower() == "}els{")
+                    {
+                        elseCounter.Pop();
+                        elseCounter.Push(1);
+
+                        if (stack.Count > 0 && ifCond.Count > 0)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            newExpr = ifCond.Pop().expr + " " + rightIntermediate.expr + " : ";
+                            //stack.Push(new Intermediate(newExpr, token));
+                            ifCond.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token == "}")
+                    {
+                        if (elseCounter.Peek() == 1 && stack.Count > 0 && ifCond.Count > 0)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            newExpr = ifCond.Pop().expr + " " + rightIntermediate.expr + " )";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else if (elseCounter.Peek() == 0 && stack.Count > 0 && ifCond.Count > 0)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            newExpr = ifCond.Pop().expr + " " + rightIntermediate.expr + " : 0 )";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token + " (elseCount: " + elseCounter.Peek() + ")");
+                            return "";
                         }
 
-                        ifElseState = 0;
+                        elseCounter.Pop();
                     }
-                    else if (token == "&&" || token.ToLower() == "AND")
+                    else if (token == "&&" || token.ToLower() == "and")
                     {
-                        var rightIntermediate = stack.Pop();
-                        var leftIntermediate = stack.Pop();
-                        newExpr = leftIntermediate.expr + " && " + rightIntermediate.expr;
-                        stack.Push(new Intermediate(newExpr, token));
+                        if (stack.Count > 1)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            var leftIntermediate = stack.Pop();
+                            newExpr = leftIntermediate.expr + " && " + rightIntermediate.expr;
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
                     }
                     else if (token == "||" || token.ToLower() == "or")
                     {
-                        var rightIntermediate = stack.Pop();
-                        var leftIntermediate = stack.Pop();
-                        newExpr = leftIntermediate.expr + " || " + rightIntermediate.expr;
-                        stack.Push(new Intermediate(newExpr, token));
+                        if (stack.Count > 1)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            var leftIntermediate = stack.Pop();
+                            newExpr = "( " + leftIntermediate.expr + " || " + rightIntermediate.expr + " )";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
                     }
                     else if (token == "!" || token.ToLower() == "not")
                     {
                         var leftIntermediate = stack.Pop();
-                        stack.Push(new Intermediate("!" + leftIntermediate.expr, token));
+                        stack.Push(new Intermediate("! " + leftIntermediate.expr, token));
                     }
                     else if (token == "/-/")
                     {
                         if (stack.Count > 0)
                         {
                             var rightIntermediate = stack.Pop();
-                            newExpr = rightIntermediate.expr + " * (-1)";
+                            newExpr = "( " + rightIntermediate.expr + " ) * (-1)";
+                            stack.Push(new Intermediate(newExpr, token));
                         }
                         else
                         {
-                            newExpr = "(-1)";
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
                         }
-
-                        stack.Push(new Intermediate(newExpr, token));
                     }
                     else if (token == "+" || token == "-")
                     {
@@ -392,35 +684,30 @@ namespace msfsLegacyImporter
                             var rightIntermediate = stack.Pop();
                             var leftIntermediate = stack.Pop();
                             newExpr = leftIntermediate.expr + " " + token + " " + rightIntermediate.expr;
-                        }
-                        else if (stack.Count > 0)
-                        {
-                            var rightIntermediate = stack.Pop();
-                            newExpr = rightIntermediate.expr + " " + token;
+                            stack.Push(new Intermediate(newExpr, token));
                         }
                         else
                         {
-                            newExpr = token;
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
                         }
-
-                        stack.Push(new Intermediate(newExpr, token));
                     }
                     else if (token == "*" || token == "/" || token == "%")
                     {
                         string leftExpr, rightExpr;
 
-                        var rightIntermediate = stack.Pop();
-                        if (rightIntermediate.oper == "+" || rightIntermediate.oper == "-")
+                        if (stack.Count > 1)
                         {
-                            rightExpr = "(" + rightIntermediate.expr + ")";
-                        }
-                        else
-                        {
-                            rightExpr = rightIntermediate.expr;
-                        }
+                            var rightIntermediate = stack.Pop();
+                            if (rightIntermediate.oper == "+" || rightIntermediate.oper == "-")
+                            {
+                                rightExpr = "(" + rightIntermediate.expr + ")";
+                            }
+                            else
+                            {
+                                rightExpr = rightIntermediate.expr;
+                            }
 
-                        if (stack.Count > 0)
-                        {
                             var leftIntermediate = stack.Pop();
                             if (leftIntermediate.oper == "+" || leftIntermediate.oper == "-")
                             {
@@ -430,22 +717,57 @@ namespace msfsLegacyImporter
                             {
                                 leftExpr = leftIntermediate.expr;
                             }
+
+                            newExpr = leftExpr + " " + token + " " + rightExpr;
+                            stack.Push(new Intermediate(newExpr, token));
                         }
                         else
                         {
-                            leftExpr = "";
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
                         }
-
-                        newExpr = leftExpr + " " + token + " " + rightExpr;
-
-                        stack.Push(new Intermediate(newExpr, token));
                     }
+                    else if (token.ToLower() == "quit")
+                    {
+                        break;
+                    }
+                    else if (token.ToLower() == "div")
+                    {
+                        if (stack.Count > 1)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            var leftIntermediate = stack.Pop();
+                            newExpr = "Math.floor( " + rightIntermediate.expr + " / " + leftIntermediate + " )";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token.ToLower() == "log")
+                    {
+                        if (stack.Count > 0)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            newExpr = "Math.log( " + rightIntermediate.expr + " ) / Math.log(10)";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    // g0
+                    // case
                     else
                     {
                         if (Regex.IsMatch(token, @"^[-0-9.]+$"))
                         {
                             // NUMBER
-                            stack.Push(new Intermediate(token, ""));
+                            stack.Push(new Intermediate(token, "NUM"));
                         }
                         else
                         {
@@ -463,93 +785,101 @@ namespace msfsLegacyImporter
                                     stack.Push(new Intermediate("Math.PI", ""));
                                     break;
                                 case "dgrd":
-                                    addExpression(stack, token, "* Math.PI/180", "after");
+                                    addExpression(stack, token, "* Math.PI/180", "after", 1, XmlHelper);
                                     break;
                                 case "rddg":
-                                    addExpression(stack, token, "* 180/Math.PI", "after");
+                                    addExpression(stack, token, "* 180/Math.PI", "after", 1, XmlHelper);
                                     break;
                                 case "abs":
-                                    addExpression(stack, token, "Math.abs", "before");
+                                    addExpression(stack, token, "Math.abs", "before", 1, XmlHelper);
                                     break;
                                 case "int":
                                 case "flr":
-                                    addExpression(stack, token, "Math.floor", "before");
+                                    addExpression(stack, token, "Math.floor", "before", 1, XmlHelper);
                                     break;
                                 case "cos":
-                                    addExpression(stack, token, "Math.cos", "before");
+                                    addExpression(stack, token, "Math.cos", "before", 1, XmlHelper);
                                     break;
                                 case "sin":
-                                    addExpression(stack, token, "Math.sin", "before");
+                                    addExpression(stack, token, "Math.sin", "before", 1, XmlHelper);
                                     break;
                                 case "acos":
-                                    addExpression(stack, token, "Math.acos", "before");
+                                    addExpression(stack, token, "Math.acos", "before", 1, XmlHelper);
                                     break;
                                 //case "ctg":
-                                //    addExpression(stack, token, "Math.cot", "before");
+                                //    addExpression(stack, token, "Math.cot", "before", XmlHelper);
                                 //    break;
                                 case "ln":
-                                    addExpression(stack, token, "Math.log", "before");
+                                    addExpression(stack, token, "Math.log", "before", 1, XmlHelper);
                                     break;
                                 case "sqr":
-                                    addExpression(stack, token, " ** 2", "after");
+                                    addExpression(stack, token, " ** 2", "after", 1, XmlHelper);
                                     break;
                                 case "asin":
-                                    addExpression(stack, token, "Math.asin", "before");
+                                    addExpression(stack, token, "Math.asin", "before", 1, XmlHelper);
                                     break;
                                 case "sqrt":
-                                    addExpression(stack, token, "Math.sqrt", "before");
+                                    addExpression(stack, token, "Math.sqrt", "before", 1, XmlHelper);
                                     break;
                                 case "exp":
-                                    addExpression(stack, token, "Math.exp", "before");
+                                    addExpression(stack, token, "Math.exp", "before", 1, XmlHelper);
                                     break;
                                 case "tg":
-                                    addExpression(stack, token, "Math.tan", "before");
+                                    addExpression(stack, token, "Math.tan", "before", 1, XmlHelper);
                                     break;
                                 case "atg":
-                                    addExpression(stack, token, "Math.atan", "before");
+                                    addExpression(stack, token, "Math.atan", "before", 1, XmlHelper);
                                     break;
                                 case "ceil":
-                                    addExpression(stack, token, "Math.ceil", "before");
+                                    addExpression(stack, token, "Math.ceil", "before", 1, XmlHelper);
                                     break;
                                 case "near":
-                                    addExpression(stack, token, "Math.round", "before");
+                                    addExpression(stack, token, "Math.round", "before", 1, XmlHelper);
                                     break;
                                 case "min":
-                                    addExpression(stack, token, "Math.min", "before");
+                                    addExpression(stack, token, "Math.min", "before", 2, XmlHelper);
                                     break;
                                 case "max":
-                                    addExpression(stack, token, "Math.max", "before");
+                                    addExpression(stack, token, "Math.max", "before", 2, XmlHelper);
                                     break;
-                                //case "log":
-                                    //addExpression(stack, token, "Math.log(val) / Math.log(10)", "before");
-                                    //break;
                                 case "pow":
-                                    addExpression(stack, token, "Math.pow", "before");
+                                    addExpression(stack, token, "Math.pow", "before", 2, XmlHelper);
                                     break;
-                                //case "div":
-                                    //addExpression(stack, token, "Math.floor(y / x)", "before");
-                                    //break;
-
-
-                                case "b":
-                                case "c":
-                                case "d":
-                                case "p":
-                                case "r":
                                 default:
-                                    Console.WriteLine("Unknown operator \""+ token + "\"");
+                                    XmlHelper.writeLog("Unknown operator \"" + token + "\"");
                                     return "";
 
                             }
 
                         }
                     }
+
+                    backupStack = stack;
+
+                    string stackLog = "";
+                    foreach (var stackItem in stack)
+                        stackLog = stackItem.expr + " | " + stackLog;
+
+                    string condLog = "";
+                    foreach (var condItem in ifCond)
+                        condLog = condItem.expr + " | " + condLog;
+
+
+
+                    XmlHelper.writeLog("Stack: " + stackLog);
+                    XmlHelper.writeLog("Cond: " + condLog);
+                    XmlHelper.writeLog("");
+
                 }
 
+
+                int i = 0;
                 foreach (var obj in stack)
                 {
-                    Console.WriteLine("\"" + obj.expr + "\" [" + obj.oper + "]");
+                    XmlHelper.writeLog("Final stack #"+i+" \"" + obj.expr + "\"");
+                    i++;
                 }
+
                 if (stack.Count > 0)
                     return stack.Peek().expr;
                 else
@@ -557,33 +887,35 @@ namespace msfsLegacyImporter
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                XmlHelper.writeLog(ex.ToString());
                 return "";
             }
         }
 
-        private void addExpression(Stack<Intermediate> stack, string token, string modifier, string position, string lastToken = "")
+        private void addExpression(Stack<Intermediate> stack, string token, string modifier, string position, int arguments, xmlHelper XmlHelper)
         {
             string newExpr = "";
 
-            if (stack.Count > 1)
+            if (arguments == 2 && stack.Count >= 2)
             {
                 var rightIntermediate = stack.Pop();
                 var leftIntermediate = stack.Pop();
                 newExpr = (position == "before" ? modifier : "") + " ( " + leftIntermediate.expr + ", " + rightIntermediate.expr + " ) " + (position == "after" ? modifier : "");
             }
-            else if (stack.Count > 0)
+            else if (arguments == 1 && stack.Count >= 1)
             {
                 var rightIntermediate = stack.Pop();
                 newExpr = (position == "before" ? modifier : "") + " ( " + rightIntermediate.expr + " ) " + (position == "after" ? modifier : "");
             }
-            else
+            else if (arguments == 0)
             {
                 newExpr = (position == "before" ? modifier + "()" : "") + (position == "after" ? "1" + modifier : "");
-            }
+            } else
+                XmlHelper.writeLog("Failed to apply " + token);
 
             stack.Push(new Intermediate(newExpr, token));
         }
         // POSTFIX CONVERTER ENDS
+
     }
 }

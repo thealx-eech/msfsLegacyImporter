@@ -55,13 +55,11 @@ This program was made to simplify FSX aircraft import into MSFS. At this moment,
 - Windows 7/8/10
 - .NET 4.5
 
-[VIDEO_TUTORIAL]
+[VIDEO_TUTORIALS]
 
 https://www.youtube.com/watch?v=Tt_6Vsp9xZY
 
-[LEGACY_COCKPIT_CRASH_FIX]
-
-https://www.youtube.com/watch?v=xVSKcXC4Gf4
+https://www.youtube.com/watch?v=TuuVtgpfjTM
 
 [NOTICE.1]
 
@@ -109,11 +107,10 @@ In release MSFS version bug with legacy aircrafts exists - if you met some other
 3.1 Script checking values of critical parameters
 3.2 If checkbox checked near some of the wrong parameter, they will be set to "0" after button pressed
 3.3 Engines power rough adjustments buttons change value of "static_thrust" for turbine engine and power_scalar for piston engine
-3.4 AIR data import available if TXT dump of AIR file exists in airTbls folder
-3.5 To create AIR dump, get AirUpdate program ( http://www.mudpond.org/ ), select AIR file inside of aircraft folder, check "Full dump" and move created TXT file to /airTbls/ next to msfsLegacyImporter.exe; TXT filename should be same as AIR filename
-3.6 If Importer was opened, you need to reload aircraft from Init tab so new file will be loaded
-3.7 All available values will appear in comparison table (AIR value / current value), check carefully that data match at least somehow
-3.8 You can import all available values, or ignore zero/flat tables
+3.4 AIR data import available if TXT dump of AIR file exists in aircraft folder
+3.5 To create AIR dump, get AirUpdate program ( http://www.mudpond.org/ ) and unpack it into Importer directory, launch it, select AIR file inside of aircraft folder, check "Full dump" and press "Dump" button. TXT file should be created in aircraft directory with same name as AIR file
+3.6 All available values will appear in comparison table (AIR value / current value), check carefully that data match at least somehow
+3.7 You can import all available values, or ignore zero/flat tables
 3.8 After import, you'll need to fix all untouched modern values manually
 3.9 List of sections at the bottom (same as 2.7-2.8)
 
@@ -138,7 +135,7 @@ In release MSFS version bug with legacy aircrafts exists - if you met some other
 6.3 If some points will be not properly formatted (like missing comma), they will be listed in red color. Manual fix required.
 6.4 Missing critical flight model values list, some of them required only after AIR file import
 6.4 AIR data import table same as in 3.4-3.8
-6.5 To import all flight model values, you'll need to add AERODYNAMICS section. You may choose either option - activate default values a leave them disabled, but in second case you'll need to fix and enable them manually otherwise game will crash (all values inside of this section except "_table" are critical).
+6.5 To import all flight model values, you'll need to add AERODYNAMICS section. You may choose either option - insert default values or leave them disabled, but in second case you'll need to fix and enable them manually otherwise game will crash (all values inside of this section except "_table" are critical).
 6.6. After both engines and flight model data imported, AIR file will be disabled and no longer readed by game. If some critical CFG values are not set, game may crash on loading process.
 6.7 List of sections at the bottom (same as 2.7-2.8)
 
@@ -163,18 +160,18 @@ In release MSFS version bug with legacy aircrafts exists - if you met some other
 10. Panel
 
 10.1 Experimental feature for 2D gauges conversion
-10.2 If you have FSX installed, you need to extract default instruments sources first by using top button. Without default instruments sources some/all gauges in custom aircraft may not work.
-10.3 If aircraft has CAB file included, you can use another button to extract these sources. If instruments already unpacked in panel folder, no actions required. You can edit these sources (both images and XML files as they will be not changed by Importer anymore).
-10.4 To convert panel, check them and press Import button.
-10.5 To adjust moving instruments (including individual gauges background) brightness, use slider. Lower value makes image brighter, higher - darker.
-10.6 If you see needles, but no gauges backgrounds appear - check "Force gauge background" option
+10.2 If you have FSX installed, you need to extract default instruments sources first by using top button, they will be stored in "\Community\legacy-vcockpits-instruments\.FSX" directory. Without default instruments sources some/all gauges aircraft may not work. However, DLL sources are not supported yet, so some gauges just can't be converted.
+10.3 If aircraft has CAB file included, you can use another button to extract these sources. If instruments already unpacked in panel folder, no actions required. You can edit these sources (both images and XML files) as they will be not changed by Importer anymore.
+10.4 To available convert panels, check some of them and press Import button.
+10.5 To adjust moving elements and individual gauges backgrounds brightness, use slider. Lower value makes image brighter, higher - darker.
+10.6 If you see needles in the cockpit, but no gauges backgrounds appear - check "Force gauge background" option
 10.7 If you experience any problems with imported gauges, you can try again with next update - each fixed issue may affect any FSX aircraft.
 10.8 Possible results:
 10.8.1 Gauges may get same view as originally in FSX and work as expected, i.e. conversion succeed
-10.8.2 Gauges may get texture background and wireframe removed from it, even if it will not functioning properly
-10.8.3 Game crashes or no gauges appear (try to check "Force gauge background") or total mess in the cockpit (forget about it for now)
+10.8.2 Gauges may get texture background and wireframe removed from it, even if it will not functioning properly; wait for updates or check generated JS files
+10.8.3 Game crashes or no gauges appear (try to check "Force gauge background") or you see total mess in the cockpit (you can try to copy required files that mentioned in warning messages)
 10.8.4 App crashes when you press one of the import buttons, usually because of XML file format issues (feel free to report)
-10.9 To remove generated panels: Press "Restore Backup" button on Panel tab, delete community/legacy-vcockpits-instruments folder
+10.9 To remove generated panels: Press "Restore Backup" button on Panel tab, delete /Community/legacy-vcockpits-instruments folder
 
 11. About
 

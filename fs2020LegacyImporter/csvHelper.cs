@@ -57,7 +57,7 @@ namespace msfsLegacyImporter
                                 sub_counter++;
                             }
 
-                            Console.WriteLine("AIR TABLE " + result.Last()[0] + " / " + result.Last()[1]);
+                            //Console.WriteLine("AIR TABLE " + result.Last()[0] + " / " + result.Last()[1]);
                         }
                     }
                     return result;

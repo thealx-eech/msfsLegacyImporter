@@ -97,6 +97,7 @@ namespace msfsLegacyImporter
             btnScan = SetButtonAtts(btnScan);
             btnImportSubmit = SetButtonAtts(btnImportSubmit);
             btnAircraftProcess = SetButtonAtts(btnAircraftProcess);
+            TextExpressionButton = SetButtonAtts(TextExpressionButton);
 
             // HIDE TABS
             int k = 0;
@@ -1733,6 +1734,8 @@ namespace msfsLegacyImporter
             int modelsToConvert = 0;
             int modelsFound = 0;
 
+            List<string> warnings = new List<String>();
+
             ModelBackupButton.Tag = "";
 
             if (aircraftDirectory != "")
@@ -1756,6 +1759,9 @@ namespace msfsLegacyImporter
                             string contents = File.ReadAllText(modelFile);
                             if (contents.Contains("MREC"))
                                 ModelsList = AddCheckBox(ModelsList, fileName, Colors.Black, modelsToConvert++);
+
+                            if (!contents.Contains("MDLXMDLH"))
+                                warnings.Add(fileName + " format is not compatible with MSFS, 3D model may not be loaded by the game" + Environment.NewLine);
                         }
                     }
                 }
@@ -1780,11 +1786,18 @@ namespace msfsLegacyImporter
                 btn.IsEnabled = false;
             }
 
-            if (modelsFound == 0 /*|| modelsToConvert > 0 && modelsWithoutBackup > 0*/)
+            if (modelsFound == 0 || warnings.Count > 0 /*|| modelsToConvert > 0 && modelsWithoutBackup > 0*/)
                 tabModel.Foreground = new SolidColorBrush(Colors.DarkRed);
 
             myPanel2.Children.Add(btn);
             ModelsList.Children.Add(myPanel2);
+
+            if (warnings.Count > 0)
+            {
+                foreach (var warning in warnings)
+                    ModelsList.Children.Add(addTextBlock(warning, HorizontalAlignment.Center, VerticalAlignment.Center, Colors.DarkRed));
+            }
+
             ModelsList.Children.Add(sectiondivider());
         } 
 
@@ -1942,25 +1955,33 @@ namespace msfsLegacyImporter
 
             StackPanel myPanel1 = new StackPanel();
 
+            Button btn1 = new Button();
+            btn1 = SetButtonAtts(btn1);
             if (cabsToConvert > 0)
             {
-                Button btn1 = new Button();
-                btn1 = SetButtonAtts(btn1);
                 btn1.Content = "Extract panel gauges resources";
                 btn1.Click += extractCabClick;
-                myPanel1.Children.Add(btn1);
-                myPanel1.Children.Add(sectiondivider());
+            } else
+            {
+                btn1.Content = "No panel resources found";
+                btn1.IsEnabled = false;
             }
+            myPanel1.Children.Add(btn1);
+            myPanel1.Children.Add(sectiondivider());
 
+            Button btn3 = new Button();
+            btn3 = SetButtonAtts(btn3);
             if (!Directory.Exists(Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\"))
             {
-                Button btn3 = new Button();
-                btn3 = SetButtonAtts(btn3);
                 btn3.Content = "Extract default FSX gauges resources";
                 btn3.Click += extractDefaultCabsClick;
-                myPanel1.Children.Add(btn3);
-                myPanel1.Children.Add(sectiondivider());
+            } else
+            {
+                btn3.Content = "Default FSX gauges resources extracted";
+                btn3.IsEnabled = false;
             }
+            myPanel1.Children.Add(btn3);
+            myPanel1.Children.Add(sectiondivider());
 
             if (cabsToConvert > 0 || cabsWithoutBackup > 0)
                 tabPanel.Foreground = new SolidColorBrush(Colors.DarkRed);
@@ -2071,7 +2092,7 @@ namespace msfsLegacyImporter
             if (selectedPath != Environment.SpecialFolder.MyDocuments.ToString())
             {
                 MessageBoxResult messageBoxResult = MessageBox.Show("Current FSX path is " + selectedPath + Environment.NewLine + Environment.NewLine +
-                    "Press YES to extract CAB files from this folder" + Environment.NewLine + 
+                    "Press YES to extract CAB files from this folder (DLL/GAU files not supported)" + Environment.NewLine + 
                     "Press NO to select FSX installation folder" + Environment.NewLine +
                     "Press CANCEL to abort", "CAB files extractions", System.Windows.MessageBoxButton.YesNoCancel);
                 if (messageBoxResult == MessageBoxResult.Cancel)
@@ -2097,6 +2118,8 @@ namespace msfsLegacyImporter
                     {
                         if (File.Exists(cabFile))
                         {
+                            Console.WriteLine("Extracting " + cabFile);
+
                             string extractDirectory = Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\" + Path.GetFileNameWithoutExtension(cabFile);
 
                             if (!Directory.Exists(extractDirectory))
@@ -2148,6 +2171,13 @@ namespace msfsLegacyImporter
 
             JSONHelper.scanTargetFolder(projectDirectory);
             SummaryUpdate();
+        }
+
+        private void TextExpressionClick(object sender, RoutedEventArgs e)
+        {
+            TextExpressionField.Visibility = Visibility.Visible;
+            TextExpressionResult.Visibility = Visibility.Visible;
+            TextExpressionResult.Text = FsxVarHelper.fsx2msfsSimVar(TextExpressionField.Text, new xmlHelper());
         }
         // PANEL END
 
