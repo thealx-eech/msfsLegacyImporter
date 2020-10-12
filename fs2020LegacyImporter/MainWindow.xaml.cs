@@ -782,7 +782,8 @@ namespace msfsLegacyImporter
 
             if (values > 0)
             {
-                btn.Content = "Insert AIR values";
+                myPanel.ToolTip = "Select valid AIR values to insert into CFG files. When you finish, AIR file can be removed." + Environment.NewLine + "But if some CFG values are missing - game may crash or aircraft will not appear in the list.";
+                btn.Content = "Insert AIR values*";
                 btn.Click += InsertAirValues;
             }
             else
@@ -799,6 +800,18 @@ namespace msfsLegacyImporter
             }
 
             myPanel.Children.Add(btn);
+
+			// REMOVE BUTTON
+            if (airFilename.Length > 1 && airFilename[0] != '.' && File.Exists(aircraftDirectory + "\\" + airFilename) && !File.Exists(aircraftDirectory + "\\." + airFilename) &&
+                !download && !launch)
+            {
+                Button btn2 = new Button();
+                btn2 = SetButtonAtts(btn2);
+                btn2.Content = "Remove AIR file";
+                btn2.Click += backupAirFile;
+                myPanel.Children.Add(btn2);
+            }
+
             parent.Children.Add(myPanel);
 
             parent.Children.Add(sectiondivider());
@@ -903,16 +916,6 @@ namespace msfsLegacyImporter
                             File.Copy(aircraftDirectory + "\\" + filename, aircraftDirectory + "\\." + filename);
                         }
 
-                        // AIR BACKUP
-                        if (airFilename.Length > 1 && airFilename[0] != '.' &&
-                            File.Exists(aircraftDirectory + "\\.flight_model.cfg") && File.Exists(aircraftDirectory + "\\.engines.cfg") &&
-                            File.Exists(aircraftDirectory + "\\" + airFilename) && !File.Exists(aircraftDirectory + "\\." + airFilename))
-                        {
-                            File.Move(aircraftDirectory + "\\" + airFilename, aircraftDirectory + "\\." + airFilename);
-                            File.Move(aircraftDirectory + "\\" + airFilename.Replace(".air", ".txt"), aircraftDirectory + "\\." + airFilename.Replace(".air", ".txt"));
-                            JSONHelper.scanTargetFolder(projectDirectory);
-                        }
-
                         for (int k = 0; k < i; k++)
                         {
                             string[] value = values[k].Split('=');
@@ -927,10 +930,24 @@ namespace msfsLegacyImporter
                 SummaryUpdate();
             }
         }
-        // AIR END
 
-        // SYSTEMS START
-        public void SummarySystems()
+        private void backupAirFile(object sender, RoutedEventArgs e)
+        {
+            // AIR BACKUP
+            if (airFilename.Length > 1 && airFilename[0] != '.' &&
+                File.Exists(aircraftDirectory + "\\" + airFilename) && !File.Exists(aircraftDirectory + "\\." + airFilename))
+            {
+                File.Move(aircraftDirectory + "\\" + airFilename, aircraftDirectory + "\\." + airFilename);
+                File.Move(aircraftDirectory + "\\" + airFilename.Replace(".air", ".txt"), aircraftDirectory + "\\." + airFilename.Replace(".air", ".txt"));
+                JSONHelper.scanTargetFolder(projectDirectory);
+                SummaryUpdate();
+            }
+        }
+
+    // AIR END
+
+    // SYSTEMS START
+    public void SummarySystems()
         {
             SystemsData.Children.Clear();
 
