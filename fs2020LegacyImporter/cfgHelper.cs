@@ -627,6 +627,11 @@ namespace msfsLegacyImporter
             return models;
         }
 
+        public bool cfgSectionExists(string filename, string sectionName)
+        {
+            return cfgAircraft.Find(x => x.Name == filename).Sections.Find(x => x.Name == sectionName) != null;
+        }
+
         public class CfgFile
         {
             public bool Active { get; set; }

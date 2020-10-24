@@ -16,6 +16,7 @@ using System.Globalization;
 using Microsoft.Deployment.Compression.Cab;
 using System.Windows.Controls.Primitives;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.Threading.Tasks;
 
 namespace msfsLegacyImporter
 {
@@ -385,46 +386,36 @@ namespace msfsLegacyImporter
             // DESCRIPTION FIX
             if (CfgHelper.cfgFileExists("flight_model.cfg"))
             {
-                int criticalIssues = 4;
-                string[] requiredValues = new string[] { "ui_certified_ceiling", "ui_max_range", "ui_autonomy", "cruise_speed" };
+                int i = 0;
 
-                foreach (var requiredValue in requiredValues)
+                for (int k = 0; k <= 99; k++)
                 {
-                    string value = CfgHelper.getCfgValue(requiredValue, "aircraft.cfg", "[FLTSIM.0]");
-                    if (value != "")
+                    string[] requiredValues = new string[] { "ui_certified_ceiling", "ui_max_range", "ui_autonomy", "cruise_speed", "ui_typerole" };
+
+                    foreach (var requiredValue in requiredValues)
                     {
-                        if (int.TryParse(value.Contains('.') ? value.Trim('"').Trim().Split('.')[0] : value.Trim('"').Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out int num) && num > 0)
+                        if (CfgHelper.cfgSectionExists("aircraft.cfg", "[FLTSIM." + k + "]"))
                         {
-                            if (num != 0)
+                            string value = CfgHelper.getCfgValue(requiredValue, "aircraft.cfg", "[FLTSIM." + k + "]").ToLower().Trim('"').Trim();
+                            if (String.IsNullOrEmpty(value) || value == "0" ||
+                                //!int.TryParse(value.Contains('.') ? value.Trim('"').Trim().Split('.')[0] : value.Trim('"').Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out int num) ||
+                                requiredValue == "ui_typerole" && (value == "glider" || value == "rotorcraft" ))
                             {
-	                            requiredValues = requiredValues.Where(val => val != requiredValue).ToArray();
-	                            criticalIssues--;
+                                if (requiredValue == "ui_typerole")
+                                    AircraftPerformance = AddCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " aircraft parameter invalid", Colors.DarkOrange, i++);
+                                else
+                                    AircraftPerformance = AddCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " aircraft parameter missing", Colors.DarkOrange, i++);
                             }
                         }
                     }
                 }
 
-                if (criticalIssues > 0)
-                {
-                    int i = 0;
-                    foreach (var requiredValue in requiredValues)
-                        AircraftPerformance = AddCheckBox(AircraftPerformance, requiredValue + " performance parameter missing", Colors.DarkOrange, i++);
-
-
-                    Button btn = new Button();
-                    btn = SetButtonAtts(btn);
-                    btn.Content = "Try to add missing performance parameters";
-                    btn.Click += AddDescriptionClick;
-                    myPanel2.Children.Add(btn);
-                }
+                Button btn = new Button();
+                btn = SetButtonAtts(btn);
+                btn.Content = "Try to add missing aircraft parameters";
+                btn.Click += AddDescriptionClick;
+                myPanel2.Children.Add(btn);
             }
-
-            // AC performance = 
-
-            // AC ui_certified_ceiling
-            // AC ui_max_range
-            // AC ui_max_range
-            // FM cruise_speed
 
             AircraftPerformance.Children.Add(myPanel2);
             AircraftPerformance.Children.Add(sectiondivider());
@@ -469,11 +460,10 @@ namespace msfsLegacyImporter
         public void AddDescriptionClick(object sender, RoutedEventArgs e)
         {
             int i = 0;
-            StackPanel tmpPnl = new StackPanel();
 
             foreach (var pnl in AircraftPerformance.Children)
             {
-                if (pnl.GetType() != tmpPnl.GetType())
+                if (pnl.GetType() != typeof(StackPanel))
                     continue;
 
                 StackPanel panel = (StackPanel)pnl;
@@ -482,14 +472,15 @@ namespace msfsLegacyImporter
                 {
                     foreach (var chkbx in panel.Children)
                     {
-                        CheckBox b = new CheckBox();
-                        if (chkbx.GetType() == b.GetType())
+                        if (chkbx.GetType() == typeof(CheckBox))
                         {
                             CheckBox a = (CheckBox)chkbx;
                             if (a.IsChecked == true && (string)a.Content != "Toggle all")
                             {
-                                string val = a.Content.ToString().Split(' ')[0].ToLower().Trim();
+                                string section = a.Content.ToString().Split(']')[0] + "]";
+                                string val = a.Content.ToString().Replace(section, "").Trim().Split(' ')[0].ToLower().Trim();
                                 string name = "";
+                                string newValue = "";
 
                                 if (val == "ui_certified_ceiling")
                                     name = "ceiling";
@@ -499,8 +490,10 @@ namespace msfsLegacyImporter
                                     name = "endurance";
                                 else if (val == "cruise_speed")
                                     name = "cruise speed";
+                                else if (val == "ui_typerole")
+                                    newValue = "\"Aircraft\"";
 
-                                //Console.WriteLine(name);
+                                //Console.WriteLine("### " + val);
 
                                 if (name != "")
                                 {
@@ -520,9 +513,13 @@ namespace msfsLegacyImporter
 
                                     if (value != "")
                                     {
-                                        CfgHelper.setCfgValue(aircraftDirectory, val, value, "aircraft.cfg", "[FLTSIM.0]");
+                                        CfgHelper.setCfgValue(aircraftDirectory, val, value, "aircraft.cfg", section);
                                         i++;
                                     }
+                                } else if (newValue != "")
+                                {
+                                    CfgHelper.setCfgValue(aircraftDirectory, val, newValue, "aircraft.cfg", section);
+                                    i++;
                                 }
 
                             }
@@ -552,7 +549,7 @@ namespace msfsLegacyImporter
                     EnginesData = AddCheckBox(EnginesData, "engine_type = " + (engine_type != "" ? engine_type : "missing"), Colors.DarkRed, criticalIssues++);
 
                 string afterburner_available = CfgHelper.getCfgValue("afterburner_available", "engines.cfg", "[TURBINEENGINEDATA]");
-                if (afterburner_available == "1")
+                if (afterburner_available != "" && afterburner_available != "0")
                     EnginesData = AddCheckBox(EnginesData, "afterburner_available = " + afterburner_available, Colors.DarkRed, criticalIssues++);
 
                 StackPanel myPanel2 = new StackPanel();
@@ -589,19 +586,16 @@ namespace msfsLegacyImporter
 
             if (CfgHelper.cfgFileExists("engines.cfg"))
             {
-                StackPanel tmpPnl = new StackPanel();
-
                 foreach (var pnl in EnginesData.Children)
                 {
-                    if (pnl.GetType() != tmpPnl.GetType())
+                    if (pnl.GetType() != typeof(StackPanel))
                         continue;
 
                     StackPanel panel = (StackPanel)pnl;
 
                     if (panel.Children.Count > 0)
                     {
-                        CheckBox b = new CheckBox();
-                        if (panel.Children[0].GetType() == b.GetType())
+                        if (panel.Children[0].GetType() == typeof(CheckBox))
                         {
                             CheckBox a = (CheckBox)panel.Children[0];
                             if (a.IsChecked == true && (string)a.Content != "Toggle all" && a.Content.ToString().Contains('='))
@@ -846,7 +840,7 @@ namespace msfsLegacyImporter
             if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\AirDat\\"))
                 Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "\\AirDat\\");
 
-            fsTabControl.IsEnabled = false;
+            Dispatcher.Invoke(() => fsTabControl.IsEnabled = false);
 
             WebClient _webClient = new WebClient();
             _webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(OnAirDownloadCompleted);
@@ -865,7 +859,7 @@ namespace msfsLegacyImporter
             sw.Start();
             while (true) { if (sw.ElapsedMilliseconds > 1000 || File.Exists(AppDomain.CurrentDomain.BaseDirectory + "AirDat\\AirUpdate.exe")) break; }
 
-            fsTabControl.IsEnabled = true;
+            Dispatcher.Invoke(() => fsTabControl.IsEnabled = true);
             SummaryUpdate();
         }
 
@@ -886,16 +880,14 @@ namespace msfsLegacyImporter
 
                     foreach (var tmpPanel in parentPanel.Children)
                     {
-                        StackPanel tmp = new StackPanel();
-                        if (tmpPanel.GetType() != tmp.GetType())
+                        if (tmpPanel.GetType() != typeof(StackPanel))
                             continue;
 
                         StackPanel panel = (StackPanel)tmpPanel;
 
                         if (panel.Children.Count > 0)
                         {
-                            CheckBox b = new CheckBox();
-                            if (panel.Children[0].GetType() == b.GetType())
+                            if (panel.Children[0].GetType() == typeof(CheckBox))
                             {
                                 CheckBox a = (CheckBox)panel.Children[0];
                                 if (a.IsChecked == true && (string)a.Content != "Toggle all")
@@ -992,19 +984,17 @@ namespace msfsLegacyImporter
             if (CfgHelper.cfgFileExists("systems.cfg"))
             {
                 int i = 0;
-                StackPanel tmpPnl = new StackPanel();
 
                 foreach (var pnl in SystemsData.Children)
                 {
-                    if (pnl.GetType() != tmpPnl.GetType())
+                    if (pnl.GetType() != typeof(StackPanel))
                         continue;
 
                     StackPanel panel = (StackPanel)pnl;
 
                     if (panel.Children.Count > 0)
                     {
-                        CheckBox b = new CheckBox();
-                        if (panel.Children[0].GetType() == b.GetType())
+                        if (panel.Children[0].GetType() == typeof(CheckBox))
                         {
                             CheckBox a = (CheckBox)panel.Children[0];
                             if (a.IsChecked == true && (string)a.Content != "Toggle all")
@@ -1276,19 +1266,16 @@ namespace msfsLegacyImporter
             {
                 string message = "";
 
-                StackPanel tmpPnl = new StackPanel();
-
                 foreach (var pnl in FlightModelIssues.Children)
                 {
-                    if (pnl.GetType() != tmpPnl.GetType())
+                    if (pnl.GetType() != typeof(StackPanel))
                         continue;
 
                     StackPanel panel = (StackPanel)pnl;
 
                     if (panel.Children.Count > 0)
                     {
-                        CheckBox b = new CheckBox();
-                        if (panel.Children[0].GetType() == b.GetType())
+                        if (panel.Children[0].GetType() == typeof(CheckBox))
                         {
                             CheckBox a = (CheckBox)panel.Children[0];
                             if (a.IsChecked == true && (string)a.Content != "Toggle all" && a.Content.ToString().Contains('='))
@@ -1384,19 +1371,17 @@ namespace msfsLegacyImporter
             {
                 int i = 0;
                 string lastPoint = null;
-                StackPanel tmpPnl = new StackPanel();
 
                 foreach (var pnl in FlightModelData.Children)
                 {
-                    if (pnl.GetType() != tmpPnl.GetType())
+                    if (pnl.GetType() != typeof(StackPanel))
                         continue;
 
                     StackPanel panel = (StackPanel)pnl;
 
                     if (panel.Children.Count > 0)
                     {
-                        CheckBox b = new CheckBox();
-                        if (panel.Children[0].GetType() == b.GetType())
+                        if (panel.Children[0].GetType() == typeof(CheckBox))
                         {
                             CheckBox a = (CheckBox)panel.Children[0];
                             if ((string)a.Content != "Toggle all")
@@ -1457,11 +1442,10 @@ namespace msfsLegacyImporter
             parentPanelsList.Add(SystemsSections);
             parentPanelsList.Add(FlightModelSections);
             parentPanelsList.Add(RunwaySections);
-            StackPanel tmpPnl = new StackPanel();
 
             foreach (var pnl in parentPanelsList)
             {
-                if (pnl.GetType() != tmpPnl.GetType())
+                if (pnl.GetType() != typeof(StackPanel))
                     continue;
 
                 StackPanel parentPanel = (StackPanel)pnl;
@@ -1553,19 +1537,17 @@ namespace msfsLegacyImporter
 
                 string[] sections = new string[100];
                 int i = 0;
-                StackPanel tmpPnl = new StackPanel();
 
                 foreach (var pnl in parentPanel.Children)
                 {
-                    if (pnl.GetType() != tmpPnl.GetType())
+                    if (pnl.GetType() != typeof(StackPanel))
                         continue;
 
                     StackPanel panel = (StackPanel)pnl;
 
                     if (panel.Children.Count > 0)
                     {
-                        CheckBox b = new CheckBox();
-                        if (panel.Children[0].GetType() == b.GetType())
+                        if (panel.Children[0].GetType() == typeof(CheckBox))
                         {
                             CheckBox a = (CheckBox)panel.Children[0];
                             if (a.IsChecked == true && (string)a.Content != "Toggle all")
@@ -1650,42 +1632,42 @@ namespace msfsLegacyImporter
             TexturesList.Children.Add(sectiondivider());
         }
 
-        private void ConvertTexturesClick(object sender, RoutedEventArgs e)
+        private void ConvertTexturesClick(object sender, EventArgs e)
         {
             fsTabControl.IsEnabled = false;
+            ConvertTexturesAsync(sender, getCheckedOptions(TexturesList), ((Button)sender).Name.ToString());
+        }
 
-            CheckBox tmp = new CheckBox();
+        private async void ConvertTexturesAsync(object sender, List<string> values, string buttonLabel)
+        {
+            await Task.Run(() => ConvertTexturesTask(sender, values, buttonLabel));
+        }
 
+        private async Task ConvertTexturesTask(object sender, List<string> values, string buttonLabel)
+        {
             // COUNT
             int count = 0;
             int converted = 0;
-            string[] bmp = new string[1000];
-            string[] dds = new string[1000];
+            string[] bmp = new string[10000];
+            string[] dds = new string[10000];
 
-            StackPanel tmpPnl = new StackPanel();
-
-            foreach (var pnl in TexturesList.Children)
+            foreach (var value in values)
             {
-                if (pnl.GetType() != tmpPnl.GetType())
-                    continue;
+                bmp[count] = projectDirectory + value.ToString().ToLower();
+                dds[count] = projectDirectory + value.ToString().ToLower().Replace("bmp", "dds");
 
-                StackPanel panel = (StackPanel)pnl;
-
-                if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
-                {
-                    CheckBox a = (CheckBox)panel.Children[0];
-                    if (a.IsChecked == true && (string)a.Content != "Toggle all")
-                    {
-                        bmp[count] = projectDirectory + a.Content.ToString().ToLower();
-                        dds[count] = projectDirectory + a.Content.ToString().ToLower().Replace("bmp", "dds");
-
-                        count++;
-                    }
-                }
+                count++;
             }
 
+            // CONVERT
             for (int i = 0; i < count; i++)
             {
+                Application.Current.Dispatcher.Invoke(() => {
+                    if (sender.GetType() == typeof(Button))
+                        ((Button)sender).Content = i + " of " + count + " textures converted";
+                });
+
+
                 if (File.Exists(dds[i]))
                 {
                     try { File.Delete(dds[i]); }
@@ -1700,9 +1682,7 @@ namespace msfsLegacyImporter
                     Process process = new Process();
                     process.StartInfo.FileName = "cmd.exe";
 
-                    Button button = (Button)sender;
-
-                    if (button.Name.ToString().Contains("ImageTool"))
+                    if (buttonLabel.Contains("ImageTool"))
                         Process.Start(AppDomain.CurrentDomain.BaseDirectory + "ImageTool.exe", "-nogui -dds -dxt5 -32 -nostop -o \"" + dds[i] + "\" \"" + bmp[i] + "\"");
                     else
                         Process.Start(AppDomain.CurrentDomain.BaseDirectory + "nvdxt.exe", "-dxt5 -quality_highest -flip -file \"" + bmp[i] + "\" -output \"" + dds[i] + "\"");
@@ -1722,23 +1702,12 @@ namespace msfsLegacyImporter
                     }
 
                     converted++;
-
-                    // SET PROGRESS
-                    /*TexturesList.Children.Add(new Rectangle
-                    {
-                        Width = ((Panel)Application.Current.MainWindow.Content).ActualHeight / count,
-                        Height = 10,
-                        StrokeThickness = 1,
-                        Stroke = new SolidColorBrush(Colors.Black),
-                        Margin = new Thickness(0)
-                    });*/
                 }
             }
 
-            fsTabControl.IsEnabled = true;
-
             JSONHelper.scanTargetFolder(projectDirectory);
-            SummaryUpdate();
+            Application.Current.Dispatcher.Invoke(() => SummaryUpdate());
+            Application.Current.Dispatcher.Invoke(() => fsTabControl.IsEnabled = true);
         }
         // TEXTURES END
 
@@ -1820,22 +1789,18 @@ namespace msfsLegacyImporter
 
         private void RemoveSwitchesClick(object sender, RoutedEventArgs e)
         {
-            CheckBox tmp = new CheckBox();
-
             // COUNT
             MessageBoxResult messageBoxResult = MessageBox.Show("You will be no longer able to use clickable elements inside of the cockpit. You can restore original interior model by clicking Restore Backup button.", "You are going to remove clickable switches", System.Windows.MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
-                StackPanel tmpPnl = new StackPanel();
-
                 foreach (var pnl in ModelsList.Children)
                 {
-                    if (pnl.GetType() != tmpPnl.GetType())
+                    if (pnl.GetType() != typeof(StackPanel))
                         continue;
 
                     StackPanel panel = (StackPanel)pnl;
 
-                    if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
+                    if (panel.Children.Count > 0 && panel.Children[0].GetType() == typeof(CheckBox))
                     {
                         CheckBox a = (CheckBox)panel.Children[0];
                         if (a.IsChecked == true && (string)a.Content != "Toggle all")
@@ -2054,57 +2019,62 @@ namespace msfsLegacyImporter
             PanelsList.Children.Add(sectiondivider());
         }
 
-        private void extractCabClick(object sender, RoutedEventArgs e)
+        // AC CAB EXTRACT
+        private void extractCabClick(object sender, EventArgs e)
         {
-            CheckBox tmp = new CheckBox();
-            StackPanel tmpPnl = new StackPanel();
-
             fsTabControl.IsEnabled = false;
+            extractAcCabAsync(sender, getCheckedOptions(CabsList));
+        }
 
-            // COUNT
-            foreach (var pnl in CabsList.Children)
+        private async void extractAcCabAsync(object sender, List<string> values)
+        {
+            await Task.Run(() => extractAcCabTask(sender, values));
+        }
+
+        private async Task extractAcCabTask(object sender, List<string> values)
+        {
+            foreach (var value in values)
             {
-                if (pnl.GetType() != tmpPnl.GetType())
-                    continue;
+                string mainFile = aircraftDirectory + "\\" + value;
+                string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
 
-                StackPanel panel = (StackPanel)pnl;
-
-                if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
+                if (File.Exists(mainFile))
                 {
-                    CheckBox a = (CheckBox)panel.Children[0];
-                    if (a.IsChecked == true && (string)a.Content != "Toggle all")
+                    Application.Current.Dispatcher.Invoke(() => {
+                        if (sender.GetType() == typeof(Button))
+                            ((Button)sender).Content = "Extracting " + Path.GetFileName(mainFile);
+                    });
+
+                    try
                     {
-                        string mainFile = aircraftDirectory + "\\" + (string)a.Content;
-                        string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
+                        string extractDirectory = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileNameWithoutExtension(mainFile);
+                        if (!Directory.Exists(extractDirectory))
+                            Directory.CreateDirectory(extractDirectory);
 
-                        if (File.Exists(mainFile))
-                        {
-                            string extractDirectory = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileNameWithoutExtension(mainFile);
-                            if (!Directory.Exists(extractDirectory))
-                                Directory.CreateDirectory(extractDirectory);
+                        if (File.Exists(backupFile))
+                            File.Delete(backupFile);
 
-                            if (File.Exists(backupFile))
-                                File.Delete(backupFile);
+                        CabInfo cab = new CabInfo(mainFile);
+                        cab.Unpack(extractDirectory);
 
-                            CabInfo cab = new CabInfo(mainFile);
-                            cab.Unpack(extractDirectory);
-
-                            File.Move(mainFile, backupFile);
-                        }
+                        File.Move(mainFile, backupFile);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Exception " + e);
                     }
                 }
             }
 
-            fsTabControl.IsEnabled = true;
-
-            SummaryUpdate();
+            JSONHelper.scanTargetFolder(projectDirectory);
+            Application.Current.Dispatcher.Invoke(() => SummaryUpdate());
+            Application.Current.Dispatcher.Invoke(() => fsTabControl.IsEnabled = true);
         }
 
+        // DEFAULT CAB EXTRACT
         private void extractDefaultCabsClick(object sender, RoutedEventArgs e)
         {
             string selectedPath = HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0\\", "SetupPath", RegistryView.Registry32);
-
-            fsTabControl.IsEnabled = false;
 
             if (selectedPath != Environment.SpecialFolder.MyDocuments.ToString())
             {
@@ -2126,68 +2096,85 @@ namespace msfsLegacyImporter
             {
                 if (Directory.Exists(selectedPath + "\\Gauges\\") && Directory.Exists(selectedPath + "\\SimObjects\\Airplanes\\"))
                 {
-                    var cabFiles = Directory.EnumerateFiles(selectedPath + "\\Gauges\\", "*.cab", SearchOption.AllDirectories);
-                    var cabFiles2 = Directory.EnumerateFiles(selectedPath + "\\SimObjects\\Airplanes\\", "*.cab", SearchOption.AllDirectories);
-
-                    IEnumerable<string> combined = cabFiles.Concat(cabFiles2);
-
-                    foreach (string cabFile in combined)
-                    {
-                        if (File.Exists(cabFile))
-                        {
-                            Console.WriteLine("Extracting " + cabFile);
-
-                            string extractDirectory = Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\" + Path.GetFileNameWithoutExtension(cabFile);
-
-                            if (!Directory.Exists(extractDirectory))
-                                Directory.CreateDirectory(extractDirectory);
-
-                            CabInfo cab = new CabInfo(cabFile);
-                            cab.Unpack(extractDirectory);
-                        }
-                    }
+                    fsTabControl.IsEnabled = false;
+                    extractDefaultCabsAsync(sender, selectedPath);
                 }
                 else
                 {
                     MessageBox.Show("Gauges or SimObjects\\Airplanes folder not found in " + selectedPath);
                 }
             }
-
-            fsTabControl.IsEnabled = true;
-
-            SummaryUpdate();
+        }
+        private async void extractDefaultCabsAsync(object sender, string selectedPath)
+        {
+            await Task.Run(() => extractDefaultCabsTask(sender, selectedPath));
         }
 
-        private void importPanelGaugeClick(object sender, RoutedEventArgs e)
+        private async Task extractDefaultCabsTask(object sender, string selectedPath)
         {
-            CheckBox tmp = new CheckBox();
-            StackPanel tmpPnl = new StackPanel();
+            var cabFiles = Directory.EnumerateFiles(selectedPath + "\\Gauges\\", "*.cab", SearchOption.AllDirectories);
+            var cabFiles2 = Directory.EnumerateFiles(selectedPath + "\\SimObjects\\Airplanes\\", "*.cab", SearchOption.AllDirectories);
 
-            fsTabControl.IsEnabled = false;
+            IEnumerable<string> combined = cabFiles.Concat(cabFiles2);
 
-            // COUNT
-            foreach (var pnl in PanelsList.Children)
+            foreach (string cabFile in combined)
             {
-                if (pnl.GetType() != tmpPnl.GetType())
-                    continue;
-
-                StackPanel panel = (StackPanel)pnl;
-
-                if (panel.Children.Count > 0 && panel.Children[0].GetType() == tmp.GetType())
+                if (File.Exists(cabFile))
                 {
-                    CheckBox a = (CheckBox)panel.Children[0];
-                    if (a.IsChecked == true && (string)a.Content != "Toggle all")
+                    Application.Current.Dispatcher.Invoke(() => {
+                        if (sender.GetType() == typeof(Button))
+                            ((Button)sender).Content = "Extracting " + Path.GetFileName(cabFile);
+                    });
+
+                    Console.WriteLine("Extracting " + cabFile);
+
+                    string extractDirectory = Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\" + Path.GetFileNameWithoutExtension(cabFile);
+
+                    if (!Directory.Exists(extractDirectory))
+                        Directory.CreateDirectory(extractDirectory);
+
+                    try
                     {
-                        XmlHelper.insertFsxGauge(aircraftDirectory, projectDirectory, (string)a.Content, (Slider)this.FindName("GammaSlider"), (CheckBox)this.FindName("ForceBackground"), CfgHelper, FsxVarHelper, JSONHelper);
+                        CabInfo cab = new CabInfo(cabFile);
+                        cab.Unpack(extractDirectory);
+                    } catch (Exception e)
+                    {
+                        Console.WriteLine("Exception " + e);
                     }
                 }
+
+                await Task.Delay(100);
             }
 
+            Application.Current.Dispatcher.Invoke(() => SummaryUpdate());
+            Application.Current.Dispatcher.Invoke(() => fsTabControl.IsEnabled = true);
+        }
 
-            fsTabControl.IsEnabled = true;
+
+        // PANEL IMPORT
+        private void importPanelGaugeClick(object sender, EventArgs e)
+        {
+            fsTabControl.IsEnabled = false;
+            importPanelGaugeAsync(sender, getCheckedOptions(PanelsList),
+                FindName("GammaSlider") != null ? (float)((Slider)FindName("GammaSlider")).Value : 1.0f,
+                FindName("ForceBackground") != null ? ((CheckBox)FindName("ForceBackground")).IsChecked == true : false);
+        }
+
+        private async void importPanelGaugeAsync(object sender, List<string> values, float GammaSlider, bool ForceBackground)
+        {
+            await Task.Run(() => importPanelGaugeTask(sender, values, GammaSlider, ForceBackground));
+        }
+
+        private async Task importPanelGaugeTask(object sender, List<string> values, float GammaSlider, bool ForceBackground)
+        {
+            foreach (var value in values)
+            {
+                XmlHelper.insertFsxGauge(sender, aircraftDirectory, projectDirectory, value, GammaSlider, ForceBackground, CfgHelper, FsxVarHelper, JSONHelper);
+            }
 
             JSONHelper.scanTargetFolder(projectDirectory);
-            SummaryUpdate();
+            Application.Current.Dispatcher.Invoke(() => SummaryUpdate());
+            Application.Current.Dispatcher.Invoke(() => fsTabControl.IsEnabled = true);
         }
 
         private void TextExpressionClick(object sender, RoutedEventArgs e)
@@ -2317,22 +2304,15 @@ namespace msfsLegacyImporter
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 TargetFolder = dialog.FileName + "\\";
-                btnTargetFolderPath.Text = "into " + TargetFolder + PackageDir.Text.ToLower().Trim() + "\\";
+                btnTargetFolderPath.Text = "into " + TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()) + "\\";
             }
-            
-            /*string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath"));
-            if (!String.IsNullOrEmpty(selectedPath))
-            {
-                TargetFolder = selectedPath + "\\";
-                btnTargetFolderPath.Text = "into " + TargetFolder + PackageDir.Text.ToLower().Trim() + "\\";
-            }*/
         }
 
         private void TextBlockTargetFile_Input(object sender, RoutedEventArgs e)
         {
             if (TargetFolder != "")
             {
-                btnTargetFolderPath.Text = "into " + TargetFolder + PackageDir.Text.ToLower().Trim() + "\\";
+                btnTargetFolderPath.Text = "into " + TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()) + "\\";
             }
         }
 
@@ -2387,10 +2367,10 @@ namespace msfsLegacyImporter
                 String.IsNullOrWhiteSpace(PackageVer1.Text) || String.IsNullOrWhiteSpace(PackageVer2.Text) || String.IsNullOrWhiteSpace(PackageVer3.Text) ||
                 String.IsNullOrWhiteSpace(PackageMinVer1.Text) || String.IsNullOrWhiteSpace(PackageMinVer2.Text) || String.IsNullOrWhiteSpace(PackageMinVer3.Text))
                 MessageBox.Show("You have to fill in all fields");
-            else if (Directory.Exists(TargetFolder + PackageDir.Text.ToLower().Trim() + "\\"))
+            else if (Directory.Exists(TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()) + "\\"))
             {
-                MessageBox.Show("Aircraft already exists in folder " + TargetFolder + PackageDir.Text);
-            } else if (SourceFolder == TargetFolder + PackageDir.Text.ToLower().Trim() + "\\")
+                MessageBox.Show("Aircraft already exists in folder " + TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()));
+            } else if (SourceFolder == TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()) + "\\")
             {
                 MessageBox.Show("You can't set same forlder for source and destination");
             }
@@ -2399,13 +2379,28 @@ namespace msfsLegacyImporter
                 string[] data = new string[] { "", "AIRCRAFT", PackageTitle.Text, PackageManufacturer.Text, PackageAuthor.Text,
             PackageVer1.Text + "." + PackageVer2.Text + "." + PackageVer3.Text, PackageMinVer1.Text + "." + PackageMinVer2.Text + "." + PackageMinVer3.Text, "" };
 
-                JSONHelper.createManifest(this, SourceFolder, TargetFolder + PackageDir.Text.ToLower().Trim() + "\\", data);
+                JSONHelper.createManifest(this, SourceFolder, TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()) + "\\", data);
             }
         }
 
         private void BtnScan_Click(object sender, RoutedEventArgs e)
         {
-            JSONHelper.scanTargetFolder(projectDirectory);
+            int filesCount = JSONHelper.scanTargetFolder(projectDirectory);
+
+            if (filesCount > 0)
+            {
+                btnScan.Content = filesCount + " files added in JSON";
+            } else
+            {
+                btnScan.Content = "No files added in JSON";
+            }
+
+            var t = Task.Run(async delegate
+            {
+                await Task.Delay(2000);
+                Dispatcher.Invoke(() => btnScan.Content = "Rescan aircraft files");
+                return;
+            });
         }
 
         private void Hyperlink_RequestNavigate(object sender,
@@ -2474,8 +2469,7 @@ namespace msfsLegacyImporter
                     {
                         foreach (var checkBox in panel.Children)
                         {
-                            CheckBox b = new CheckBox();
-                            if (checkBox.GetType() == b.GetType())
+                            if (checkBox.GetType() == typeof(CheckBox))
                             {
                                 CheckBox thisCheckBox = (CheckBox)checkBox;
                                 if (i <= 0 && thisCheckBox.IsChecked == true)
@@ -2625,7 +2619,7 @@ namespace msfsLegacyImporter
         {
             if (updateURL != "")
             {
-                fsTabControl.IsEnabled = false;
+                Dispatcher.Invoke(() => fsTabControl.IsEnabled = false);
 
                 WebClient _webClient = new WebClient();
                 _webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(OnDownloadCompleted);
@@ -2678,7 +2672,7 @@ namespace msfsLegacyImporter
                 }
             }
 
-            fsTabControl.IsEnabled = true;
+            Dispatcher.Invoke(() => fsTabControl.IsEnabled = true);
         }
 
         public void SetUpdateReady()
@@ -2728,6 +2722,28 @@ namespace msfsLegacyImporter
             sectn.Margin = new Thickness(0, 0, 0, 10);
 
             return sectn;
+        }
+
+        private List<string> getCheckedOptions(StackPanel panel)
+        {
+            List<string> values = new List<string>();
+
+            foreach (var pnl in panel.Children)
+            {
+                if (pnl.GetType() != typeof(StackPanel))
+                    continue;
+
+                if (((StackPanel)pnl).Children.Count > 0 && ((StackPanel)pnl).Children[0].GetType() == typeof(CheckBox))
+                {
+                    CheckBox a = (CheckBox)((StackPanel)pnl).Children[0];
+                    if (((CheckBox)((StackPanel)pnl).Children[0]).IsChecked == true && (string)((CheckBox)((StackPanel)pnl).Children[0]).Content != "Toggle all")
+                    {
+                        values.Add((string)a.Content);
+                    }
+                }
+            }
+
+            return values;
         }
     }
 

@@ -6,7 +6,7 @@ namespace msfsLegacyImporter
 {
     class fsxVarHelper
     {
-        public string fsx2msfsSimVar(string fsxSimVar, xmlHelper XmlHelper)
+        public string fsx2msfsSimVar(string fsxSimVar, xmlHelper XmlHelper, bool returnVariable = true)
         {
             fsxSimVar = Regex.Replace(fsxSimVar, "\r\n|\r|\n", "");
             fsxSimVar = Regex.Replace(fsxSimVar, @"\s\s+", " ");
@@ -17,7 +17,6 @@ namespace msfsLegacyImporter
 
             // REPLACE VARIABLES
             Random r = new Random();
-            //var regex = new Regex(@"(.*).*{.*}.*{.*}|\((.*?)\)");
             var regex = new Regex(@"\((.*?)\)");
             foreach (var match in regex.Matches(fsxVariable))
             {
@@ -43,15 +42,114 @@ namespace msfsLegacyImporter
                 if (infix[infix.Length - 1] == '+' || infix[infix.Length - 1] == '*' || infix[infix.Length - 1] == '/' || infix[infix.Length - 1] == '-')
                     infix = infix.Substring(infix.Length - 1).Trim();
 
-                XmlHelper.writeLog("Orig: " + fsxSimVar);
-                XmlHelper.writeLog("Final: " + infix);
+                XmlHelper.writeLog("Expression: " + fsxSimVar);
+                XmlHelper.writeLog("Parsing result: " + infix + Environment.NewLine);
 
-                if (!String.IsNullOrEmpty(infix) && infix.Length > 1)
-                    return "var ExpressionResult = " + infix + "; /* PARSED FROM \"" + fsxSimVar + "\" */";
+                if (!String.IsNullOrEmpty(infix))
+                {
+                    if (returnVariable)
+                        return "var ExpressionResult = " + infix + "; /* PARSED FROM \"" + fsxSimVar + "\" */";
+                    else
+                        return infix;
+                }
             }
 
-            XmlHelper.writeLog("NOT PARSED " + fsxSimVar);
-            return "var ExpressionResult = 0; /* SIM VAR \"" + fsxSimVar + "\" NOT PARSED! */";
+            XmlHelper.writeLog("NOT PARSED " + fsxSimVar + Environment.NewLine);
+            if (returnVariable)
+                return "var ExpressionResult = 0; /* SIM VAR \"" + fsxSimVar + "\" NOT PARSED! */";
+            else
+                return "0";
+        }
+
+        public string fsx2msfsGaugeString(string gaugeTextString, xmlHelper XmlHelper)
+        {
+            XmlHelper.writeLog("# Gauge String #");
+
+            string gaugeString = Regex.Replace(gaugeTextString, "\r\n|\r|\n", "");
+            gaugeString = gaugeString.Replace(")%(", ")%%(");
+            List<string[]> gaugeScripts = new List<string[]>();
+
+            // REPLACE SCRIPTS
+            Random r = new Random();
+            var regex = new Regex(@"%\(.+?\)%(![0-9a-z\.\-\+ ]+?!)?");
+            foreach (var script in regex.Matches(gaugeString))
+            {
+                string placeholder = "scriptPlaceholder" + r.Next(10000000, 90000000).ToString();
+                gaugeScripts.Add(new string[] { script.ToString(), placeholder });
+                gaugeString = gaugeString.Replace(script.ToString(), placeholder);
+            }
+
+            string newGaugeString = "";
+
+            if (gaugeString.Contains("scriptPlaceholder"))
+            {
+
+                var regex1 = new Regex(@"scriptPlaceholder[0-9]{8}");
+                var placeholdersList = regex1.Matches(gaugeString);
+
+                int i = 0;
+                foreach (string line in Regex.Split(gaugeString, @"scriptPlaceholder[0-9]{8}"))
+                {
+                    if (!String.IsNullOrEmpty(line))
+                    {
+                        XmlHelper.writeLog("Line: " + line + "; Current: " + newGaugeString);
+                        //gaugeString = gaugeString.Replace(line, "\"" + line + "\" + ");
+                        newGaugeString += "\"" + line + "\" + ";
+                    }
+
+                    if (i < placeholdersList.Count)
+                        newGaugeString += placeholdersList[i].ToString();
+
+                    i++;
+                }
+            } else
+                newGaugeString = "\"" + gaugeString + "\"";
+
+            foreach (string[] gaugeScript in gaugeScripts)
+            {
+                string formattingValue = "";
+                string msfsVariable = gaugeScript[0];
+                var regex2 = new Regex(@"![0-9a-z\.\-\+ ]+?!");
+                foreach (var formatting in regex2.Matches(msfsVariable)) {
+                    formattingValue = formatting.ToString().Trim('!');
+                    msfsVariable = msfsVariable.Replace(formatting.ToString(), "");
+                }
+
+                msfsVariable = "( " + fsx2msfsSimVar(msfsVariable.Substring(2, msfsVariable.Length - 4), XmlHelper, false) + " )";
+
+                if (!String.IsNullOrEmpty(formattingValue))
+                {
+                    if (formattingValue.Contains("s")) // STRING
+                    {
+
+                    }
+                    else if (formattingValue.Contains("d")) { // DIGIT
+                        if (formattingValue.Contains("-"))
+                            msfsVariable = "Math.min(0, Math.round" + msfsVariable + ")";
+                        else if (formattingValue.Contains("+"))
+                            msfsVariable = "Math.max(0, Math.round" + msfsVariable + ")";
+                        else
+                            msfsVariable = "Math.round" + msfsVariable + "";
+                    }
+                    else if (formattingValue.Contains("f")) // FLOAT
+                    {
+                        formattingValue = formattingValue.Replace("f","");
+                        if (formattingValue.Contains("."))
+                            msfsVariable = msfsVariable + ".toFixed("+(formattingValue.Split('.')[1]) +")";
+                    }
+                }
+
+                newGaugeString = newGaugeString.Replace(gaugeScript[1], msfsVariable + ".toString() + ");
+            }
+
+            newGaugeString = newGaugeString.Trim().Trim('+');
+            XmlHelper.writeLog("Gauge string: " + gaugeTextString);
+            XmlHelper.writeLog("Result: " + newGaugeString);
+
+            // %((A:Kohlsman setting hg,millibars))%!6.2f! mb
+            // %\((.*?)\)%\!.*\!|%\((.*?)\)%
+
+            return newGaugeString;
         }
 
         private string getMsfsVariable(string fsxVariable, xmlHelper XmlHelper)
@@ -455,7 +553,7 @@ namespace msfsLegacyImporter
 
                     string newExpr;
 
-                    XmlHelper.writeLog("Token: " + token);
+                    XmlHelper.writeLog("Current token: " + token);
 
                     // s0 - Stores the top value in an internal register, but does not pop it from the stack.
                     if (Regex.IsMatch(token, @"^s[-0-9.]+$"))
@@ -486,7 +584,7 @@ namespace msfsLegacyImporter
                     // sp0 - Loads a value from a register to the top of the stack
                     else if (Regex.IsMatch(token, @"^sp[-0-9.]+$"))
                     {
-                        if (int.TryParse(token.Replace("sp", ""), out int num) && stackRegister[num] != null)
+                        if (int.TryParse(token.Replace("sp", ""), out int num))
                         {
                             stackRegister[num] = stack.Pop();
                         }
@@ -597,7 +695,11 @@ namespace msfsLegacyImporter
                         {
                             var rightIntermediate = stack.Pop();
                             newExpr = ifCond.Pop().expr + " " + rightIntermediate.expr + " : ";
-                            //stack.Push(new Intermediate(newExpr, token));
+                            ifCond.Push(new Intermediate(newExpr, token));
+                        }
+                        else if (ifCond.Count > 0)
+                        {
+                            newExpr = ifCond.Pop().expr;
                             ifCond.Push(new Intermediate(newExpr, token));
                         }
                         else
@@ -608,17 +710,31 @@ namespace msfsLegacyImporter
                     }
                     else if (token == "}")
                     {
-                        if (elseCounter.Peek() == 1 && stack.Count > 0 && ifCond.Count > 0)
+                        if (elseCounter.Peek() == 1 && ifCond.Count > 0)
                         {
-                            var rightIntermediate = stack.Pop();
-                            newExpr = ifCond.Pop().expr + " " + rightIntermediate.expr + " )";
-                            stack.Push(new Intermediate(newExpr, token));
+                            if (stack.Count > 0)
+                            {
+                                var rightIntermediate = stack.Pop();
+                                newExpr = ifCond.Pop().expr + " " + rightIntermediate.expr + " )";
+                                stack.Push(new Intermediate(newExpr, token));
+                            } else
+                            {
+                                newExpr = ifCond.Pop().expr + " )";
+                                stack.Push(new Intermediate(newExpr, token));
+                            }
                         }
-                        else if (elseCounter.Peek() == 0 && stack.Count > 0 && ifCond.Count > 0)
+                        else if (elseCounter.Peek() == 0 && ifCond.Count > 0)
                         {
-                            var rightIntermediate = stack.Pop();
-                            newExpr = ifCond.Pop().expr + " " + rightIntermediate.expr + " : 0 )";
-                            stack.Push(new Intermediate(newExpr, token));
+                            if (stack.Count > 0)
+                            {
+                                var rightIntermediate = stack.Pop();
+                                newExpr = ifCond.Pop().expr + " " + rightIntermediate.expr + " : 0 )";
+                                stack.Push(new Intermediate(newExpr, token));
+                            } else
+                            {
+                                newExpr = ifCond.Pop().expr + " : 0 )";
+                                stack.Push(new Intermediate(newExpr, token));
+                            }
                         }
                         else
                         {
@@ -661,14 +777,14 @@ namespace msfsLegacyImporter
                     else if (token == "!" || token.ToLower() == "not")
                     {
                         var leftIntermediate = stack.Pop();
-                        stack.Push(new Intermediate("! " + leftIntermediate.expr, token));
+                        stack.Push(new Intermediate("!(" + leftIntermediate.expr + ")", token));
                     }
-                    else if (token == "/-/")
+                    else if (token == "/-/" || token.ToLower() == "neg")
                     {
                         if (stack.Count > 0)
                         {
                             var rightIntermediate = stack.Pop();
-                            newExpr = "( " + rightIntermediate.expr + " ) * (-1)";
+                            newExpr = "(" + rightIntermediate.expr + ") * (-1)";
                             stack.Push(new Intermediate(newExpr, token));
                         }
                         else
@@ -677,13 +793,41 @@ namespace msfsLegacyImporter
                             return "";
                         }
                     }
-                    else if (token == "+" || token == "-")
+                    else if (token == "++")
+                    {
+                        if (stack.Count > 0)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            newExpr = "(( " + rightIntermediate.expr + " ) + 1)";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token == "--")
+                    {
+                        if (stack.Count > 0)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            newExpr = "(( " + rightIntermediate.expr + " ) - 1)";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token == "+" || token == "-" || token == "scat")
                     {
                         if (stack.Count > 1)
                         {
                             var rightIntermediate = stack.Pop();
                             var leftIntermediate = stack.Pop();
-                            newExpr = leftIntermediate.expr + " " + token + " " + rightIntermediate.expr;
+                            newExpr = leftIntermediate.expr + " " + (token != "scat" ? token : "+") + " " + rightIntermediate.expr;
                             stack.Push(new Intermediate(newExpr, token));
                         }
                         else
@@ -692,7 +836,7 @@ namespace msfsLegacyImporter
                             return "";
                         }
                     }
-                    else if (token == "*" || token == "/" || token == "%")
+                    else if (token == "*" || token == "/" || token == "%" || token == "&" || token == "|" || token == "^" || token == ">>" || token == "<<")
                     {
                         string leftExpr, rightExpr;
 
@@ -737,7 +881,21 @@ namespace msfsLegacyImporter
                         {
                             var rightIntermediate = stack.Pop();
                             var leftIntermediate = stack.Pop();
-                            newExpr = "Math.floor( " + rightIntermediate.expr + " / " + leftIntermediate + " )";
+                            newExpr = "Math.floor( parseInt(" + leftIntermediate.expr + ") / parseInt(" + rightIntermediate.expr + ") )";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token.ToLower() == "lg")
+                    {
+                        if (stack.Count > 0)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            newExpr = "Math.log(" + rightIntermediate.expr + ") / Math.log(10)";
                             stack.Push(new Intermediate(newExpr, token));
                         }
                         else
@@ -748,10 +906,25 @@ namespace msfsLegacyImporter
                     }
                     else if (token.ToLower() == "log")
                     {
+                        if (stack.Count > 1)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            var leftIntermediate = stack.Pop();
+                            newExpr = "Math.log(" + leftIntermediate.expr + ") / Math.log(" + rightIntermediate.expr + ")";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token.ToLower() == "ctg")
+                    {
                         if (stack.Count > 0)
                         {
                             var rightIntermediate = stack.Pop();
-                            newExpr = "Math.log( " + rightIntermediate.expr + " ) / Math.log(10)";
+                            newExpr = "1 / Math.tan(" + rightIntermediate.expr + ")";
                             stack.Push(new Intermediate(newExpr, token));
                         }
                         else
@@ -762,17 +935,137 @@ namespace msfsLegacyImporter
                     }
                     // g0
                     // case
+                    else if (token.ToLower() == "rng")
+                    {
+                        if (stack.Count > 2)
+                        {
+                            var compare = stack.Pop();
+                            var rightIntermediate = stack.Pop();
+                            var leftIntermediate = stack.Pop();
+                            newExpr = "( " + leftIntermediate.expr + " <= " + compare.expr + " && " + compare.expr + " <= " + rightIntermediate.expr + " )";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token.ToLower() == "schr")
+                    {
+                        if (stack.Count > 1)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            var leftIntermediate = stack.Pop();
+                            newExpr = "(" + leftIntermediate.expr + ").indexOf(String.fromCharCode(" + rightIntermediate.expr + "))";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token.ToLower() == "sstr")
+                    {
+                        if (stack.Count > 1)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            var leftIntermediate = stack.Pop();
+                            newExpr = "(" + rightIntermediate.expr + ").indexOf(" + leftIntermediate.expr + ")";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token.ToLower() == "ssub")
+                    {
+                        if (stack.Count > 1)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            var leftIntermediate = stack.Pop();
+                            newExpr = "(" + rightIntermediate.expr + ").replace(" + leftIntermediate.expr + ", '')";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token.ToLower() == "symb")
+                    {
+                        if (stack.Count > 1)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            var leftIntermediate = stack.Pop();
+                            newExpr = "(" + leftIntermediate.expr + ")[" + rightIntermediate.expr + "]";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token.ToLower() == "scmp")
+                    {
+                        if (stack.Count > 1)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            var leftIntermediate = stack.Pop();
+                            newExpr = leftIntermediate.expr + " !== " + rightIntermediate.expr;
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
+                    else if (token.ToLower() == "scmi")
+                    {
+                        if (stack.Count > 1)
+                        {
+                            var rightIntermediate = stack.Pop();
+                            var leftIntermediate = stack.Pop();
+                            newExpr = "(" + leftIntermediate.expr + ").toLowerCase() !== (" + rightIntermediate.expr + ").toLowerCase()";
+                            stack.Push(new Intermediate(newExpr, token));
+                        }
+                        else
+                        {
+                            XmlHelper.writeLog("Failed to apply " + token);
+                            return "";
+                        }
+                    }
                     else
                     {
-                        if (Regex.IsMatch(token, @"^[-0-9.]+$"))
+                        if (token.Length >= 2 && token[0] == '@')
                         {
-                            // NUMBER
+                            stack.Push(new Intermediate(token.Substring(1), "VAR"));
+                        }
+                        else if (Regex.IsMatch(token, @"^[-0-9.]+$"))
+                        {
                             stack.Push(new Intermediate(token, "NUM"));
+                        }
+                        else if (Regex.IsMatch(token, @"0[xX][0-9A-Fa-f]+"))
+                        {
+                            stack.Push(new Intermediate(token, "HEX"));
+                        }
+                        else if (token.Length >= 2 && token[0] == '\'' && token[token.Length - 1] == '\'')
+                        {
+                            stack.Push(new Intermediate(token, "STR"));
+                        }
+                        else if (token.ToLower() == "true" || token.ToLower() == "false") {
+                            stack.Push(new Intermediate(token.ToLower(), "SYS"));
                         }
                         else
                         {
                             // OPERATOR
-                            switch (token)
+                            switch (token.ToLower())
                             {
                                 case "dnor":
                                 case "d360":
@@ -845,6 +1138,30 @@ namespace msfsLegacyImporter
                                 case "pow":
                                     addExpression(stack, token, "Math.pow", "before", 2, XmlHelper);
                                     break;
+                                case "~":
+                                    addExpression(stack, token, "~", "before", 1, XmlHelper);
+                                    break;
+                                case "eps":
+                                    addExpression(stack, token, "Number.EPSILON * ", "before", 1, XmlHelper);
+                                    break;
+                                case "atg2":
+                                    addExpression(stack, token, "Math.atan2", "before", 2, XmlHelper);
+                                    break;
+
+                                case "lc":
+                                    addExpression(stack, token, ".toLowerCase()", "after", 1, XmlHelper);
+                                    break;
+                                case "uc":
+                                case "cap":
+                                    addExpression(stack, token, ".toUpperCase()", "after", 1, XmlHelper);
+                                    break;
+                                case "chr":
+                                    addExpression(stack, token, "String.fromCharCode", "before", 1, XmlHelper);
+                                    break;
+                                case "ord":
+                                    addExpression(stack, token, ".charCodeAt(0)", "after", 1, XmlHelper);
+                                    break;
+
                                 default:
                                     XmlHelper.writeLog("Unknown operator \"" + token + "\"");
                                     return "";
@@ -866,8 +1183,8 @@ namespace msfsLegacyImporter
 
 
 
-                    XmlHelper.writeLog("Stack: " + stackLog);
-                    XmlHelper.writeLog("Cond: " + condLog);
+                    XmlHelper.writeLog("Main stack: " + stackLog);
+                    XmlHelper.writeLog("Condition stack: " + condLog);
                     XmlHelper.writeLog("");
 
                 }
@@ -876,7 +1193,7 @@ namespace msfsLegacyImporter
                 int i = 0;
                 foreach (var obj in stack)
                 {
-                    XmlHelper.writeLog("Final stack #"+i+" \"" + obj.expr + "\"");
+                    XmlHelper.writeLog("Final stack #"+i+": " + obj.expr);
                     i++;
                 }
 
@@ -900,12 +1217,12 @@ namespace msfsLegacyImporter
             {
                 var rightIntermediate = stack.Pop();
                 var leftIntermediate = stack.Pop();
-                newExpr = (position == "before" ? modifier : "") + " ( " + leftIntermediate.expr + ", " + rightIntermediate.expr + " ) " + (position == "after" ? modifier : "");
+                newExpr = (position == "before" ? modifier : "") + "( " + leftIntermediate.expr + ", " + rightIntermediate.expr + " )" + (position == "after" ? modifier : "");
             }
             else if (arguments == 1 && stack.Count >= 1)
             {
                 var rightIntermediate = stack.Pop();
-                newExpr = (position == "before" ? modifier : "") + " ( " + rightIntermediate.expr + " ) " + (position == "after" ? modifier : "");
+                newExpr = (position == "before" ? modifier : "") + "(" + rightIntermediate.expr + ")" + (position == "after" ? modifier : "");
             }
             else if (arguments == 0)
             {

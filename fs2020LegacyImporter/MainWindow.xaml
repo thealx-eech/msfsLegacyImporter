@@ -297,7 +297,7 @@
                                 </Hyperlink>
                             </TextBlock>
                             <TextBlock>
-                                <Hyperlink NavigateUri="https://discord.com/channels/746517825413447750/747831930212581479" RequestNavigate="Hyperlink_RequestNavigate">
+                                <Hyperlink NavigateUri="https://discord.gg/bdbcZnP" RequestNavigate="Hyperlink_RequestNavigate">
                                     MFS SDK Discord channel
                                 </Hyperlink>
                             </TextBlock>

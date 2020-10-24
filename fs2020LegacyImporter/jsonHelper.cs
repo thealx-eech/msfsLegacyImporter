@@ -69,12 +69,13 @@ namespace msfsLegacyImporter
             }
         }
 
-        public void scanTargetFolder(string TargetFolder)
+        public int scanTargetFolder(string TargetFolder)
         {
+            int i = 0;
+
             if (TargetFolder != "")
             {
                 Content[] array = new Content[10000];
-                int i = 0;
 
                 // ADD MANIFEST AT THE TOP
 
@@ -114,9 +115,11 @@ namespace msfsLegacyImporter
                 {
                     Console.WriteLine(ex.ToString());
                     MessageBox.Show("Can't write into file " + TargetFolder + "\\layout.json");
-                    return;
+                    return 0;
                 }
             }
+
+            return i;
         }
 
         private static void CloneDirectory(string root, string dest)
