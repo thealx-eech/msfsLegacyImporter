@@ -278,10 +278,14 @@ namespace msfsLegacyImporter
                                 if (GaugeSize[0] == "0" && GaugeSize[1] == "0")
                                     writeLog("ERROR: " + "Gauge with zero size!");
 
-                                css += "		width: " + GaugeSize[0] + "px;" + Environment.NewLine + "		height: " + GaugeSize[1] + "px;" + Environment.NewLine;
-
                                 if (GaugeSize[0] != "0" && GaugeSize[1] != "0" && imgSize[0] != "0" && imgSize[1] != "0") // SCALE GAUGE IF NECESSARY
+                                {
+                                    css += "		width: " + imgSize[0] + "px;" + Environment.NewLine + "		height: " + imgSize[1] + "px;" + Environment.NewLine;
                                     css += Environment.NewLine + "		transform: scale(calc(" + GaugeSize[0] + " / " + imgSize[0] + "), calc(" + GaugeSize[1] + " / " + imgSize[1] + "));" + Environment.NewLine + "		transform-origin: 0 0;" + Environment.NewLine;
+                                } else
+                                {
+                                    css += "		width: " + GaugeSize[0] + "px;" + Environment.NewLine + "		height: " + GaugeSize[1] + "px;" + Environment.NewLine;
+                                }
 
                                 css += "}" + Environment.NewLine;
 

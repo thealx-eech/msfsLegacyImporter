@@ -1,6 +1,6 @@
 [TERMS_OF_USE]
 
-This test version of application can be used for personal purpose only. EXE file is unsigned debug build, so your Windows Defender or antivirus software may be triggered. If you are not sure it's safe - just don't use it and wait for the release. Before push any complaints, upload EXE file on virustotal.com and ensure that it really contains any malicious code.
+This test version of application can be used for personal purpose only. EXE file is unsigned debug build, so your Windows Defender or antivirus software may be triggered. If you are not sure it's safe - just don't use it and wait for the release.
 
 [DESCRIPTION]
 
@@ -25,8 +25,8 @@ This program was made to simplify FSX aircraft import into MSFS. At this moment,
 - notify about contact point formatting issues
 - convert external/cockpit lights
 - bulk convert of BMP textures to DDS
-- import AIR value into CFG files (not one-click solution as require manual adjustments)
-- import 2D gauges (experimental)
+- import AIR values into CFG files
+- import 2D panels (WIP)
 - backup and restore editable files
 - inform about available program update, perform self update if triggered by user
 
