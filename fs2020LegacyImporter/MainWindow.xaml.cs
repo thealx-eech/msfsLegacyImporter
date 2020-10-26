@@ -182,16 +182,8 @@ namespace msfsLegacyImporter
                     fileTrackWatcher.Path = aircraftDirectory + "\\";
                     fileTrackWatcher.EnableRaisingEvents = true;
 
-                    // CHECK FOR DLL FILES
-                    if (Directory.GetFiles(aircraftDirectory, "*.dll", SearchOption.AllDirectories).Length > 0)
-                    {
-                        LoadLabel.Text = "Aircraft folder contains DLL files - anvionics or even animation may not work in the game";
-                        LoadLabel.Foreground = new SolidColorBrush(Colors.DarkRed);
-                    }
-                    else {
-                        LoadLabel.Text = "Click on tabs to discover available features";
-                        LoadLabel.Foreground = new SolidColorBrush(Colors.Black);
-                    }
+                    LoadLabel.Text = "Click on tabs to discover available fixes";
+                    LoadLabel.Foreground = new SolidColorBrush(Colors.Black);
 
                     SummaryUpdate();
                 }
@@ -461,75 +453,57 @@ namespace msfsLegacyImporter
         {
             int i = 0;
 
-            foreach (var pnl in AircraftPerformance.Children)
-            {
-                if (pnl.GetType() != typeof(StackPanel))
-                    continue;
+            foreach (var checkboxLabel in getCheckedOptions(AircraftPerformance)) {
+                string section = checkboxLabel.Split(']')[0] + "]";
+                string val = checkboxLabel.Replace(section, "").Trim().Split(' ')[0].ToLower().Trim();
+                string name = "";
+                string newValue = "";
 
-                StackPanel panel = (StackPanel)pnl;
+                if (val == "ui_certified_ceiling")
+                    name = "ceiling";
+                else if (val == "ui_max_range")
+                    name = "range";
+                else if (val == "ui_autonomy")
+                    name = "endurance";
+                else if (val == "cruise_speed")
+                    name = "cruise speed";
+                else if (val == "ui_typerole")
+                    newValue = "\"Aircraft\"";
 
-                if (panel.Children.Count > 0)
+                //Console.WriteLine("### " + val);
+
+                if (name != "")
                 {
-                    foreach (var chkbx in panel.Children)
+                    string value = "";
+
+                    if (val != "cruise_speed")
                     {
-                        if (chkbx.GetType() == typeof(CheckBox))
-                        {
-                            CheckBox a = (CheckBox)chkbx;
-                            if (a.IsChecked == true && (string)a.Content != "Toggle all")
-                            {
-                                string section = a.Content.ToString().Split(']')[0] + "]";
-                                string val = a.Content.ToString().Replace(section, "").Trim().Split(' ')[0].ToLower().Trim();
-                                string name = "";
-                                string newValue = "";
+                        Regex regex = new Regex(@"(?i)(.*)" + name + @"(\\t\\n|\\n)([\d,]+)(.+)(?-i)");
+                        Match match = regex.Match(CfgHelper.getCfgValue("performance", "aircraft.cfg", "[GENERAL]"));
 
-                                if (val == "ui_certified_ceiling")
-                                    name = "ceiling";
-                                else if (val == "ui_max_range")
-                                    name = "range";
-                                else if (val == "ui_autonomy")
-                                    name = "endurance";
-                                else if (val == "cruise_speed")
-                                    name = "cruise speed";
-                                else if (val == "ui_typerole")
-                                    newValue = "\"Aircraft\"";
-
-                                //Console.WriteLine("### " + val);
-
-                                if (name != "")
-                                {
-                                    string value = "";
-
-                                    if (val != "cruise_speed")
-                                    {
-                                        Regex regex = new Regex(@"(?i)(.*)" + name + @"(\\t\\n|\\n)([\d,]+)(.+)(?-i)");
-                                        Match match = regex.Match(CfgHelper.getCfgValue("performance", "aircraft.cfg", "[GENERAL]"));
-
-                                        if (match.Success && match.Groups.Count >= 3)
-                                            value = match.Groups[3].Value.Replace(",", "");
-                                    } else
-                                    {
-                                        value = CfgHelper.getCfgValue(val, "flight_model.cfg", "[REFERENCE SPEEDS]");
-                                    }
-
-                                    if (value != "")
-                                    {
-                                        CfgHelper.setCfgValue(aircraftDirectory, val, value, "aircraft.cfg", section);
-                                        i++;
-                                    }
-                                } else if (newValue != "")
-                                {
-                                    CfgHelper.setCfgValue(aircraftDirectory, val, newValue, "aircraft.cfg", section);
-                                    i++;
-                                }
-
-                            }
-                        }
+                        if (match.Success && match.Groups.Count >= 3)
+                            value = match.Groups[3].Value.Replace(",", "");
+                    }
+                    else
+                    {
+                        value = CfgHelper.getCfgValue(val, "flight_model.cfg", "[REFERENCE SPEEDS]");
                     }
 
-                    if (i > 0)
-                        CfgHelper.saveCfgFiles(aircraftDirectory, new string[] { "aircraft.cfg" });
+                    if (value != "")
+                    {
+                        CfgHelper.setCfgValue(aircraftDirectory, val, value, "aircraft.cfg", section);
+                        i++;
+                    }
+                }
+                else if (newValue != "")
+                {
+                    CfgHelper.setCfgValue(aircraftDirectory, val, newValue, "aircraft.cfg", section);
+                    i++;
                 }
             }
+
+            if (i > 0)
+                CfgHelper.saveCfgFiles(aircraftDirectory, new string[] { "aircraft.cfg" });
 
             SummaryUpdate();
         }
@@ -586,27 +560,12 @@ namespace msfsLegacyImporter
 
             if (CfgHelper.cfgFileExists("engines.cfg"))
             {
-                foreach (var pnl in EnginesData.Children)
+                foreach (var checkboxLabel in getCheckedOptions(EnginesData, "="))
                 {
-                    if (pnl.GetType() != typeof(StackPanel))
-                        continue;
+                    string[] val = checkboxLabel.Split('=');
 
-                    StackPanel panel = (StackPanel)pnl;
-
-                    if (panel.Children.Count > 0)
-                    {
-                        if (panel.Children[0].GetType() == typeof(CheckBox))
-                        {
-                            CheckBox a = (CheckBox)panel.Children[0];
-                            if (a.IsChecked == true && (string)a.Content != "Toggle all" && a.Content.ToString().Contains('='))
-                            {
-                                string[] val = a.Content.ToString().Split('=');
-
-                                CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg");
-                                i++;
-                            }
-                        }
-                    }
+                    CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg");
+                    i++;
                 }
             }
 
@@ -878,25 +837,10 @@ namespace msfsLegacyImporter
                     string[] values = new string[1000];
                     int i = 0;
 
-                    foreach (var tmpPanel in parentPanel.Children)
+                    foreach (var checkboxLabel in getCheckedOptions(parentPanel))
                     {
-                        if (tmpPanel.GetType() != typeof(StackPanel))
-                            continue;
-
-                        StackPanel panel = (StackPanel)tmpPanel;
-
-                        if (panel.Children.Count > 0)
-                        {
-                            if (panel.Children[0].GetType() == typeof(CheckBox))
-                            {
-                                CheckBox a = (CheckBox)panel.Children[0];
-                                if (a.IsChecked == true && (string)a.Content != "Toggle all")
-                                {
-                                    values[i] = a.Tag.ToString();
-                                    i++;
-                                }
-                            }
-                        }
+                        values[i] = checkboxLabel;
+                        i++;
                     }
 
                     if (i > 0)
@@ -985,53 +929,35 @@ namespace msfsLegacyImporter
             {
                 int i = 0;
 
-                foreach (var pnl in SystemsData.Children)
+                foreach (var checkboxLabel in getCheckedOptions(SystemsData))
                 {
-                    if (pnl.GetType() != typeof(StackPanel))
-                        continue;
-
-                    StackPanel panel = (StackPanel)pnl;
-
-                    if (panel.Children.Count > 0)
+                    if (checkboxLabel.ToLower().Trim().StartsWith("light."))
                     {
-                        if (panel.Children[0].GetType() == typeof(CheckBox))
+                        // CONVERTS LIGHT DATA
+                        // light\.(\d+)(.*)=(.*)(\d+),(.*)(\d+),(.*)(\d+),(.*)(fx_[A-Za-z]+)(.*)
+                        // MSFS lightdef.0 = Type:1#Index:1#LocalPosition:-11.5,0,11.6#LocalRotation:0,0,0#EffectFile:LIGHT_ASOBO_BeaconTop#Node:#PotentiometerIndex:1#EmMesh:LIGHT_ASOBO_BeaconTop
+                        // FSX light.0 = 3,  -39.00, -23.6,  -0.25, fx_navredm ,
+                        string[] fsxLight = checkboxLabel.Split('=');
+                        if (fsxLight.Length >= 2)
                         {
-                            CheckBox a = (CheckBox)panel.Children[0];
-                            if (a.IsChecked == true && (string)a.Content != "Toggle all")
+                            string fsxNum = fsxLight[0].Trim().Replace("light.", "");
+                            string[] fsxData = fsxLight[1].Split(',');
+                            if (fsxData.Length >= 5)
                             {
-                                string val = a.Content.ToString();
+                                string type = fsxData[0].Replace(" ", "").Trim();
+                                string x = fsxData[1].Replace(" ", "").Trim();
+                                string y = fsxData[2].Replace(" ", "").Trim();
+                                string z = fsxData[3].Replace(" ", "").Trim();
+                                Regex regex = new Regex(@"(fx_[A-Za-z]*)");
+                                Match match = regex.Match(fsxData[4]);
+                                Regex digRregex = new Regex("[0-9.-]+");
+                                if (match.Success && digRregex.IsMatch(fsxNum) && digRregex.IsMatch(type) && digRregex.IsMatch(x) && digRregex.IsMatch(y) && digRregex.IsMatch(z))
+                                {
+                                    string newLight = "Type:" + getMfsfLightType(type) + "#Index:0#LocalPosition:" + x + "," + y + "," + z + "#LocalRotation:0,0,0#EffectFile:" + getMfsfLightEff(match.Value) + "#Node:#PotentiometerIndex:1#EmMesh:" + getMfsfLightEff(match.Value);
+                                    CfgHelper.setCfgValue(aircraftDirectory, "lightdef." + fsxNum, newLight, "systems.cfg", "[LIGHTS]");
+                                    CfgHelper.setCfgValueStatus(aircraftDirectory, "light." + fsxNum, "systems.cfg", "[LIGHTS]", false);
 
-                                if (val.ToLower().Trim().StartsWith("light.")) {
-                                    // CONVERTS LIGHT DATA
-                                    // light\.(\d+)(.*)=(.*)(\d+),(.*)(\d+),(.*)(\d+),(.*)(fx_[A-Za-z]+)(.*)
-                                    // MSFS lightdef.0 = Type:1#Index:1#LocalPosition:-11.5,0,11.6#LocalRotation:0,0,0#EffectFile:LIGHT_ASOBO_BeaconTop#Node:#PotentiometerIndex:1#EmMesh:LIGHT_ASOBO_BeaconTop
-                                    // FSX light.0 = 3,  -39.00, -23.6,  -0.25, fx_navredm ,
-                                    string[] fsxLight = val.Split('=');
-                                    if (fsxLight.Length >= 2) {
-                                        string fsxNum = fsxLight[0].Trim().Replace("light.", "");
-                                        string[] fsxData = fsxLight[1].Split(',');
-                                        if (fsxData.Length >= 5)
-                                        {
-                                            string type = fsxData[0].Replace(" ", "").Trim();
-                                            string x = fsxData[1].Replace(" ", "").Trim();
-                                            string y = fsxData[2].Replace(" ", "").Trim();
-                                            string z = fsxData[3].Replace(" ", "").Trim();
-                                            Regex regex = new Regex(@"(fx_[A-Za-z]*)");
-                                            Match match = regex.Match(fsxData[4]);
-                                            Regex digRregex = new Regex("[0-9.-]+");
-                                            if (match.Success && digRregex.IsMatch(fsxNum) && digRregex.IsMatch(type) && digRregex.IsMatch(x) && digRregex.IsMatch(y) && digRregex.IsMatch(z))
-                                            {
-                                                string newLight = "Type:" + getMfsfLightType(type) + "#Index:0#LocalPosition:" + x + "," + y + "," + z + "#LocalRotation:0,0,0#EffectFile:" + getMfsfLightEff(match.Value) + "#Node:#PotentiometerIndex:1#EmMesh:" + getMfsfLightEff(match.Value);
-                                                CfgHelper.setCfgValue(aircraftDirectory, "lightdef." + fsxNum, newLight, "systems.cfg", "[LIGHTS]");
-                                                CfgHelper.setCfgValueStatus(aircraftDirectory, "light." + fsxNum, "systems.cfg", "[LIGHTS]", false);
-
-                                                i++;
-
-                                                //Console.WriteLine(val);
-                                                //Console.WriteLine(msfsLight);
-                                            }
-                                        }
-                                    }
+                                    i++;
                                 }
                             }
                         }
@@ -1266,50 +1192,35 @@ namespace msfsLegacyImporter
             {
                 string message = "";
 
-                foreach (var pnl in FlightModelIssues.Children)
+                foreach (var checkboxLabel in getCheckedOptions(FlightModelIssues, "="))
                 {
-                    if (pnl.GetType() != typeof(StackPanel))
-                        continue;
+                    string val = checkboxLabel.Split('=')[0].Trim();
 
-                    StackPanel panel = (StackPanel)pnl;
-
-                    if (panel.Children.Count > 0)
+                    if (val.Contains("_table"))
+                        CfgHelper.setCfgValue(aircraftDirectory, val, "-0.785:1,0:0.4,0.785:1", "flight_model.cfg");
+                    else if (val == "compute_aero_center")
+                        CfgHelper.setCfgValue(aircraftDirectory, val, "1", "flight_model.cfg");
+                    else if (val == "fuselage_length")
                     {
-                        if (panel.Children[0].GetType() == typeof(CheckBox))
-                        {
-                            CheckBox a = (CheckBox)panel.Children[0];
-                            if (a.IsChecked == true && (string)a.Content != "Toggle all" && a.Content.ToString().Contains('='))
-                            {
-                                string val = a.Content.ToString().Split('=')[0].Trim();
-
-                                if (val.Contains("_table"))
-                                    CfgHelper.setCfgValue(aircraftDirectory, val, "-0.785:1,0:0.4,0.785:1", "flight_model.cfg");
-                                else if (val == "compute_aero_center")
-                                    CfgHelper.setCfgValue(aircraftDirectory, val, "1", "flight_model.cfg");
-                                else if (val == "fuselage_length")
-                                {
-                                    string length = CfgHelper.getCfgValue("wing_span", "flight_model.cfg", "[AIRPLANE_GEOMETRY]");
-                                    double num;
-                                    string stringNewVal = (Double.TryParse(length, out num) ? 1.1 * num : 50).ToString();
-                                    CfgHelper.setCfgValue(aircraftDirectory, val, stringNewVal, "flight_model.cfg");
-                                    message += val + " value was calculated as "+ stringNewVal + " from wing_span, you'll need to adjust it manually." + Environment.NewLine +
-                                        "If after " + val + " insertion center of gravity will be broken, adjust first (longitudinal) value of empty_weight_cg_position (increase to move CG forward, decrease - backwad)" + Environment.NewLine + Environment.NewLine;
-                                }
-                                else if (val == "fuselage_diameter")
-                                {
-                                    string length = CfgHelper.getCfgValue("wing_span", "flight_model.cfg", "[AIRPLANE_GEOMETRY]");
-                                    double num;
-                                    string weight = CfgHelper.getCfgValue("max_gross_weight", "flight_model.cfg", "[WEIGHT_AND_BALANCE]");
-                                    double num2;
-                                    string stringNewVal = Math.Max(5, (Double.TryParse(length, out num) && Double.TryParse(length, out num2) ? num * num2 / 666 : 5)).ToString();
-                                    CfgHelper.setCfgValue(aircraftDirectory, val, stringNewVal, "flight_model.cfg");
-                                    message += val + " value was calculated as "+ stringNewVal + " from wing_span and max_gross_weight, you'll need to adjust it manually" + Environment.NewLine + Environment.NewLine;
-                                }
-
-                                i++;
-                            }
-                        }
+                        string length = CfgHelper.getCfgValue("wing_span", "flight_model.cfg", "[AIRPLANE_GEOMETRY]");
+                        double num;
+                        string stringNewVal = (Double.TryParse(length, out num) ? 1.1 * num : 50).ToString();
+                        CfgHelper.setCfgValue(aircraftDirectory, val, stringNewVal, "flight_model.cfg");
+                        message += val + " value was calculated as " + stringNewVal + " from wing_span, you'll need to adjust it manually." + Environment.NewLine +
+                            "If after " + val + " insertion center of gravity will be broken, adjust first (longitudinal) value of empty_weight_cg_position (increase to move CG forward, decrease - backwad)" + Environment.NewLine + Environment.NewLine;
                     }
+                    else if (val == "fuselage_diameter")
+                    {
+                        string length = CfgHelper.getCfgValue("wing_span", "flight_model.cfg", "[AIRPLANE_GEOMETRY]");
+                        double num;
+                        string weight = CfgHelper.getCfgValue("max_gross_weight", "flight_model.cfg", "[WEIGHT_AND_BALANCE]");
+                        double num2;
+                        string stringNewVal = Math.Max(5, (Double.TryParse(length, out num) && Double.TryParse(length, out num2) ? num * num2 / 666 : 5)).ToString();
+                        CfgHelper.setCfgValue(aircraftDirectory, val, stringNewVal, "flight_model.cfg");
+                        message += val + " value was calculated as " + stringNewVal + " from wing_span and max_gross_weight, you'll need to adjust it manually" + Environment.NewLine + Environment.NewLine;
+                    }
+
+                    i++;
                 }
                 
                 if (message != "")
@@ -1538,25 +1449,10 @@ namespace msfsLegacyImporter
                 string[] sections = new string[100];
                 int i = 0;
 
-                foreach (var pnl in parentPanel.Children)
+                foreach (var checkboxLabel in getCheckedOptions(parentPanel))
                 {
-                    if (pnl.GetType() != typeof(StackPanel))
-                        continue;
-
-                    StackPanel panel = (StackPanel)pnl;
-
-                    if (panel.Children.Count > 0)
-                    {
-                        if (panel.Children[0].GetType() == typeof(CheckBox))
-                        {
-                            CheckBox a = (CheckBox)panel.Children[0];
-                            if (a.IsChecked == true && (string)a.Content != "Toggle all")
-                            {
-                                sections[i] = a.Content.ToString();
-                                i++;
-                            }
-                        }
-                    }
+                    sections[i] = checkboxLabel;
+                    i++;
                 }
 
                 if (i > 0)
@@ -1793,86 +1689,73 @@ namespace msfsLegacyImporter
             MessageBoxResult messageBoxResult = MessageBox.Show("You will be no longer able to use clickable elements inside of the cockpit. You can restore original interior model by clicking Restore Backup button.", "You are going to remove clickable switches", System.Windows.MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
-                foreach (var pnl in ModelsList.Children)
+                foreach (var checkboxLabel in getCheckedOptions(ModelsList))
                 {
-                    if (pnl.GetType() != typeof(StackPanel))
-                        continue;
+                    string mainFile = aircraftDirectory + "\\" + checkboxLabel;
 
-                    StackPanel panel = (StackPanel)pnl;
-
-                    if (panel.Children.Count > 0 && panel.Children[0].GetType() == typeof(CheckBox))
+                    if (File.Exists(mainFile))
                     {
-                        CheckBox a = (CheckBox)panel.Children[0];
-                        if (a.IsChecked == true && (string)a.Content != "Toggle all")
+                        byte[] cache = new byte[4];
+                        byte[] MDLDsize = new byte[4];
+                        int MDLDsizeInt = -1;
+                        byte[] MRECsize = new byte[4];
+                        int MRECsizeInt = -1;
+                        int MDLDpos = -1;
+                        int MRECpos = -1;
+
+
+                        byte[] buf = File.ReadAllBytes(mainFile);
+                        for (int i = 0; i < buf.Length; i++)
                         {
-                            string mainFile = aircraftDirectory + "\\" + (string)a.Content;
-
-                            if (File.Exists(mainFile))
+                            for (int k = 0; k < cache.Length - 1; k++)
                             {
-                                byte[] cache = new byte[4];
-                                byte[] MDLDsize = new byte[4];
-                                int MDLDsizeInt = -1;
-                                byte[] MRECsize = new byte[4];
-                                int MRECsizeInt = -1;
-                                int MDLDpos = -1;
-                                int MRECpos = -1;
-
-
-                                byte[] buf = File.ReadAllBytes(mainFile);
-                                for (int i = 0; i < buf.Length; i++)
-                                {
-                                    for (int k = 0; k < cache.Length - 1; k++)
-                                    {
-                                        cache[k] = cache[k + 1];
-                                    }
-                                    cache[cache.Length - 1] = buf[i];
-
-                                    System.Text.UTF8Encoding enc = new System.Text.UTF8Encoding();
-                                    string s = enc.GetString(cache);
-
-                                    if (s == "MDLD")
-                                        MDLDpos = i - 3;
-                                    else if (s == "MREC")
-                                        MRECpos = i - 3;
-
-                                    if (MDLDpos > 0 && i == MDLDpos + 7) // CAPTURE MDLD SIZE
-                                    {
-                                        if (BitConverter.IsLittleEndian)
-                                            Array.Reverse(cache);
-                                        MDLDsizeInt = cache[3] | (cache[2] << 8) | (cache[1] << 16) | (cache[0] << 24);
-                                        //Console.WriteLine(BitConverter.ToString(cache));
-
-                                    }
-                                    else if (MRECpos > 0 && i == MRECpos + 7) // CAPTURE MREC SIZE
-                                    {
-                                        if (BitConverter.IsLittleEndian)
-                                            Array.Reverse(cache);
-                                        MRECsizeInt = cache[3] | (cache[2] << 8) | (cache[1] << 16) | (cache[0] << 24);
-                                        //Console.WriteLine(BitConverter.ToString(cache));
-                                    }
-                                    else if (MRECpos > 0 && MRECsizeInt > 0 && i < MRECpos + MRECsizeInt + 7) // FILL MREC WITH ZEROES
-                                    {
-                                        buf[i] = 0x00;
-                                    }
-                                }
-
-                                if (MRECpos > 0 && MRECsizeInt > 0)
-                                {
-                                    // MAKE MDL BACKUP
-                                    backUpFile(mainFile);
-
-                                    // CLEAR AIRCRAFT CACHE
-                                    deleteCVCfolder();
-
-                                    Console.WriteLine("MDLD pos" + MDLDpos + " lng" + MDLDsizeInt + "; MREC pos" + MRECpos + " lng" + MRECsizeInt);
-                                    File.WriteAllBytes(mainFile, buf);
-                                }
-                                else
-                                {
-                                    MessageBox.Show("Clickable switches removal from " + a.Content + " failed");
-                                }
+                                cache[k] = cache[k + 1];
                             }
+                            cache[cache.Length - 1] = buf[i];
 
+                            System.Text.UTF8Encoding enc = new System.Text.UTF8Encoding();
+                            string s = enc.GetString(cache);
+
+                            if (s == "MDLD")
+                                MDLDpos = i - 3;
+                            else if (s == "MREC")
+                                MRECpos = i - 3;
+
+                            if (MDLDpos > 0 && i == MDLDpos + 7) // CAPTURE MDLD SIZE
+                            {
+                                if (BitConverter.IsLittleEndian)
+                                    Array.Reverse(cache);
+                                MDLDsizeInt = cache[3] | (cache[2] << 8) | (cache[1] << 16) | (cache[0] << 24);
+                                //Console.WriteLine(BitConverter.ToString(cache));
+
+                            }
+                            else if (MRECpos > 0 && i == MRECpos + 7) // CAPTURE MREC SIZE
+                            {
+                                if (BitConverter.IsLittleEndian)
+                                    Array.Reverse(cache);
+                                MRECsizeInt = cache[3] | (cache[2] << 8) | (cache[1] << 16) | (cache[0] << 24);
+                                //Console.WriteLine(BitConverter.ToString(cache));
+                            }
+                            else if (MRECpos > 0 && MRECsizeInt > 0 && i < MRECpos + MRECsizeInt + 7) // FILL MREC WITH ZEROES
+                            {
+                                buf[i] = 0x00;
+                            }
+                        }
+
+                        if (MRECpos > 0 && MRECsizeInt > 0)
+                        {
+                            // MAKE MDL BACKUP
+                            backUpFile(mainFile);
+
+                            // CLEAR AIRCRAFT CACHE
+                            deleteCVCfolder();
+
+                            Console.WriteLine("MDLD pos" + MDLDpos + " lng" + MDLDsizeInt + "; MREC pos" + MRECpos + " lng" + MRECsizeInt);
+                            File.WriteAllBytes(mainFile, buf);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Clickable switches removal from " + checkboxLabel + " failed");
                         }
                     }
                 }
@@ -1936,6 +1819,16 @@ namespace msfsLegacyImporter
             }
 
             StackPanel myPanel1 = new StackPanel();
+
+            // CHECK FOR DLL FILES
+            if (Directory.GetFiles(aircraftDirectory, "*.dll", SearchOption.AllDirectories).Length > 0 || Directory.GetFiles(aircraftDirectory, "*.gau", SearchOption.AllDirectories).Length > 0)
+            {
+                TextBlock dllWarning = new TextBlock();
+                dllWarning.Text = "Aircraft folder contains DLL/GAU files - anvionics and/or animation may not work in the game";
+                dllWarning.Foreground = new SolidColorBrush(Colors.DarkRed);
+                myPanel1.Children.Add(dllWarning);
+                tabPanel.Foreground = new SolidColorBrush(Colors.DarkRed);
+            }
 
             Button btn1 = new Button();
             btn1 = SetButtonAtts(btn1);
@@ -2724,7 +2617,7 @@ namespace msfsLegacyImporter
             return sectn;
         }
 
-        private List<string> getCheckedOptions(StackPanel panel)
+        private List<string> getCheckedOptions(StackPanel panel, string additionalCondition = "")
         {
             List<string> values = new List<string>();
 
@@ -2736,7 +2629,8 @@ namespace msfsLegacyImporter
                 if (((StackPanel)pnl).Children.Count > 0 && ((StackPanel)pnl).Children[0].GetType() == typeof(CheckBox))
                 {
                     CheckBox a = (CheckBox)((StackPanel)pnl).Children[0];
-                    if (((CheckBox)((StackPanel)pnl).Children[0]).IsChecked == true && (string)((CheckBox)((StackPanel)pnl).Children[0]).Content != "Toggle all")
+                    if (((CheckBox)((StackPanel)pnl).Children[0]).IsChecked == true && (string)((CheckBox)((StackPanel)pnl).Children[0]).Content.ToString() != "Toggle all" &&
+                        ( additionalCondition == "" || ((CheckBox)((StackPanel)pnl).Children[0]).Content.ToString().Contains(additionalCondition) ) )
                     {
                         values.Add((string)a.Content);
                     }
