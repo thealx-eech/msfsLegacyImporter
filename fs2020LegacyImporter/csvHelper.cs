@@ -61,7 +61,7 @@ namespace msfsLegacyImporter
                         }
                     }
                     return result;
-                } catch (Exception e) {
+                } catch {
                     MessageBox.Show("File " + path + " is locked");
                 }
             }
@@ -76,7 +76,6 @@ namespace msfsLegacyImporter
                 List<string[]> result = new List<string[]>();
                 using (var reader = new StreamReader(path))
                 {
-                    var good = new List<Test>();
                     var bad = new List<string>();
                     //var isRecordBad = false;
 
@@ -141,7 +140,7 @@ namespace msfsLegacyImporter
                     }
 
                     foreach (string val in bad) {
-                        Console.WriteLine("Bad value: " + bad);
+                        Console.WriteLine("Bad value: " + val);
                     }
 
 
@@ -219,12 +218,6 @@ namespace msfsLegacyImporter
             }
 
             return null;
-        }
-
-        public class Test
-        {
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
         }
     }
 }

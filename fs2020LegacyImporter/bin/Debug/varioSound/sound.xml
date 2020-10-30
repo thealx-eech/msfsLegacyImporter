@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<SoundInfo Version="1.0">
+	<AlwaysPlaySounds>
+		<!-- SOLID -->
+		<Sound WwiseEvent="STALL_WARNING" Wwisedata="false" FileName="variotone_solid">
+			<WwiseRTPC SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0" RTPCName="VERTICAL_SPEED"/> 
+			<PitchCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="1">
+			  <Point SimValue="-1000.000" Output="0.4" />
+			  <Point SimValue="-300.000" Output="0.6" />
+			</PitchCurve>
+			<VolumeCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0">
+			  <Point SimValue="-1000" Output="[VOLUME]" />
+			  <Point SimValue="-300" Output="[VOLUME]" />
+			  <Point SimValue="-299.99" Output="0.0" />
+			</VolumeCurve>
+		</Sound>
+
+		<Sound WwiseEvent="STALL_WARNING" Wwisedata="false" FileName="variotone_solid">
+			<WwiseRTPC SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0" RTPCName="VERTICAL_SPEED"/> 
+			<PitchCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="1">
+			  <Point SimValue="-299.99" Output="0.6" />
+			  <Point SimValue="-200.000" Output="0.75" />
+			</PitchCurve>
+			<VolumeCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0">
+			  <Point SimValue="-300" Output="0.0" />
+			  <Point SimValue="-299.99" Output="[VOLUME]" />
+			  <Point SimValue="-200" Output="[VOLUME]" />
+			  <Point SimValue="-199.99" Output="0.0" />
+			</VolumeCurve>
+		</Sound>
+
+		<Sound WwiseEvent="STALL_WARNING" Wwisedata="false" FileName="variotone_solid">
+			<WwiseRTPC SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0" RTPCName="VERTICAL_SPEED"/> 
+			<PitchCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="1">
+			  <Point SimValue="-199.99" Output="0.75" />
+			  <Point SimValue="-100.000" Output="0.9" />
+			</PitchCurve>
+			<VolumeCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0">
+			  <Point SimValue="-200" Output="0.0" />
+			  <Point SimValue="-199.99" Output="[VOLUME]" />
+			  <Point SimValue="-100" Output="[VOLUME]" />
+			  <Point SimValue="-99.99" Output="0.0" />
+			</VolumeCurve>
+		</Sound>
+
+		<Sound WwiseEvent="STALL_WARNING" Wwisedata="false" FileName="variotone_solid">
+			<WwiseRTPC SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0" RTPCName="VERTICAL_SPEED"/> 
+			<PitchCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="1">
+			  <Point SimValue="-99.99" Output="0.9" />
+			  <Point SimValue="-50" Output="0.95" />
+			</PitchCurve>
+			<VolumeCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0">
+			  <Point SimValue="-100" Output="0.0" />
+			  <Point SimValue="-99.99" Output="[VOLUME]" />
+			  <Point SimValue="-50" Output="[VOLUME]" />
+			  <Point SimValue="-49.99" Output="0.0" />
+			</VolumeCurve>
+		</Sound>
+
+		<!-- HALFDUTY -->
+		<Sound WwiseEvent="STALL_WARNING" Wwisedata="false" FileName="variotone_cycle600">
+			<WwiseRTPC SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0" RTPCName="VERTICAL_SPEED"/> 
+			<PitchCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="1">
+			  <Point SimValue="0.000" Output="1" />
+			  <Point SimValue="50" Output="1.1" />
+			</PitchCurve>
+			<VolumeCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0">
+			  <Point SimValue="-0.01" Output="0.0" />
+			  <Point SimValue="0" Output="[VOLUME]" />
+			  <Point SimValue="49.99" Output="[VOLUME]" />
+			  <Point SimValue="50" Output="0" />
+			</VolumeCurve>
+		</Sound>
+
+		<Sound WwiseEvent="STALL_WARNING" Wwisedata="false" FileName="variotone_cycle550">
+			<WwiseRTPC SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0" RTPCName="VERTICAL_SPEED"/> 
+			<PitchCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="1">
+			  <Point SimValue="50" Output="1.1" />
+			  <Point SimValue="100" Output="1.2" />
+			</PitchCurve>
+			<VolumeCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0">
+			  <Point SimValue="49.99" Output="0.0" />
+			  <Point SimValue="50" Output="[VOLUME]" />
+			  <Point SimValue="99.99" Output="[VOLUME]" />
+			  <Point SimValue="100" Output="0" />
+			</VolumeCurve>
+		</Sound>
+
+		<Sound WwiseEvent="STALL_WARNING" Wwisedata="false" FileName="variotone_cycle500">
+			<WwiseRTPC SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0" RTPCName="VERTICAL_SPEED"/> 
+			<PitchCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="1">
+			  <Point SimValue="100" Output="1.2" />
+			  <Point SimValue="200" Output="1.35" />
+			</PitchCurve>
+			<VolumeCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0">
+			  <Point SimValue="99.99" Output="0.0" />
+			  <Point SimValue="100" Output="[VOLUME]" />
+			  <Point SimValue="199.99" Output="[VOLUME]" />
+			  <Point SimValue="200" Output="0" />
+			</VolumeCurve>
+		</Sound>
+
+		<Sound WwiseEvent="STALL_WARNING" Wwisedata="false" FileName="variotone_cycle400">
+			<WwiseRTPC SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0" RTPCName="VERTICAL_SPEED"/> 
+			<PitchCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="1">
+			  <Point SimValue="200" Output="1.35" />
+			  <Point SimValue="300" Output="1.5" />
+			</PitchCurve>
+			<VolumeCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0">
+			  <Point SimValue="199.99" Output="0.0" />
+			  <Point SimValue="200" Output="[VOLUME]" />
+			  <Point SimValue="299.99" Output="[VOLUME]" />
+			  <Point SimValue="300" Output="0" />
+			</VolumeCurve>
+		</Sound>
+
+		<Sound WwiseEvent="STALL_WARNING" Wwisedata="false" FileName="variotone_cycle300">
+			<WwiseRTPC SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0" RTPCName="VERTICAL_SPEED"/> 
+			<PitchCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="1">
+			  <Point SimValue="300" Output="1.5" />
+			  <Point SimValue="500" Output="1.8" />
+			</PitchCurve>
+			<VolumeCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0">
+			  <Point SimValue="299.99" Output="0.0" />
+			  <Point SimValue="300" Output="[VOLUME]" />
+			  <Point SimValue="499.99" Output="[VOLUME]" />
+			  <Point SimValue="500" Output="0" />
+			</VolumeCurve>
+		</Sound>
+
+		<Sound WwiseEvent="STALL_WARNING" Wwisedata="false" FileName="variotone_cycle250">
+			<WwiseRTPC SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0" RTPCName="VERTICAL_SPEED"/> 
+			<PitchCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="1">
+			  <Point SimValue="500" Output="1.8" />
+			  <Point SimValue="1000" Output="2.25" />
+			</PitchCurve>
+			<VolumeCurve SimVar="VERTICAL SPEED" Units="FEET PER MINUTE" Index="0">
+			  <Point SimValue="499.99" Output="0.0" />
+			  <Point SimValue="500" Output="[VOLUME]" />
+			</VolumeCurve>
+		</Sound>
+
+		</AlwaysPlaySounds>
+</SoundInfo>

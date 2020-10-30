@@ -5,37 +5,117 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:msfsLegacyImporter"
         mc:Ignorable="d"
-        Title="MSFS Legacy Importer" Height="800" Width="640">
+        Title="MSFS Legacy Importer" Height="640" Width="640">
 
     <DockPanel>
-        <TabControl Name="fsTabControl">
-            <TabItem Header="Init">
-                    <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
-                    <TextBlock Name="Header" TextWrapping="Wrap" Text="Load imported FSX (Legacy) or MSFS (Native) aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
-                    <TextBlock Name="LoadLabel" TextWrapping="Wrap" Text="Make files backup before load aircraft" VerticalAlignment="Top" DockPanel.Dock="Top"  FontSize="10" HorizontalAlignment="Center" Background="#00808080"/>
-                    <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" VerticalAlignment="Top">
-                        <TextBlock Name="btnOpenFilePath"></TextBlock>
-                    </WrapPanel>
-                    <Button x:Name="btnOpenFile" Click="BtnOpenFile_Click">Browse</Button>
 
-                    <Separator Height="1" Margin="0 10 0 0" Width="auto"/>
-                        <StackPanel DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom">
-                            <TextBlock Name="Header3" TextWrapping="Wrap" Text="Update LAYOUT.JSON file of current aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,10,0,-1" Background="Transparent"/>
-                            <Button x:Name="btnScan" Click="BtnScan_Click">Rescan aircraft files</Button>
+        <Grid Name="mainScreen" HorizontalAlignment="Stretch" Width="640" Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.Resources>
+                <ImageBrush x:Key="img1" ImageSource="mainLeft.png" Stretch="UniformToFill"/>
+                <ImageBrush x:Key="img2" ImageSource="mainRight.png" Stretch="UniformToFill"/>
+                
+            </Grid.Resources>
+
+            <TextBlock Name="imageLeft" Cursor="Hand" Grid.Column="0" Grid.Row="0" Background="{StaticResource img1}" PreviewMouseDown="mainImportClick" >
+                <TextBlock.Triggers>
+                <EventTrigger RoutedEvent="TextBlock.MouseEnter">
+                    <EventTrigger.Actions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetName="imageRight"  Storyboard.TargetProperty="(TextBlock.Opacity)"
+                            From="1.0" To="0.25" Duration="0:0:0.25" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                    </EventTrigger.Actions>
+                </EventTrigger>  
+                <EventTrigger RoutedEvent="TextBlock.MouseLeave">
+                    <EventTrigger.Actions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetName="imageRight"  Storyboard.TargetProperty="(TextBlock.Opacity)"
+                            To="1" Duration="0:0:0.25" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                    </EventTrigger.Actions>
+                </EventTrigger>                      
+              </TextBlock.Triggers>
+            </TextBlock>
+            <TextBlock Name="imageRight" Cursor="Hand" Grid.Column="1" Grid.Row="0" Background="{StaticResource img2}" PreviewMouseDown="mainLoadClick" >
+                <TextBlock.Triggers>
+                    <EventTrigger RoutedEvent="TextBlock.MouseEnter">
+                        <EventTrigger.Actions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                            Storyboard.TargetName="imageLeft"  Storyboard.TargetProperty="(TextBlock.Opacity)"
+                            From="1.0" To="0.25" Duration="0:0:0.25" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger.Actions>
+                    </EventTrigger>
+                    <EventTrigger RoutedEvent="TextBlock.MouseLeave">
+                        <EventTrigger.Actions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                            Storyboard.TargetName="imageLeft"  Storyboard.TargetProperty="(TextBlock.Opacity)"
+                            To="1" Duration="0:0:0.25" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger.Actions>
+                    </EventTrigger>
+                </TextBlock.Triggers>
+            </TextBlock>
+        </Grid>
+
+        <TabControl Name="fsTabControl">
+            <TabItem Name="tabInit" Header="Init">
+                    <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
+                        <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
+                            <Button Content="Main Menu" Name="MainMenuButton" Tag="" Margin="1" Click="ShowMainMenu" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                        </WrapPanel>
+
+                        <StackPanel Name="LoadAircraft" DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom">
+                            <TextBlock Name="LoadHeader" TextWrapping="Wrap" Text="Load imported FSX (Legacy) or MSFS (Native) aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                            <TextBlock TextWrapping="Wrap" Text="Set path of imported FSX aircraft or native MSFS aircaft" VerticalAlignment="Top" DockPanel.Dock="Top"  FontSize="10" HorizontalAlignment="Center" Background="#00808080"/>
+                            <Button x:Name="btnOpenFile" Click="BtnOpenFile_Click">Browse</Button>
+                            <Separator Height="1" Margin="0 10 0 0" Width="auto"/>
                         </StackPanel>
-                        <Separator Height="1" Width="auto"/>
-                        <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
+
+                        <StackPanel Name="RescanFiles" DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom">
+                            <TextBlock Name="LoadedHeader" TextWrapping="Wrap" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center"  Margin="0,10,0,10" Background="Transparent"/>
+                            <TextBlock Name="LoadLabel" TextWrapping="Wrap" Text="Make files backup before applying any fixes" VerticalAlignment="Top" DockPanel.Dock="Top"  FontSize="10" HorizontalAlignment="Center" Background="#00808080"/>
+                            <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" VerticalAlignment="Top">
+                                <TextBlock Name="btnOpenFilePath"></TextBlock>
+                            </WrapPanel>
+                            <TextBlock Name="Header3" TextWrapping="Wrap" Text="Update LAYOUT.JSON file of current aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                            <Button x:Name="btnScan" Click="BtnScan_Click">Rescan aircraft files</Button>
+                            <Separator Height="1" Width="auto"/>
+                        </StackPanel>
+                        <StackPanel Name="AircraftProcess"  Margin="0,0,0,0"  DockPanel.Dock="Top" VerticalAlignment="Top">
+                        </StackPanel>
+
+                        <StackPanel Name="ImportForm" DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
                             <TextBlock Name="Header2" TextWrapping="Wrap" Text="Import new FSX aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
-                        <TextBlock TextWrapping="Wrap" Text="To be ready to fail is to be prepared for success" VerticalAlignment="Top" DockPanel.Dock="Top"  FontSize="10" HorizontalAlignment="Center" Background="#00808080"/>
-                        <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,10" VerticalAlignment="Top">
-                            <Button Width="auto" Name="btnSourceFolder" Click="BtnOpenSourceFile_Click">FSX aircraft directory</Button>
-                            <Button Name="btnTargetFolder" Click="BtnOpenTargetFile_Click">MSFS Community directory</Button>
-                        </WrapPanel>
-                        <WrapPanel Width="auto" DockPanel.Dock="Top" Margin="5,0,0,5" VerticalAlignment="Top">
-                            <TextBlock Name="btnSourceFolderPath" MinWidth="100" HorizontalAlignment="Left"></TextBlock>
-                            <TextBlock Name="btnTargetFolderPath" MinWidth="100" HorizontalAlignment="Left"></TextBlock>
-                        </WrapPanel>
-                        <Grid Margin="5,5,5,5">
+                            <TextBlock TextWrapping="Wrap" Text="Set path of FSX aircraft directory first (not the root of installed FSX), then set MSFS Community folder path" VerticalAlignment="Top" DockPanel.Dock="Top"  FontSize="10" HorizontalAlignment="Center" Background="#00808080"/>
+                            <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,10" VerticalAlignment="Top">
+                                <Button Width="auto" Name="btnSourceFolder" Click="BtnOpenSourceFile_Click">FSX aircraft directory</Button>
+                                <Button Name="btnTargetFolder" Click="BtnOpenTargetFile_Click">MSFS Community directory</Button>
+                            </WrapPanel>
+                            <WrapPanel Width="auto" DockPanel.Dock="Top" Margin="5,0,0,5" VerticalAlignment="Top">
+                                <TextBlock Name="btnSourceFolderPath" MinWidth="100" HorizontalAlignment="Left"></TextBlock>
+                                <TextBlock Name="btnTargetFolderPath" MinWidth="100" HorizontalAlignment="Left"></TextBlock>
+                            </WrapPanel>
+                            <Grid Margin="5,5,5,5">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="100"/>
                                     <ColumnDefinition/>
@@ -93,13 +173,6 @@
                             </Grid>
                             <Button Margin="5,5,5,5" Width="auto" x:Name="btnImportSubmit" Click="BtnImportSubmit_Click">Import</Button>
                         </StackPanel>
-                        <Separator Height="1" Margin="0 0 0 10" Width="auto"/>
-                        <StackPanel DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom" >
-                            <TextBlock TextWrapping="Wrap" Text="Alex Marko @ 2020" DockPanel.Dock="Bottom"  HorizontalAlignment="Center" VerticalAlignment="Bottom"  Background="#03FFFFFF"/>
-                        <TextBlock TextWrapping="Wrap" Text="Do not publish imported aircraft without author permission (really, don't)."  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>
-                        <TextBlock TextWrapping="Wrap" Text="Instead, send me a link of your import process tutorial and it will be added to the program description."  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>
-                        <TextBlock TextWrapping="Wrap" Text="And please mention this tool if you are sharing any kind of import result. Good luck with your experiments!"  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>
-                    </StackPanel>
                     </StackPanel>
             </TabItem>
 
@@ -112,10 +185,6 @@
                         </WrapPanel>
                         <!--<TextBlock x:Name="AircraftContent" VerticalAlignment="Top" TextWrapping="Wrap"  DockPanel.Dock="Top">
                     </TextBlock>-->
-                        <StackPanel Name="AircraftProcess"  Margin="0,0,0,0"  DockPanel.Dock="Top" VerticalAlignment="Top">
-                        </StackPanel>
-                        <Button x:Name="btnAircraftProcess" Click="BtnAircraftProcess_Click"   DockPanel.Dock="Top" VerticalAlignment="Top">Process aircraft.cfg file</Button>
-                        <Separator Height="1" Margin="0 0 0 10" Width="auto"/>
                         <StackPanel Name="AircraftPerformance"  Margin="0,0,0,0"  DockPanel.Dock="Top" VerticalAlignment="Top">
                         </StackPanel>
                         <StackPanel Name="AircraftSections" Tag="aircraft.cfg" VerticalAlignment="Top">
@@ -153,6 +222,25 @@
                 </ScrollViewer>
             </TabItem>
 
+            <TabItem Name="tabFlightModel" Header="FlightModel">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <StackPanel VerticalAlignment="Top">
+                        <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
+                            <Button Content="Make Backup" Name="FlightModelBackupButton" Margin="1" Tag="flight_model.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="Edit" Margin="1" Name="FlightModelEditButton" Tag="flight_model.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                        </WrapPanel>
+                        <StackPanel Name="FlightModelData" VerticalAlignment="Top">
+                        </StackPanel>
+                        <StackPanel Name="FlightModelIssues" VerticalAlignment="Top">
+                        </StackPanel>
+                        <StackPanel Name="FlightModelAir" Tag="flight_model.cfg" VerticalAlignment="Top">
+                        </StackPanel>
+                        <StackPanel Name="FlightModelSections" Tag="flight_model.cfg" VerticalAlignment="Top">
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
             <TabItem Name="tabCockpit" Header="Cockpit">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel VerticalAlignment="Top">
@@ -176,25 +264,6 @@
                         <StackPanel Name="SystemsData" VerticalAlignment="Top">
                         </StackPanel>
                         <StackPanel Name="SystemsSections" Tag="systems.cfg" VerticalAlignment="Top">
-                        </StackPanel>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-
-            <TabItem Name="tabFlightModel" Header="FlightModel">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <StackPanel VerticalAlignment="Top">
-                        <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
-                            <Button Content="Make Backup" Name="FlightModelBackupButton" Margin="1" Tag="flight_model.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
-                            <Button Content="Edit" Margin="1" Name="FlightModelEditButton" Tag="flight_model.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
-                        </WrapPanel>
-                        <StackPanel Name="FlightModelData" VerticalAlignment="Top">
-                        </StackPanel>
-                        <StackPanel Name="FlightModelIssues" VerticalAlignment="Top">
-                        </StackPanel>
-                        <StackPanel Name="FlightModelAir" Tag="flight_model.cfg" VerticalAlignment="Top">
-                        </StackPanel>
-                        <StackPanel Name="FlightModelSections" Tag="flight_model.cfg" VerticalAlignment="Top">
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
@@ -234,7 +303,16 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Name="tabPanel" Header="Panel">
+            <TabItem Name="tabSound" Header="Sounds">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <StackPanel VerticalAlignment="Top">
+                        <StackPanel Name="SoundList" VerticalAlignment="Top" >
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Name="tabPanel" Header="Panels">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel VerticalAlignment="Top">
                         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
@@ -260,14 +338,11 @@
                     <StackPanel>
                         <StackPanel Name="AboutContent" VerticalAlignment="Top">
                         </StackPanel>
-                        <StackPanel Name="Howto" VerticalAlignment="Top" Margin="5,5,5,20">
-                            <TextBlock Name="Header5" TextWrapping="Wrap" Text="Howto" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,10" Background="Transparent"/>
-                            <TextBlock TextWrapping="Wrap" Width="600" HorizontalAlignment="Stretch" Margin="0,0,0,20">If you want to import FSX aircraft into MSFS, press "FSX aircraft directory" to select original FSX aircraft folder (usually inside of [FSX]\SimObjects\Airplanes\), then "MSFS Community directory" and fill in all fields below. After "Import" button pressed, files will be copied into Community folder and configs loaded into the program memory. You can proceed to aircraft configuration by clicking tabs.</TextBlock>
-                            <TextBlock TextWrapping="Wrap" Width="600" HorizontalAlignment="Stretch" Margin="0,0,0,20">To load installed legacy or native aircraft, select its folder by pressing "Browse" button</TextBlock>
-                            <TextBlock TextWrapping="Wrap" Width="600" HorizontalAlignment="Stretch">Colored labels:</TextBlock>
-                            <TextBlock TextWrapping="Wrap" Width="600" Foreground="DarkGreen" HorizontalAlignment="Stretch">enabled value/section or no issues detected in file</TextBlock>
-                            <TextBlock TextWrapping="Wrap" Width="600" Foreground="DarkOrange" HorizontalAlignment="Stretch">disabled value/section but probably not required</TextBlock>
-                            <TextBlock TextWrapping="Wrap" Width="600" Foreground="DarkRed" HorizontalAlignment="Stretch">wrong values or missing sections, some issues detected in file</TextBlock>
+                        <StackPanel Name="Label" VerticalAlignment="Top" HorizontalAlignment="Center" Width="auto" Margin="5,5,5,20">
+                            <TextBlock Name="Header5" TextWrapping="Wrap" Text="Colored labels" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,10" Background="Transparent"/>
+                            <TextBlock Width="600" Foreground="DarkGreen">enabled value/section or no issues detected in file</TextBlock>
+                            <TextBlock Width="600" Foreground="DarkOrange">disabled value/section but probably not required</TextBlock>
+                            <TextBlock Width="600" Foreground="DarkRed">wrong values or missing sections, some issues detected in file</TextBlock>
                         </StackPanel>
                         <StackPanel Name="UsefulLinks" VerticalAlignment="Top" Margin="5" Width="auto" HorizontalAlignment="Center">
                             <TextBlock Name="Header4" TextWrapping="Wrap" Text="Links and credits" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,0,0,10" Background="Transparent"/>
@@ -331,6 +406,13 @@
 
                             <TextBlock TextWrapping="Wrap" Margin="0,20,0,0" TextAlignment="Center">To send direct message, visit Discord channel</TextBlock>
                             <TextBlock TextWrapping="Wrap" Margin="0,0,0,20" TextAlignment="Center">or email to info@eech.online</TextBlock>
+                        </StackPanel>
+                        <Separator Height="1" Margin="0 0 0 10" Width="auto"/>
+                        <StackPanel DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom" >
+                            <TextBlock TextWrapping="Wrap" Text="Alex Marko @ 2020" DockPanel.Dock="Bottom"  HorizontalAlignment="Center" VerticalAlignment="Bottom"  Background="#03FFFFFF"/>
+                            <TextBlock TextWrapping="Wrap" Text="Do not publish imported aircraft without author permission (really, don't)."  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>
+                            <TextBlock TextWrapping="Wrap" Text="Instead, send me a link of your import process tutorial and it will be added to the program description."  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>
+                            <TextBlock TextWrapping="Wrap" Text="And please mention this tool if you are sharing any kind of import result. Good luck with your experiments!"  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>

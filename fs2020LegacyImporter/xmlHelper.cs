@@ -59,7 +59,7 @@ namespace msfsLegacyImporter
             try {
                 File.WriteAllLines(logfile, new string[0]);
             }
-            catch (Exception e) { }
+            catch { }
 
             string htmlTpl = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "panelTpl\\panel.html");
             string cssTpl = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "panelTpl\\panel.css");
@@ -173,7 +173,7 @@ namespace msfsLegacyImporter
 
                         foreach (var gaugeData in gaugesList)
                         {
-                            gaugeGroup = gaugeData[0].Split('!')[0].Trim().ToLower();
+                            gaugeGroup = Path.GetFileName(gaugeData[0].Split('!')[0].Trim().ToLower());
                             gaugeSanitizedGroup = Regex.Replace(gaugeGroup, @"[^0-9A-Za-z ,.-_]", "").Replace(" ", "_");
                             gaugeName = gaugeData[0].Split('!')[1].Trim();
                             gaugeSanitizedName = sanitizeString(gaugeName);
@@ -196,6 +196,8 @@ namespace msfsLegacyImporter
                             // AC SUBFOLDER
                             if (!Directory.Exists(panelDir) || !File.Exists(panelDir + "\\" + gaugeName + ".xml"))
                                 panelDir = Path.GetDirectoryName(mainFile) + "\\" + gaugeGroup;
+                            if (!Directory.Exists(panelDir) || !File.Exists(panelDir + "\\" + gaugeName + ".xml"))
+                                panelDir = Path.GetDirectoryName(mainFile) + "\\." + gaugeGroup;
 
                             // FSX CABS
                             if (!Directory.Exists(panelDir) || !File.Exists(panelDir + "\\" + gaugeName + ".xml"))
@@ -205,6 +207,11 @@ namespace msfsLegacyImporter
                                 string msg = "Gauge file " + gaugeGroup + "\\" + gaugeName + ".xml not found";
                                 errors += msg + Environment.NewLine + Environment.NewLine;
                                 writeLog("ERROR: " + msg);
+
+                                try { if (panelDir == Path.GetDirectoryName(mainFile) + "\\" + gaugeGroup)
+                                        Directory.Move(panelDir, Path.GetDirectoryName(mainFile) + "\\." + gaugeGroup); }
+                                catch { }
+
                                 continue;
                             }
 
@@ -314,6 +321,10 @@ namespace msfsLegacyImporter
                                 errors += "Failed to process " + gaugeGroup + "\\" + gaugeName + ".xml" + Environment.NewLine + Environment.NewLine;
                                 writeLog(ex.ToString());
                             }
+
+                            try { if (panelDir == Path.GetDirectoryName(mainFile) + "\\" + gaugeGroup)
+                                    Directory.Move(panelDir, Path.GetDirectoryName(mainFile) + "\\." + gaugeGroup); }
+                            catch { }
                         }
 
                         if (html != "")
@@ -1007,7 +1018,7 @@ namespace msfsLegacyImporter
                         sw.WriteLine(lines);
                     }
                 }
-                catch (Exception e) { }
+                catch { }
             } else
             {
                 Console.WriteLine(lines);

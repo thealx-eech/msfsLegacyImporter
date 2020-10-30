@@ -1,32 +1,39 @@
-[TERMS_OF_USE]
+[SECURITY_NOTICE]
 
-This test version of application can be used for personal purpose only. EXE file is unsigned debug build, so your Windows Defender or antivirus software may be triggered. If you are not sure it's safe - just don't use it and wait for the release.
+EXE file of this application is unsigned, so your Windows Defender or another antivirus software may be triggered. Sometimes it even block EXE file as malware (before or after archive extraction), it happen because of signatures comparison technology that does not analyse real program functionality but searching matches in binary data.
+Each update build was submit into Microsoft Security Intelligence service to make sure it will be not blocked by Windows Defender, but it take days until cloud database, and then your client, will be updated. If you experience such issue - you may try to apply security intelligence manual update following this instruction [https://www.microsoft.com/en-us/wdsi/defenderupdates]  and then try to run application again.
+If you are using some different antivirus software - you can send file for detailed analysis manually which available for most services. Usually it takes 2-4 hours to complete, as result EXE file will be whitelisted after next signatures update.
+If it still does not work and you do not trust program developer - don't use it for now and wait for the release version.
 
 [DESCRIPTION]
 
-This program was made to simplify FSX aircraft import into MSFS. At this moment, it can be named assistant, as just performs routine import actions, and also provide some guidance on how to fix detected issues. Maybe some day it will become converter, but now a lot of manual changes in aircraft files required to make it work properly.
+This program was made to simplify FSX aircraft import into MSFS. Two levels of import available - Legacy (Ethusiast Mode) and Modern (Developer Mode). First one providing list of fixes for various critical issues, lights and textures conversion, 2D gauges import. Second also have tools for CFG files manipulations and AIR file import. Please read LICENSE.TXT file content for both levels.
 
 [PROVIDED_FEATURES]
 
 - copy files from FSX to MSFS Community folder with proper structure
 - generate layout.json file with list of files
-- generate manifest.json file based on typed by user data
-- load existing legacy MSFS aircraft
+- generate manifest.json file based on loaded from aircraft pacage data (manual edit possible)
+- load existing legacy or native MSFS aircraft
 - split AIRCRAFT.CFG on relative CFG files
-- insert missing values into imported CFG files
-- insert missing CFG file sections on users choice
+- insert missing values into imported CFG file(s)
+- insert missing CFG file sections on user choice
 - populate missing performance values from description
-- insert missing gauges parameters from templates (does not fix missing cockpit gauges!)
+- fix ui_typerole invalid value
+- insert external view gauges
 - set speed indicator limits from cruise_speed value
 - detect buggy engine values (engine_type and afterburner_available)
 - adjust engines output power
 - fix runway issues (gears raised, fuel pump disabled, parking brakes disabled)
 - fix contact points duplicates (stuck landing gear issue)
 - notify about contact point formatting issues
-- convert external/cockpit lights
+- convert exterior/interior lights
+- insert taxi lights
 - bulk convert of BMP textures to DDS
 - import AIR values into CFG files
-- import 2D panels (WIP)
+- import 2D gauges (WIP)
+- toggle aircraft sounds
+- insert/remove variometer tone
 - backup and restore editable files
 - inform about available program update, perform self update if triggered by user
 
@@ -61,46 +68,36 @@ https://www.youtube.com/watch?v=Tt_6Vsp9xZY
 
 https://www.youtube.com/watch?v=TuuVtgpfjTM
 
-[NOTICE.1]
+[NOTICE]
 
-This is an early test version, so use it only if you have some experience and knowledge in this process. This program manipulates with files and reading/writing registry values, so use it on your own risk. Application is not signed, so possibly you antivirus will ask permission to launch it.
-
-[NOTICE.2]
-
-This converter for personal use only. Do not publish converted planes. If you are owner of the model, you can contact me about issues you have and maybe I can fix some.
-
-[NOTICE.3]
-
-In release MSFS version bug with legacy aircrafts exists - if you met some other player with same aircraft and exactly the same AC folder name (inside SimObjects), game will crash for any of you. So it is not recommended to play imported airplanes online.
+Since MSFS release, bug with legacy aircrafts exists - if you met some other player with same aircraft and exactly the same AC folder name (inside SimObjects), game will crash for any of you. So it is not recommended to play imported airplanes online.
 
 
-[DETAILED_DESCRIPTION]
+[CFG_PARSER]
 
-0. CFG parser
+Application loading all required CFG and FLT filed into the memory once aircraft loaded or imported, and updating local files values after each user action. 
+If some files was edited manually while aircraft data loaded into the memory, notification appear that files should be reloaded.
+To avoid parsing issues, keep files formatting properly (comment symbol is ";", no spaces inside of [SECTION_NAME], inactive parameters has ";-" at the beginning of line)
 
-0.1 Application loading all required CFG and FLT filed into the memory once aircraft loaded or imported, and updating local files values after each user action.
-0.2 If some files was edited manually while aircraft data loaded into the memory, notification appear that files should be reloaded.
-0.3 To avoid parsing issues, keep files formatting properly (comment symbol is ";", no spaces inside of [SECTION_NAME], inactive parameters has ";-" at the beginning of line)
-
+0. Main Screen
+0.1 Left side - new import from FSX. On press, import form will appear. Original FSX aircraft folder should be selected first (usually inside of [FSX]\SimObjects\Airplanes\ but may be unpacked aircraft directory). Perfectly, it could be stock airplane with analogue 2D or 3D gauges. After Community folder is selected and fields populated, import can be performed. After success import tabs with available instruments will appear.
+0.2 Right side - load MSFS aircraft. Button Browse will appear, after pressing it you'll need to find legacy or native aircraft folder inside of MSFS Community directory. After folder is selected, available CFG files and textures will be scanned, related tabs will show up. If you have not converted any aircraft yet (with Importer or any other method), use section 0.1 first. 
 
 1. Init page
 
-1.1 1st section is Load installed aircraft. After Browse button pressed, you'll need to find legacy or native aircraft folder inside MSFS Community directory. After folder is selected, available CFG files and textures will be scanned, related tabs will show up. If you have not converted any aircraft yet (with Importer or any other method), don't use section 1.1 instead. 
-1.2 Update LAYOUT.JSON section can be triggered manually if you are moving/renaming files inside of aircraft. When you're using Importer functions that affects files and folders (like CFG split of textures conversion), this option being triggered automatically, no need to press it after each operation.
-1.3 Import FSX aircraft section - original FSX aircraft folder should be selected first (usually inside of [FSX]\SimObjects\Airplanes\). Perfectly, it could be stock airplane with minimum amount of 2D gauges. However, freeware/paid products will good to test as well. After Community folder is selected and fields populated, import can be performed. After success import tabs with available instruments will appear.
+1.1 Current aircraft information
+1.2 Update LAYOUT.JSON section can be triggered manually if you are moving/renaming files inside of aircraft. When you're using Importer features that affects files and folders (like CFG split of textures conversion), this option being triggered automatically, no need to press it after each operation.
+1.3 Current import mode information. If current mode is Basic, Full import mode button will be at the bottom. Before proceed, important to check that all sections in AIRCRAFT.CFG labeled properly - in format like '[SECTION_NAME]' (not ';[SECTION_NAME]' or '[ SECTION NAME ]' ). When pressed, script will compare template CFGs (taken from MSFS generic plane) with aircraft.cfg and move presented sections in relative files. Original aircraft.cfg file will be renamed to ".aircraft.cfg" and ignored by JSON generator. You can remove it if you want but it does not affect the game anyway. After processing, layout.json will be regenerated automatically
+1.4 If current mode is Full import, list of CFG files inside of aircraft folder. If all of them presented - no actions required. If some/all except aircraft.cfg are missing - Process button available.
+1.5 If "unknown.cfg" file appear after processing - some of the sections was not found in templates, first thing to do is check that unrecognized sections labels written correctly. If you sure, that that section was not moved to proper CFG file by mistake - please report.
 
 2. Aircraft
 
-2.1 On top is list of CFG files inside of aircraft folder. If all of them presented - no actions required. If some/all except aircraft.cfg are missing - Process button available. When pressed, script will compare template CFGs (taken from MSFS generic plane) with aircraft.cfg and move presented sections in relative files. 
-2.2 Before proceed, important to check that all sections in AIRCRAFT.CFG labeled properly - in format like '[SECTION_NAME]' (not ';[SECTION_NAME]' or '[ SECTION NAME ]' ).
-2.3 If "unknown.cfg" file appear after processing - some of the sections was not found in templates, first thing to do is check that unrecognized sections labels written correctly. If you sure, that that section was not moved to proper CFG file by mistake - please report.
-2.4 Original aircraft.cfg file will be renamed to ".aircraft.cfg" and ignored by JSON generator. You can remove it if you want but it does not affect the game anyway.
-2.5 After processing, layout.json will be regenerated automatically
-2.6 Missing performance parameters list below tells you that some values are missing. You can press the button below so Importer will parse aircraft description and get missing values, but that not always possible. If some of the notifies left unresolved, you can add missing value in aircraft.cfg file manually.
-2.7 Sections list of this file. In green - presented sections (but it still may have some missing/disabled values), in orange - missing but not required sections, in red - highly likely missing required section for this aircraft.
-2.8 Once some sections selected and Insert button pressed, you will be asked about new variables - if you press YES, all default values will be inserted into file as active parameters, if NO - inactive. It is recommended to choose YES for sections colored in RED.
-2.9 If DLL files exists in aircraft folder, message appear about partially working avionics
-2.10 Backup button available on all editable sections, once created - it can be clicked to restore original file. Backup file can be removed only manually.
+2.1 Missing or invalid aircraft parameters list. You can check all/some options and press the button below, script will try to search for selected values in aircraft description, but they may be not presented. If some of the notifies left unresolved, you can add missing values in aircraft.cfg file manually.
+2.2 Sections list of this file. In green - presented sections (but it still may have some missing/disabled values), in orange - missing but not required sections, in red - highly likely missing required section for this aircraft.
+2.3 Once some sections selected and Insert button pressed, you will be asked about new variables - if you press YES, all default values will be inserted into file as active parameters, if NO - inactive. It is recommended to choose YES for sections colored in RED.
+2.4 If DLL files exists in aircraft folder, message appear about partially working avionics
+2.5 Backup button available on all editable sections, once created - it can be clicked to restore original file. Backup file can be removed only manually.
 
 3. Engines
 
@@ -114,7 +111,7 @@ In release MSFS version bug with legacy aircrafts exists - if you met some other
 3.8 After import, you'll need to fix all untouched modern values manually
 3.9 List of sections at the bottom (same as 2.7-2.8)
 
-4. Cockpit
+4. Cockpit (Full import mode)
 
 4.1 Script is checking for instruments and gauges presence (but not their statuses, so if some gauge marked in green it still can be disabled or not configured)
 4.2 In red marked missing instruments, that appear on external view. So it is recommended to enable them.
@@ -123,10 +120,9 @@ In release MSFS version bug with legacy aircrafts exists - if you met some other
 
 5. Systems
 
-5.1 List of lights listed here. If some of them in FSX format, you can select checkboxes and press convert button
-5.2 FSX has much shorter list of light effects compare to MSFS so possibly you will see not exactly the same effect in the game
-5.3 You may need to adjust direction coordinates after conversion (by default set to 0,0,0)
-5.4 List of sections (same as 2.7-2.8)
+5.1 List of lights listed here. If some of them in FSX format, you can select checkboxes and press convert button. FSX has much shorter list of light effects compare to MSFS so possibly you will see not exactly the same effect in the game. You may need to adjust direction coordinates after conversion (by default set to 0,0,0)
+5.2 If aircraft does not have taxi or landing lights, you will see list of landing gear points, to which taxi lights can be attached (raised 2ft). No animation, so lights always stay in same position. You can always adjust their position manually (format: type, left/right, forward/backward, down/up).
+5.3 List of sections (same as 2.7-2.8)
 
 6. FlightModel
 
@@ -136,12 +132,12 @@ In release MSFS version bug with legacy aircrafts exists - if you met some other
 6.4 Missing critical flight model values list, some of them required only after AIR file import
 6.4 AIR data import table same as in 3.4-3.8
 6.5 To import all flight model values, you'll need to add AERODYNAMICS section. You may choose either option - insert default values or leave them disabled, but in second case you'll need to fix and enable them manually otherwise game will crash (all values inside of this section except "_table" are critical).
-6.6. After both engines and flight model data imported, AIR file will be disabled and no longer readed by game. If some critical CFG values are not set, game may crash on loading process.
+6.6 After both engines and flight model data imported, AIR file will be disabled and no longer readed by game. If some critical CFG values are not set, game may crash on loading process.
 6.7 List of sections at the bottom (same as 2.7-2.8)
 
-7. Runway
+7. Runway (Full import mode only)
 
-7.1 Configs section for Runway state (affect aircraft behavior once you get controls).
+7.1 Configs section for Runway state (affect aircraft avionics state once you get controls on the ground).
 7.2 May fix issues like raised landing gears, parking brakes disabled, fuel pumps/valves disabled
 
 8. Textures
@@ -157,27 +153,33 @@ In release MSFS version bug with legacy aircrafts exists - if you met some other
 9.2 After Remove button pressed, backup of MDL file will be created (only if it does not exists) and _CVC_ folder (cache) of this aircraft cleared
 9.3 Original MDL can be restored by clicking button in right top corner of Models tab
 
-10. Panel
+10 Sounds
 
-10.1 Experimental feature for 2D gauges conversion
-10.2 If you have FSX installed, you need to extract default instruments sources first by using top button, they will be stored in "\Community\legacy-vcockpits-instruments\.FSX" directory. Without default instruments sources some/all gauges aircraft may not work. However, DLL sources are not supported yet, so some gauges just can't be converted.
-10.3 If aircraft has CAB file included, you can use another button to extract these sources. If instruments already unpacked in panel folder, no actions required. You can edit these sources (both images and XML files) as they will be not changed by Importer anymore.
-10.4 To available convert panels, check some of them and press Import button.
-10.5 To adjust moving elements and individual gauges backgrounds brightness, use slider. Lower value makes image brighter, higher - darker.
-10.6 If you see needles in the cockpit, but no gauges backgrounds appear - check "Force gauge background" option
-10.7 If you experience any problems with imported gauges, you can try again with next update - each fixed issue may affect any FSX aircraft.
-10.8 Possible results:
-10.8.1 Gauges may get same view as originally in FSX and work as expected, i.e. conversion succeed
-10.8.2 Gauges may get texture background and wireframe removed from it, even if it will not functioning properly; wait for updates or check generated JS files
-10.8.3 Game crashes or no gauges appear (try to check "Force gauge background") or you see total mess in the cockpit (you can try to copy required files that mentioned in warning messages)
-10.8.4 App crashes when you press one of the import buttons, usually because of XML file format issues (feel free to report)
-10.9 To remove generated panels: Press "Restore Backup" button on Panel tab, delete /Community/legacy-vcockpits-instruments folder
+10.1 List of sound sample, used by aircraft. Each sound can be enabled and disabled anytime.
+10.2 If sound.xml file does not exist yet, variometer tone button available and it volume adjustment.
+10.3 If sound.xml exists, removal button will be there.
 
-11. About
+11. Panel
 
-11.1 Update availability. If update available, tab label will be colored in red
-11.2 Manual update will open zip link in the browser
-11.3 Self update will pull update archive from the server, unpack it, replace EXEs and restart process
+11.1 Experimental feature for 2D gauges conversion
+11.2 If you have FSX installed, you need to extract default instruments sources first by using top button, they will be stored in "\Community\legacy-vcockpits-instruments\.FSX" directory. Without default instruments sources some/all gauges aircraft may not work. However, DLL sources are not supported yet, so some gauges just can't be converted.
+11.3 If aircraft has CAB file included, you can use another button to extract these sources. If instruments already unpacked in panel folder, no actions required. You can edit these sources (both images and XML files) as they will be not changed by Importer anymore.
+11.4 To available convert panels, check some of them and press Import button.
+11.5 To adjust moving elements and individual gauges backgrounds brightness, use slider. Lower value makes image brighter, higher - darker.
+11.6 If you see needles in the cockpit, but no gauges backgrounds appear - check "Force gauge background" option
+11.7 If you experience any problems with imported gauges, you can try again with next update - each fixed issue may affect any FSX aircraft.
+11.8 Possible results:
+11.8.1 Gauges may get same view as originally in FSX and work as expected, i.e. conversion succeed
+11.8.2 Gauges may get texture background and wireframe removed from it, even if it will not functioning properly; wait for updates or check generated JS files
+11.8.3 Game crashes or no gauges appear (try to check "Force gauge background") or you see total mess in the cockpit (you can try to copy required files that mentioned in warning messages)
+11.8.4 App crashes when you press one of the import buttons, usually because of XML file format issues (feel free to report)
+11.9 To remove generated panels: Press "Restore Backup" button on Panel tab, delete /Community/legacy-vcockpits-instruments folder
+
+12. About
+
+12.1 Update availability. If update available, tab label will be colored in red
+12.2 Manual update will open zip link in the browser
+12.3 Self update will pull update archive from the server, unpack it, replace EXEs and restart process
 
 [CREDITS]
 
