@@ -75,19 +75,21 @@
                     </EventTrigger>
                 </TextBlock.Triggers>
             </TextBlock>
+            <ComboBox Name="LangSelector" Grid.ColumnSpan="2" HorizontalAlignment="Right" FontSize="18" Height="30" VerticalAlignment="bottom" Width="auto" Margin="15 15 30 15">
+            </ComboBox>
         </Grid>
 
         <TabControl Name="fsTabControl">
             <TabItem Name="tabInit" Header="Init">
                     <StackPanel DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
                         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
-                            <Button Content="Main Menu" Name="MainMenuButton" Tag="" Margin="1" Click="ShowMainMenu" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                        <Button Content="MainMenuButton" Name="MainMenuButton" Tag="" Margin="1" Click="ShowMainMenu" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         </WrapPanel>
 
                         <StackPanel Name="LoadAircraft" DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom">
-                            <TextBlock Name="LoadHeader" TextWrapping="Wrap" Text="Load imported FSX (Legacy) or MSFS (Native) aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
-                            <TextBlock TextWrapping="Wrap" Text="Set path of imported FSX aircraft or native MSFS aircaft" VerticalAlignment="Top" DockPanel.Dock="Top"  FontSize="10" HorizontalAlignment="Center" Background="#00808080"/>
-                            <Button x:Name="btnOpenFile" Click="BtnOpenFile_Click">Browse</Button>
+                        <TextBlock Name="load_imported_header" TextWrapping="Wrap" Text="load_imported_header" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                        <TextBlock  Name="load_imported_notice" TextWrapping="Wrap" Text="load_imported_notice" VerticalAlignment="Top" DockPanel.Dock="Top"  FontSize="10" HorizontalAlignment="Center" Background="#00808080"/>
+                        <Button x:Name="btnOpenFile" Click="BtnOpenFile_Click">btnOpenFile</Button>
                             <Separator Height="1" Margin="0 10 0 0" Width="auto"/>
                         </StackPanel>
 
@@ -97,19 +99,19 @@
                             <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" VerticalAlignment="Top">
                                 <TextBlock Name="btnOpenFilePath"></TextBlock>
                             </WrapPanel>
-                            <TextBlock Name="Header3" TextWrapping="Wrap" Text="Update LAYOUT.JSON file of current aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
-                            <Button x:Name="btnScan" Click="BtnScan_Click">Rescan aircraft files</Button>
+                        <TextBlock Name="update_layout_header" TextWrapping="Wrap" Text="update_layout_header" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                        <Button x:Name="btnScan" Click="BtnScan_Click">btnScan</Button>
                             <Separator Height="1" Width="auto"/>
                         </StackPanel>
                         <StackPanel Name="AircraftProcess"  Margin="0,0,0,0"  DockPanel.Dock="Top" VerticalAlignment="Top">
                         </StackPanel>
 
                         <StackPanel Name="ImportForm" DockPanel.Dock="Top" Height="auto" VerticalAlignment="Top">
-                            <TextBlock Name="Header2" TextWrapping="Wrap" Text="Import new FSX aircraft" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
-                            <TextBlock TextWrapping="Wrap" Text="Set path of FSX aircraft directory first (not the root of installed FSX), then set MSFS Community folder path" VerticalAlignment="Top" DockPanel.Dock="Top"  FontSize="10" HorizontalAlignment="Center" Background="#00808080"/>
-                            <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,10" VerticalAlignment="Top">
-                                <Button Width="auto" Name="btnSourceFolder" Click="BtnOpenSourceFile_Click">FSX aircraft directory</Button>
-                                <Button Name="btnTargetFolder" Click="BtnOpenTargetFile_Click">MSFS Community directory</Button>
+                        <TextBlock Name="new_import_header" TextWrapping="Wrap" Text="new_import_header" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                        <TextBlock Name="new_import_notice" TextWrapping="Wrap" Text="new_import_notice" VerticalAlignment="Top" DockPanel.Dock="Top"  FontSize="10" HorizontalAlignment="Center" Background="#00808080"/>
+                        <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,10" VerticalAlignment="Top">
+                            <Button Width="auto" Name="btnSourceFolder" Click="BtnOpenSourceFile_Click">btnSourceFolder</Button>
+                            <Button Name="btnTargetFolder" Click="BtnOpenTargetFile_Click">btnTargetFolder</Button>
                             </WrapPanel>
                             <WrapPanel Width="auto" DockPanel.Dock="Top" Margin="5,0,0,5" VerticalAlignment="Top">
                                 <TextBlock Name="btnSourceFolderPath" MinWidth="100" HorizontalAlignment="Left"></TextBlock>
@@ -171,7 +173,7 @@
                                 <TextBox Name="PackageMinVer2" Grid.Column="2" Text="17"/>
                                 <TextBox Name="PackageMinVer3" Grid.Column="3" Text="10"/>
                             </Grid>
-                            <Button Margin="5,5,5,5" Width="auto" x:Name="btnImportSubmit" Click="BtnImportSubmit_Click">Import</Button>
+                        <Button Margin="5,5,5,5" Width="auto" x:Name="btnImportSubmit" Click="BtnImportSubmit_Click">btnImportSubmit</Button>
                         </StackPanel>
                     </StackPanel>
             </TabItem>
@@ -180,8 +182,8 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
-                            <Button Content="Make Backup" Name="AircraftBackupButton" Margin="1" Tag="aircraft.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
-                            <Button Content="Edit" Margin="1" Name="AircraftEditButton" Tag="aircraft.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="AircraftBackupButton" Name="AircraftBackupButton" Margin="1" Tag="aircraft.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="AircraftEditButton" Margin="1" Name="AircraftEditButton" Tag="aircraft.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         </WrapPanel>
                         <!--<TextBlock x:Name="AircraftContent" VerticalAlignment="Top" TextWrapping="Wrap"  DockPanel.Dock="Top">
                     </TextBlock>-->
@@ -197,12 +199,12 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel VerticalAlignment="Top">
                         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
-                            <Button Content="Make Backup" Name="EnginesBackupButton" Margin="1" Tag="engines.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
-                            <Button Content="Edit" Margin="1" Name="EnginesEditButton" Tag="engines.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="EnginesBackupButton" Name="EnginesBackupButton" Margin="1" Tag="engines.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="EnginesEditButton" Margin="1" Name="EnginesEditButton" Tag="engines.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         </WrapPanel>
                         <StackPanel Name="EnginesData" VerticalAlignment="Top">
                         </StackPanel>
-                        <TextBlock TextWrapping="Wrap" Text="Adjust engines power" Foreground="Black" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
+                        <TextBlock Name="engines_power" TextWrapping="Wrap" Text="engines_power" Foreground="Black" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
                         <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,20,0,40" VerticalAlignment="Top">
                             <Button Width="auto" Click="BtnEnginePowerClick" Tag="0.5">-50%</Button>
                             <Button Width="auto" Click="BtnEnginePowerClick" Tag="0.75">-25%</Button>
@@ -226,9 +228,11 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel VerticalAlignment="Top">
                         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
-                            <Button Content="Make Backup" Name="FlightModelBackupButton" Margin="1" Tag="flight_model.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
-                            <Button Content="Edit" Margin="1" Name="FlightModelEditButton" Tag="flight_model.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="FlightModelBackupButton" Name="FlightModelBackupButton" Margin="1" Tag="flight_model.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="FlightModelEditButton" Margin="1" Name="FlightModelEditButton" Tag="flight_model.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         </WrapPanel>
+                        <StackPanel Name="ContactPointsData" VerticalAlignment="Top">
+                        </StackPanel>
                         <StackPanel Name="FlightModelData" VerticalAlignment="Top">
                         </StackPanel>
                         <StackPanel Name="FlightModelIssues" VerticalAlignment="Top">
@@ -245,8 +249,8 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel VerticalAlignment="Top">
                         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
-                            <Button Content="Make Backup" Name="CockpitBackupButton" Margin="1" Tag="cockpit.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
-                            <Button Content="Edit" Margin="1" Name="CockpitEditButton" Tag="cockpit.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="CockpitBackupButton" Name="CockpitBackupButton" Margin="1" Tag="cockpit.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="CockpitEditButton" Margin="1" Name="CockpitEditButton" Tag="cockpit.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         </WrapPanel>
                         <StackPanel Name="CockpitSections" Tag="cockpit.cfg" VerticalAlignment="Top">
                         </StackPanel>
@@ -258,8 +262,8 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel VerticalAlignment="Top">
                         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
-                            <Button Content="Make Backup" Name="SystemsBackupButton" Margin="1" Tag="systems.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
-                            <Button Content="Edit" Margin="1" Name="SystemsEditButton" Tag="systems.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="SystemsBackupButton" Name="SystemsBackupButton" Margin="1" Tag="systems.cfg" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="SystemsEditButton" Margin="1" Name="SystemsEditButton" Tag="systems.cfg" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         </WrapPanel>
                         <StackPanel Name="SystemsData" VerticalAlignment="Top">
                         </StackPanel>
@@ -273,8 +277,8 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel VerticalAlignment="Top">
                         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
-                            <Button Content="Make Backup" Margin="1" Name="RunwayBackupButton" Tag="runway.flt" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
-                            <Button Content="Edit" Margin="1" Name="RunwayEditButton" Tag="runway.flt" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="RunwayBackupButton" Margin="1" Name="RunwayBackupButton" Tag="runway.flt" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="RunwayEditButton" Margin="1" Name="RunwayEditButton" Tag="runway.flt" Click="CfgEditClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         </WrapPanel>
                         <StackPanel Name="RunwayData" VerticalAlignment="Top">
                         </StackPanel>
@@ -295,8 +299,10 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel VerticalAlignment="Top">
                         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
-                            <Button Content="Make Backup" Margin="1" Name="ModelBackupButton" Tag="" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="ModelBackupButton" Margin="1" Name="ModelBackupButton" Tag="" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         </WrapPanel>
+                        <StackPanel Name="MissingLiveryModels" VerticalAlignment="Top" >
+                        </StackPanel>
                         <StackPanel Name="ModelsList" VerticalAlignment="Top" >
                         </StackPanel>
                     </StackPanel>
@@ -316,7 +322,7 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel VerticalAlignment="Top">
                         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
-                            <Button Content="Make Backup" Margin="1" Name="PanelBackupButton" Tag="" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
+                            <Button Content="PanelBackupButton" Margin="1" Name="PanelBackupButton" Tag="" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         </WrapPanel>
                         <StackPanel Name="CabsList" VerticalAlignment="Top" >
                         </StackPanel>
@@ -327,7 +333,7 @@
                         <StackPanel Name="ExpressionTest" VerticalAlignment="Top" Width="600">
                             <TextBox Name="TextExpressionField" Visibility="Collapsed" Height="100" HorizontalAlignment="Stretch"></TextBox>
                             <TextBlock Name="TextExpressionResult"  Visibility="Collapsed" Height="100" HorizontalAlignment="Stretch" TextWrapping="Wrap" ></TextBlock>
-                            <Button Name="TextExpressionButton" Click="TextExpressionClick">Test FSX Expressions converter</Button>
+                            <Button Name="TextExpressionButton" Click="TextExpressionClick">TextExpressionButton</Button>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
@@ -339,16 +345,21 @@
                         <StackPanel Name="AboutContent" VerticalAlignment="Top">
                         </StackPanel>
                         <StackPanel Name="Label" VerticalAlignment="Top" HorizontalAlignment="Center" Width="auto" Margin="5,5,5,20">
-                            <TextBlock Name="Header5" TextWrapping="Wrap" Text="Colored labels" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,10" Background="Transparent"/>
-                            <TextBlock Width="600" Foreground="DarkGreen">enabled value/section or no issues detected in file</TextBlock>
-                            <TextBlock Width="600" Foreground="DarkOrange">disabled value/section but probably not required</TextBlock>
-                            <TextBlock Width="600" Foreground="DarkRed">wrong values or missing sections, some issues detected in file</TextBlock>
+                            <TextBlock Name="about_colored_header" TextWrapping="Wrap" Text="about_colored_header" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,10" Background="Transparent"/>
+                            <TextBlock Name="about_colored_green" Width="600" Foreground="DarkGreen">about_colored_green</TextBlock>
+                            <TextBlock Name="about_colored_orange" Width="600" Foreground="DarkOrange">about_colored_orange</TextBlock>
+                            <TextBlock Name="about_colored_red" Width="600" Foreground="DarkRed">about_colored_red</TextBlock>
                         </StackPanel>
                         <StackPanel Name="UsefulLinks" VerticalAlignment="Top" Margin="5" Width="auto" HorizontalAlignment="Center">
-                            <TextBlock Name="Header4" TextWrapping="Wrap" Text="Links and credits" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,0,0,10" Background="Transparent"/>
+                            <TextBlock Name="about_links_header" TextWrapping="Wrap" Text="about_links_header" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,0,0,10" Background="Transparent"/>
                             <TextBlock>
                                 <Hyperlink NavigateUri="readme.txt" RequestNavigate="Hyperlink_RequestNavigate">
                                     Readme
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock>
+                                <Hyperlink NavigateUri="https://docs.google.com/document/d/1TRCWeobJksmINLaV6u7aRGjeSFQSA2fUx-Mlua6z4IM/edit?usp=sharing" RequestNavigate="Hyperlink_RequestNavigate">
+                                    UI translation
                                 </Hyperlink>
                             </TextBlock>
                             <TextBlock>

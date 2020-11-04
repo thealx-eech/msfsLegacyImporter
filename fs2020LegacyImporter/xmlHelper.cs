@@ -187,7 +187,7 @@ namespace msfsLegacyImporter
                             //SET BUTTON LABEL
                             Application.Current.Dispatcher.Invoke(() => {
                                 if (sender.GetType() == typeof(Button))
-                                    ((Button)sender).Content = "Importing gauge \"" + gaugeName + "\"";
+                                    ((Button)sender).Content = gaugeName;
                             });
 
                             // AC CAB

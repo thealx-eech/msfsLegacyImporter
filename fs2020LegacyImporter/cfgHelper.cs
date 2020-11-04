@@ -23,6 +23,7 @@ namespace msfsLegacyImporter
         private List<CfgFile> cfgTemplates;
         private List<CfgFile> cfgAircraft;
         public long lastChangeTimestamp;
+        private bool DEBUG = false;
 
 
         public bool processCfgfiles(string sourcesPath, bool isAircraft = false)
@@ -466,22 +467,18 @@ namespace msfsLegacyImporter
             return i;
         }
 
-        public string[] getContactPoints(string aircraftDirectory, string type = "")
+        public List<string> getContactPoints(string aircraftDirectory, string type = "")
         {
-            string[] contactPointsList = new string[100];
-            int i = 0;
+            List<string> contactPointsList = new List<string>();
 
             CfgSection section = cfgFileExists("flight_model.cfg") ? cfgAircraft.Find(x => x.Name == "flight_model.cfg").Sections.Find(x => x.Name == "[CONTACT_POINTS]") :
                 cfgAircraft.Find(x => x.Name == "aircraft.cfg").Sections.Find(x => x.Name == "[CONTACT_POINTS]");
 
             if (section != null)
                 foreach (CfgLine line in section.Lines)
-                    if (line.Active && line.Name.StartsWith("point.") && (type == "" || line.Value.Contains(',') && line.Value.Split(',')[0].Trim() == type))
-                    {
-                        contactPointsList[i] = line.Name + " = " + line.Value;
-                        //Console.WriteLine(contactPointsList[i]);
-                        i++;
-                    }
+                    if (line.Active && line.Name.StartsWith("point.") && ( type == "" || line.Value.Contains(',') && 
+                        (line.Value.Split(',')[0].Trim() == type || line.Value.Split(',')[0].Trim().Contains('.') && line.Value.Split(',')[0].Trim().Split('.')[0] == type) ))
+                        contactPointsList.Add(line.Name + " = " + line.Value);
 
             return contactPointsList;
         }
@@ -497,6 +494,8 @@ namespace msfsLegacyImporter
                 string sect = "";
 
                 string engine_type = getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]");
+                if (engine_type.Contains('.'))
+                    engine_type = engine_type.Split('.')[0];
                 if (engine_type == "1" || engine_type == "5") // JET
                 {
                     attr = "static_thrust";
@@ -619,13 +618,17 @@ namespace msfsLegacyImporter
                         CfgLine line = section.Lines.Find(x => x.Name == attrname);
                         if (line != null && (line.Active || ignoreInactive))
                         {
-                            Console.WriteLine("getCfgValue: " + filename + " / " + (sectionname != "" ? sectionname : "ANY") + " / " + attrname + " = " + line.Value);
+                            if (DEBUG)
+                                Console.WriteLine("getCfgValue: " + filename + " / " + (sectionname != "" ? sectionname : "ANY") + " / " + attrname + " = " + line.Value);
                             return line.Value;
                         }
                     }
                 }
             }
-            Console.WriteLine("getCfgValue: " + filename + " / " + (sectionname != "" ? sectionname : "ANY") + " / " + attrname + " NOT FOUND");
+
+            if (DEBUG)
+                Console.WriteLine("getCfgValue: " + filename + " / " + (sectionname != "" ? sectionname : "ANY") + " / " + attrname + " NOT FOUND");
+
             return "";
         }
 
@@ -644,13 +647,15 @@ namespace msfsLegacyImporter
                     if (line != null) {
                         line.Active = active;
 
-                        Console.WriteLine("setCfgValueStatus: " + filename + " / " + (sectionname != "" ? sectionname : "ANY") + " / " + attrname + " set to " + active);
+                        if (DEBUG)
+                            Console.WriteLine("setCfgValueStatus: " + filename + " / " + (sectionname != "" ? sectionname : "ANY") + " / " + attrname + " set to " + active);
                         return true;
                     }
                 }
             }
 
-            Console.WriteLine("setCfgValueStatus: " + filename + " / " + (sectionname != "" ? sectionname : "ANY") + " / " + attrname + " NOT FOUND");
+            if (DEBUG)
+                Console.WriteLine("setCfgValueStatus: " + filename + " / " + (sectionname != "" ? sectionname : "ANY") + " / " + attrname + " NOT FOUND");
             return false;
         }
 
@@ -661,7 +666,8 @@ namespace msfsLegacyImporter
                 CfgSection ligtsList = cfgFile.Sections.Find(x => x.Name == sectionname);
                 if (ligtsList != null)
                 {
-                    Console.WriteLine("setCfgValueStatus: " + cfgFile.Name + " / " + sectionname + " set to " + active);
+                    if (DEBUG)
+                        Console.WriteLine("setCfgValueStatus: " + cfgFile.Name + " / " + sectionname + " set to " + active);
 
                     ligtsList.Active = active;
                     foreach (CfgLine line in ligtsList.Lines)
@@ -671,7 +677,8 @@ namespace msfsLegacyImporter
                 }
             }
 
-            Console.WriteLine("setCfgValueStatus: " + cfgFile.Name + " / " + sectionname + " NOT FOUND");
+            if (DEBUG)
+                Console.WriteLine("setCfgValueStatus: " + cfgFile.Name + " / " + sectionname + " NOT FOUND");
             return cfgFile;
         }
 
@@ -754,6 +761,27 @@ namespace msfsLegacyImporter
                 filename = "aircraft.cfg";
 
             return cfgAircraft.Find(x => x.Name == filename).Sections.Find(x => x.Name == sectionName) != null;
+        }
+
+        public List<string> getMissingLiveryModels(string aircraftDirectory)
+        {
+            List<string> missingLiveryModels = new List<string>();
+            if (cfgFileExists("aircraft.cfg"))
+            {
+                for (int k = 0; k <= 99; k++)
+                {
+                    if (cfgSectionExists("aircraft.cfg", "[FLTSIM." + k + "]"))
+                    {
+                        string texture = getCfgValue("texture", "aircraft.cfg", "[FLTSIM." + k + "]").ToLower().Trim('"').Trim();
+                        string model = getCfgValue("model", "aircraft.cfg", "[FLTSIM." + k + "]").ToLower().Trim('"').Trim();
+
+                        if (!String.IsNullOrEmpty(texture) && (String.IsNullOrEmpty(model) || model != texture))
+                            missingLiveryModels.Add("[FLTSIM." + k + "] (texture:"+texture+" model:"+ (String.IsNullOrEmpty(model) ? "empty" : model) + ")");
+                    }
+                }
+            }
+            
+            return missingLiveryModels;
         }
 
         public class CfgFile

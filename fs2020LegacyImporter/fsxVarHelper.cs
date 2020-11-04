@@ -221,7 +221,7 @@ namespace msfsLegacyImporter
                 case string hn when hn.Equals("(A:Variometer rate,knots)", StringComparison.InvariantCultureIgnoreCase):
                     //return "parseFloat(SimVar.GetSimVarValue(\"AIRCRAFT WIND Y\", \"knots\"))"; // TODO: fix rate
                     //return "parseFloat(SimVar.GetSimVarValue(\"ACCELERATION BODY Y\", \"feet per second squared\"), 0);";
-                    return "(parseFloat(SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"feet per minute\"), 0) + parseFloat(SimVar.GetSimVarValue(\"ACCELERATION WORLD Y\", \"feet per minute squared\"), 0)) / 101;";
+                    return "parseFloat(SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"feet per minute\"), 0) / 101 + parseFloat(SimVar.GetSimVarValue(\"ACCELERATION WORLD Z\", \"feet per minute squared\"), 0)";
                 case string hn when hn.Equals("(A:Wiskey compass indication degrees,degrees)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"degrees\"))";
                 case string hn when hn.Equals("(A:Magnetic compass,radians)", StringComparison.InvariantCultureIgnoreCase):

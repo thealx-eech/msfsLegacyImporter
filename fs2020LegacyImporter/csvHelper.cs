@@ -6,11 +6,17 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace msfsLegacyImporter
 {
     class csvHelper
     {
+        private List<languageFile> langugeFiles;
+        private languageFile defaultLanguage;
+        private languageFile userLanguage;
+        private bool DEBUG = false;
+
         public List<string[]> processAirTable(string path, string[] header)
         {
             if (File.Exists(path))
@@ -134,7 +140,9 @@ namespace msfsLegacyImporter
                             result.Add(new string[] { prev_id + "-" + sub_counter, field2, field3 });
                             sub_counter++;
                         }
-                        Console.WriteLine("AIR VALUES " + result.Last()[0] + " / " + result.Last()[1] + " / " + result.Last()[2]);
+                        
+                        if (DEBUG)
+                            Console.WriteLine("AIR VALUES " + result.Last()[0] + " / " + result.Last()[1] + " / " + result.Last()[2]);
 
                         //isRecordBad = false;
                     }
@@ -172,7 +180,9 @@ namespace msfsLegacyImporter
                         if (currentToken != "" && tableData != "")
                         {
                             result.Add(new string[] { currentToken + "-" + sub_counter, "", tableData.TrimEnd(',') });
-                            Console.WriteLine("AIR VALUES " + result.Last()[0] + " / " + result.Last()[1] + " / " + result.Last()[2]);
+
+                            if (DEBUG)
+                                Console.WriteLine("AIR VALUES " + result.Last()[0] + " / " + result.Last()[1] + " / " + result.Last()[2]);
                         }
 
                         currentToken = "";
@@ -202,7 +212,9 @@ namespace msfsLegacyImporter
 
                                 result.Add(new string[] { currentToken + "-" + sub_counter, "", val });
                                 tableData = "";
-                                Console.WriteLine("AIR VALUES " + result.Last()[0] + " / " + result.Last()[1] + " / " + result.Last()[2].ToString());
+
+                                if (DEBUG)
+                                    Console.WriteLine("AIR VALUES " + result.Last()[0] + " / " + result.Last()[1] + " / " + result.Last()[2].ToString());
                             }
 
                             sub_counter++;
@@ -218,6 +230,142 @@ namespace msfsLegacyImporter
             }
 
             return null;
+        }
+
+        public void languageUpdate(string language)
+        {
+            string userLanguagefile = AppDomain.CurrentDomain.BaseDirectory + "\\lngFls\\userLanguage";
+            foreach (languageFile langugeFile in langugeFiles)
+            {
+                if (langugeFile.Name == language)
+                {
+                    Console.WriteLine("Language changed to " + language);
+                    userLanguage = langugeFile;
+                    try { File.WriteAllText(userLanguagefile, language); } catch { }
+                    break;
+                }
+            }
+        }
+
+        public void initializeLanguages(ComboBox LangSelector)
+        {
+            string userLanguagefile = AppDomain.CurrentDomain.BaseDirectory + "\\lngFls\\userLanguage";
+            string language = "English - Default";
+            if (File.Exists(userLanguagefile))
+            {
+                try { language = File.ReadAllText(userLanguagefile); } catch { }
+            }
+
+
+            langugeFiles = new List<languageFile>();
+            defaultLanguage = null;
+            userLanguage = null;
+
+            foreach (string filepath in Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory + "\\lngFls\\", "*.csv", SearchOption.TopDirectoryOnly))
+            {
+                string filename = Path.GetFileNameWithoutExtension(filepath);
+                languageFile currentLanguage = new languageFile(filename, new List<string[]>());
+
+                try
+                {
+                    using (var reader = new StreamReader(filepath))
+                    {
+                        var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+                        string[] header = new string[] { "slug", "translation", "original" };
+                        csv.Configuration.HasHeaderRecord = true;
+                        csv.Configuration.IgnoreQuotes = false;
+                        csv.Configuration.Delimiter = ",";
+
+                        var bad = new List<string>();
+                        csv.Configuration.BadDataFound = context =>
+                        {
+                            bad.Add(context.RawRecord);
+                        };
+
+                        while (csv.Read())
+                        {
+                            if (csv.Context.Row == 1)
+                            {
+                                csv.ReadHeader();
+                                continue;
+                            }
+
+                            csv.TryGetField(header[0], out string field1);
+                            string field2;
+                            if (filename == "English - Default")
+                                csv.TryGetField(header[2], out field2);
+                            else
+                                csv.TryGetField(header[1], out field2);
+
+                            if (!string.IsNullOrEmpty(field1) && !string.IsNullOrEmpty(field2))
+                                currentLanguage.Rows.Add(new string[] { field1, field2 });
+                        }
+
+                        Console.WriteLine("Bad records: " + string.Join(",", bad));
+                    }
+
+                    ComboBoxItem item = new ComboBoxItem();
+                    item.Content = filename;
+                    item.Tag = filename;
+                    LangSelector.Items.Add(item);
+
+                    langugeFiles.Add(currentLanguage);
+
+                    if (currentLanguage.Rows.Count > 0 && filename == language)
+                    {
+                        userLanguage = currentLanguage;
+                        LangSelector.Text = filename;
+                    }
+                    if (currentLanguage.Rows.Count > 0 && filename == "English - Default")
+                    {
+                        defaultLanguage = currentLanguage;
+                        if (string.IsNullOrEmpty(language))
+                            LangSelector.Text = filename;
+                    }
+
+                    Console.WriteLine("Language file " + filename + " loaded, " + currentLanguage.Rows.Count + " records added");
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("Error to parse \"\\lngFls\\" + language + ".csv\": " + e.Message);
+                }
+            }
+
+            if (userLanguage == null)
+                MessageBox.Show("Language file " + language + ".csv is empty.");
+
+            if (defaultLanguage == null)
+                MessageBox.Show("Language file english.csv not found.");
+        }
+
+        public string trans(string slug)
+        {
+            if (userLanguage != null)
+            {
+                string[] trans = userLanguage.Rows.Find(x => x[0] == slug);
+                if (trans != null && !String.IsNullOrEmpty(trans[1]))
+                    return trans[1].Replace("\\n", Environment.NewLine);
+            }
+
+            if (defaultLanguage != null)
+            {
+                string[] trans = defaultLanguage.Rows.Find(x => x[0] == slug);
+                if (trans != null && !String.IsNullOrEmpty(trans[1]))
+                    return trans[1].Replace("\\n", Environment.NewLine);
+            }
+
+            return slug;
+        }
+
+        public class languageFile
+        {
+            public string Name { get; set; }
+            public List<string[]> Rows { get; set; }
+            public languageFile(string name, List<string[]> rows)
+            {
+                Name = name;
+                Rows = rows;
+            }
         }
     }
 }

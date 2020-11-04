@@ -93,17 +93,23 @@ namespace msfsLegacyImporter
 
             InitializeComponent();
 
+            JSONHelper = new jsonHelper();
+            CfgHelper = new cfgHelper();
+            CsvHelper = new csvHelper();
+            XmlHelper = new xmlHelper();
+            FsxVarHelper = new fsxVarHelper();
+            FileDialogHelper = new fileDialogHelper();
+
+            // INIT LANGUAGES
+            CsvHelper.initializeLanguages(LangSelector);
+            LangSelector.DropDownClosed += new EventHandler(languageUpdated);
+
+            // SETUP MAIN SCREEN
             mainScreen.Visibility = Visibility.Visible;
             fsTabControl.Visibility = Visibility.Collapsed;
 
             // STYLE BUTTONS
-            btnOpenFile = SetButtonAtts(btnOpenFile);
-            btnSourceFolder = SetButtonAtts(btnSourceFolder);
-            btnTargetFolder = SetButtonAtts(btnTargetFolder);
-            btnScan = SetButtonAtts(btnScan);
-            btnImportSubmit = SetButtonAtts(btnImportSubmit);
-            TextExpressionButton = SetButtonAtts(TextExpressionButton);
-            MainMenuButton = SetButtonAtts(MainMenuButton, false);
+            setupStyles();
 
             // HIDE TABS
             int k = 0;
@@ -114,18 +120,45 @@ namespace msfsLegacyImporter
                 k++;
             }
 
-            JSONHelper = new jsonHelper();
-            CfgHelper = new cfgHelper();
-            CsvHelper = new csvHelper();
-            XmlHelper = new xmlHelper();
-            FsxVarHelper = new fsxVarHelper();
-            FileDialogHelper = new fileDialogHelper();
-
             // TRY TO LOAD CFGTPL FILES
             if (!CfgHelper.processCfgfiles(AppDomain.CurrentDomain.BaseDirectory + "\\cfgTpl\\"))
+            {
+                MessageBox.Show(CsvHelper.trans("init_cfg_tpl_missing"));
                 Environment.Exit(1);
+            }
 
             _ = CheckUpdateAsync();
+        }
+
+        private void setupStyles()
+        {
+            btnOpenFile = SetButtonAtts(btnOpenFile);
+            btnSourceFolder = SetButtonAtts(btnSourceFolder);
+            btnTargetFolder = SetButtonAtts(btnTargetFolder);
+            btnScan = SetButtonAtts(btnScan);
+            btnImportSubmit = SetButtonAtts(btnImportSubmit);
+            TextExpressionButton = SetButtonAtts(TextExpressionButton);
+            MainMenuButton = SetButtonAtts(MainMenuButton, false);
+
+            load_imported_header = SetHeaderAtts(load_imported_header);
+            load_imported_notice = SetHeaderAtts(load_imported_notice);
+            update_layout_header = SetHeaderAtts(update_layout_header);
+            new_import_header = SetHeaderAtts(new_import_header);
+            new_import_notice = SetHeaderAtts(new_import_notice);
+            engines_power = SetHeaderAtts(engines_power);
+            about_links_header = SetHeaderAtts(about_links_header);
+            about_colored_header = SetHeaderAtts(about_colored_header);
+            about_colored_green = SetHeaderAtts(about_colored_green);
+            about_colored_orange = SetHeaderAtts(about_colored_orange);
+            about_colored_red = SetHeaderAtts(about_colored_red);
+
+
+        }
+        private void languageUpdated(object sender, System.EventArgs e)
+        {
+            CsvHelper.languageUpdate(((ComboBoxItem)(sender as ComboBox).SelectedItem).Content.ToString());
+            setupStyles();
+            SummaryUpdate(true);
         }
 
         // FSX IMPORT
@@ -233,7 +266,7 @@ namespace msfsLegacyImporter
 
                 if (aircraftDirectory != "")
                 {
-                    LoadedHeader.Text = "Current aircraft: " + new DirectoryInfo(projectDirectory).Name;
+                    LoadedHeader.Text = CsvHelper.trans("init_curr_aircraft") + ": " + new DirectoryInfo(projectDirectory).Name;
                     //btnOpenFile.Content = "Select another aircraft";
 
                     btnOpenFilePath.Text = projectDirectory;
@@ -252,7 +285,7 @@ namespace msfsLegacyImporter
                     fileTrackWatcher.Path = aircraftDirectory + "\\";
                     fileTrackWatcher.EnableRaisingEvents = true;
 
-                    LoadLabel.Text = "Click on tabs to discover available fixes";
+                    LoadLabel.Text = CsvHelper.trans("init_tabs_click");
                     LoadLabel.Foreground = new SolidColorBrush(Colors.Black);
 
                     SummaryUpdate();
@@ -260,7 +293,7 @@ namespace msfsLegacyImporter
             }
             else
             {
-                MessageBox.Show("Selected folder " + directory + " should contain SimObjects folder, and layout.json + manifest.json files");
+                MessageBox.Show(string.Format(CsvHelper.trans("init_simobject_missing"), directory));
             }
         }
 
@@ -269,7 +302,7 @@ namespace msfsLegacyImporter
             if (DateTime.UtcNow.Ticks - CfgHelper.lastChangeTimestamp > 10000000)
             {
                 Dispatcher.Invoke(() => fsTabControl.IsEnabled = false);
-                MessageBoxResult messageBoxResult = MessageBox.Show("File " + Path.GetFileName(e.FullPath) + " was edited outside of the program" + Environment.NewLine + "Aircraft data should be reloaded", "CFG file change detected", MessageBoxButton.YesNo);
+                MessageBoxResult messageBoxResult = MessageBox.Show(string.Format(CsvHelper.trans("file_edited_outside"), Path.GetFileName(e.FullPath)), CsvHelper.trans("file_edited"), MessageBoxButton.YesNo);
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
                     CfgHelper.processCfgfiles(aircraftDirectory + "\\", true);
@@ -385,11 +418,11 @@ namespace msfsLegacyImporter
 
                                     if (File.Exists(backupFile))
                                     {
-                                        btn.Content = "Restore Backup";
+                                        btn.Content = CsvHelper.trans("restore_backup");
                                         break;
                                     }
                                     else
-                                        btn.Content = "Make Backup";
+                                        btn.Content = CsvHelper.trans("make_backup");
                                 }
                                 else
                                 {
@@ -455,7 +488,7 @@ namespace msfsLegacyImporter
                     TextBlock myBlock = null;
                     if (file == ".unknown.cfg" && File.Exists(aircraftDirectory + "\\" + file))
                     {
-                        myBlock = addTextBlock(file + ": ignored", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkOrange);
+                        myBlock = addTextBlock(file + ": "+ CsvHelper.trans("init_cfg_ignored"), HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkOrange);
                     }
                     else if (file == ".unknown.cfg")
                     {
@@ -463,12 +496,12 @@ namespace msfsLegacyImporter
                     }
                     else if (!File.Exists(aircraftDirectory + "\\" + file))
                     {
-                        myBlock = addTextBlock(file + ": missing", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkRed);
+                        myBlock = addTextBlock(file + ": "+ CsvHelper.trans("init_cfg_missing"), HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkRed);
                         status = 0;
                     }
                     else
                     {
-                        myBlock = addTextBlock(file + ": loaded", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkGreen);
+                        myBlock = addTextBlock(file + ": " + CsvHelper.trans("init_cfg_loaded"), HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkGreen);
                         presentedFiles.Add(file);
                     }
 
@@ -476,44 +509,43 @@ namespace msfsLegacyImporter
                 }
 
                 TextBlock modeHeader = addTextBlock("", HorizontalAlignment.Center, VerticalAlignment.Top, Colors.Black);
-                modeHeader.Margin = new Thickness(0, 20, 0, 0);
+                modeHeader.Margin = new Thickness(0, 10, 0, 0);
                 modeHeader.TextWrapping = TextWrapping.Wrap;
-                modeHeader.FontSize = 24;
+                modeHeader.FontSize = 21;
 
                 TextBlock modeDescr = addTextBlock("", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black);
-                modeDescr.Margin = new Thickness(0, 20, 0, 0);
+                modeDescr.Margin = new Thickness(0, 10, 0, 0);
                 modeDescr.TextWrapping = TextWrapping.Wrap;
-                modeDescr.FontSize = 15;
+                modeDescr.FontSize = 14;
 
                 TextBlock modeDescr2 = addTextBlock("", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black);
-                modeDescr2.Margin = new Thickness(0, 20, 0, 0);
+                modeDescr2.Margin = new Thickness(0, 10, 0, 0);
                 modeDescr2.TextWrapping = TextWrapping.Wrap;
-                modeDescr2.FontSize = 15;
+                modeDescr2.FontSize = 14;
 
                 if (presentedFiles.Count == 1 && presentedFiles.Contains("aircraft.cfg"))
                 {
-                    currentMode = "Basic import mode";
-                    modeHeader.Text = currentMode + " is active";
+                    currentMode = CsvHelper.trans("init_basic_mode");
+                    modeHeader.Text = currentMode + " " + CsvHelper.trans("init_mode_active");
                     AircraftProcess.Children.Add(modeHeader);
 
-                    modeDescr.Text = 
-"In " + currentMode + " you will have most features available, even if they will be applied to the single config file - \"aircraft.cfg\"." + Environment.NewLine +
-"This way MSFS will treat aircraft as Legacy, so flight model and engine configs will be loaded in compatibility mode. It is the easiest way to avoid engines, avionics and flight model issues." + Environment.NewLine +
-"However, MSFS compatibility code itself has issues that can't be fixed by changing config values. Also modern values (such as external view gauges) are not supported and can't be used." + Environment.NewLine + Environment.NewLine;
-                    modeDescr.Text +=
-"*Even if aircraft, imported in this mode, is playable and may have only minor issues, avoid publishing such portovers at any cost - these half-broken planes should be never named as releases. " +
-"If you still wish to share your success - make a video or text tutorial which can be used by other enthusiasts for educational purposes." + Environment.NewLine;
+                    modeDescr.Text =
+                    CsvHelper.trans("init_basic_notice1") + Environment.NewLine +
+                    CsvHelper.trans("init_basic_notice2") + Environment.NewLine +
+                    CsvHelper.trans("init_basic_notice3") + Environment.NewLine + Environment.NewLine +
+                    CsvHelper.trans("init_basic_notice4") +
+                    CsvHelper.trans("init_basic_notice5") + Environment.NewLine;
                     myPanel.Children.Add(modeDescr);
                 }
                 else
                 {
-                    currentMode = "Full import mode";
-                    modeHeader.Text = currentMode + " is active";
+                    currentMode = CsvHelper.trans("init_full_mode");
+                    modeHeader.Text = currentMode + " " + CsvHelper.trans("init_mode_active");
                     AircraftProcess.Children.Add(modeHeader);
 
                     modeDescr.Text =
-currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS will treat this aircraft as Native." + Environment.NewLine +
-"In this case more complicated requirements will be applied to existing values and you will experience various issues that can be fixed by applying available fixes or editing config data. It is strongly recommended to perform AIR data import, remove air file, and add all missing variables manually to finalize import process." + Environment.NewLine + Environment.NewLine;
+                    CsvHelper.trans("init_full_notice1") + Environment.NewLine +
+                    CsvHelper.trans("init_full_notice2") + Environment.NewLine;
                     modeDescr.Width = 460;
                     myPanel.Children.Add(modeDescr);
 
@@ -525,9 +557,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                         cfgsList.Children.Add(presentedFilesLabel);
                     myPanel.Children.Add(cfgsList);
 
-                    modeDescr2.Text =
-"*If you are the owner of the aircraft, or get permission to publish the import result, for free or for payment, you have to credit this tool in the release description." + Environment.NewLine +
-"Feel free to contact me about any issues you will have with your project.";
+                    modeDescr2.Text = CsvHelper.trans("init_full_notice3") + Environment.NewLine + CsvHelper.trans("init_full_notice4");
                     myPanel.Children.Add(modeDescr2);
 
                 }
@@ -539,12 +569,12 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 btn.Click += BtnAircraftProcess_Click;
 
                 if (presentedFiles.Count == 1 && presentedFiles.Contains("aircraft.cfg")) {
-                    btn.Content = "Enable Full import mode";
+                    btn.Content = CsvHelper.trans("init_full_enable");
                     myPanel.Children.Add(btn);
                 }
                 else if (status == 0)
                 {
-                    btn.Content = "Parse AIRCRAFT.CFG";
+                    btn.Content = CsvHelper.trans("init_parse_cfg");
                     myPanel.Children.Add(btn);
                 }
 
@@ -584,11 +614,11 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                             {
                                 if (requiredValue == "ui_typerole")
                                 {
-                                    AircraftPerformance = AddCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " aircraft parameter invalid", Colors.DarkRed, i++);
+                                    AircraftPerformance = AddCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " " + CsvHelper.trans("aircraft_parameter_invalid"), Colors.DarkRed, i++);
                                     tabAircraft.Foreground = new SolidColorBrush(Colors.DarkRed);
                                 }
                                 else
-                                    AircraftPerformance = AddCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " aircraft parameter missing", Colors.DarkOrange, i++);
+                                    AircraftPerformance = AddCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " " + CsvHelper.trans("aircraft_parameter_missing"), Colors.DarkOrange, i++);
                             }
                         }
                     }
@@ -596,11 +626,11 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
                 Button btn = new Button();
                 btn = SetButtonAtts(btn);
-                btn.Content = "Try to add missing aircraft parameters";
+                btn.Content = CsvHelper.trans("aircraft_add_missing_parameters");
                 btn.Click += AddDescriptionClick;
                 myPanel2.Children.Add(btn);
 
-                TextBlock notice = addTextBlock("Missing performance values will be searched in aircraft description. Invalid aircraft type value highlighted in red color, it should be fixed otherwise aircraft will not appear in main menu list.",
+                TextBlock notice = addTextBlock(CsvHelper.trans("aircraft_missing_parameter_notice"),
                    HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
                 notice.TextWrapping = TextWrapping.Wrap;
                 notice.Width = 600;
@@ -616,7 +646,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
         {
             if (!File.Exists(aircraftDirectory + "\\aircraft.cfg"))
             {
-                MessageBox.Show("aircraft.cfg not found in aircraft directory", "", MessageBoxButton.OK);
+                MessageBox.Show(CsvHelper.trans("aircraft_cfg_not_found"), "", MessageBoxButton.OK);
             }
             else
             {
@@ -629,14 +659,14 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                     }
                     catch (Exception ex) {
                         Console.WriteLine(ex.ToString());
-                        MessageBox.Show("CFG split failed");
+                        MessageBox.Show(CsvHelper.trans("aircraft_cfg_split_failed"));
                         return;
                     }
                 }
 
                 if (!File.Exists(aircraftDirectory + "\\.aircraft.cfg"))
                 {
-                    MessageBoxResult messageBoxResult = MessageBox.Show("aircraft.cfg file will be split on parts, so MSFS will treat this aircraft as Native. This operation can't be undone, current config file will be saved as \".aircraft.cfg\"", "AIRCRAFT.CFG conversion warning", System.Windows.MessageBoxButton.YesNo);
+                    MessageBoxResult messageBoxResult = MessageBox.Show(CsvHelper.trans("aircraft_split_notice"), CsvHelper.trans("aircraft_split_header"), System.Windows.MessageBoxButton.YesNo);
                     if (messageBoxResult == MessageBoxResult.Yes)
                     {
                         CfgHelper.splitCfg(aircraftDirectory);
@@ -737,10 +767,10 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
                 if (criticalIssues > 0)
                 {
-                    btn.Content = "Fix engines issues";
+                    btn.Content = CsvHelper.trans("engines_fix_issues");
                     btn.Click += FixengineClick;
 
-                    TextBlock notice = addTextBlock("Invalid engine value should be fixed, otherwise aircraft will be ignored by flight model code and stay frozen even in the air.",
+                    TextBlock notice = addTextBlock(CsvHelper.trans("engines_issues_notice"),
                        HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
                     notice.TextWrapping = TextWrapping.Wrap;
                     notice.Width = 600;
@@ -751,7 +781,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 }
                 else
                 {
-                    btn.Content = "No engines issues";
+                    btn.Content = CsvHelper.trans("engines_no_issues");
                     btn.IsEnabled = false;
                 }
 
@@ -824,31 +854,31 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
             if (!File.Exists(conversionTable))
             {
-                buttonLabel = "No AIR conversion tables found";
-                toolTip = "File " + conversionTable + " does not exists." + Environment.NewLine + "Extract folder \"airTbls\" from program archive into same directory, where EXE is stored.";
+                buttonLabel = CsvHelper.trans("air_tbl_not_found");
+                toolTip = string.Format(CsvHelper.trans("air_tbl_not_found_notice"), conversionTable);
             }
             else if (!File.Exists(AppDomain.CurrentDomain.BaseDirectory + "AirDat\\AirUpdate.exe"))
             {
-                buttonLabel = "AirUpdate.exe not found";
-                toolTip = "AirUpdate not found in Importer folder." + Environment.NewLine + "Cick this button to download and unpack archive from www.mudpond.org";
+                buttonLabel = CsvHelper.trans("airupdate_not_found");
+                toolTip = CsvHelper.trans("airupdate_not_found_notice");
                 download = true;
             }
             else if (!File.Exists(airExported))
             {
-                buttonLabel = "No exported AIR table data found";
-                toolTip = "File " + airExported + " does not exists." + Environment.NewLine + "Click this button to launch AirUpdate and follow these steps:" + Environment.NewLine +
-                    "1. \"Select Air File\"" + Environment.NewLine + 
-                    "2. Navigate to \"" + aircraftDirectory+ "\"" + Environment.NewLine + "" +
-                    "3. Select AIR file" + Environment.NewLine +
-                    "4. Check \"Full dump\" option" + Environment.NewLine +
-                    "5. Press \"Dump\" button" + Environment.NewLine +
-                    "6. Close AirUpdate";
+                buttonLabel = CsvHelper.trans("air_dump_not_found");
+                toolTip = string.Format(CsvHelper.trans("air_dump_notice"), airExported) + Environment.NewLine +
+                    CsvHelper.trans("air_dump_notice1") + Environment.NewLine +
+                    CsvHelper.trans("air_dump_notice2") + aircraftDirectory+ "\"" + Environment.NewLine + "" +
+                    CsvHelper.trans("air_dump_notice3") + Environment.NewLine +
+                    CsvHelper.trans("air_dump_notice4") + Environment.NewLine +
+                    CsvHelper.trans("air_dump_notice5") + Environment.NewLine +
+                    CsvHelper.trans("air_dump_notice6");
                 launch = true;
             }
             else
             {
-                buttonLabel = "No AIR values available for import";
-                toolTip = "AIR and CFG values identical. You can try to insert" + Environment.NewLine + "missing sections without default values activation.";
+                buttonLabel = CsvHelper.trans("air_no_values_to_import");
+                toolTip = CsvHelper.trans("air_no_values_to_import_notice");
                 // GET FSX->ASOBO TABLE
                 // NAME VALUE
                 var fsx2msfsTable = CsvHelper.processAirTable(conversionTable, new string[] { "Table/Record", "Asobo" });
@@ -886,7 +916,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                                     DynamicGrid.ColumnDefinitions.Add(gridCol1);
                                     DynamicGrid.ColumnDefinitions.Add(gridCol2);
 
-                                    TextBlock myBlock2 = addTextBlock("New val: " + airLine[2], HorizontalAlignment.Left, VerticalAlignment.Top,
+                                    TextBlock myBlock2 = addTextBlock(CsvHelper.trans("air_new_val") + ": " + airLine[2], HorizontalAlignment.Left, VerticalAlignment.Top,
                                         airLine[2] == "0" || airLine[2] == "0.0" || Regex.IsMatch(airLine[2], @"(0,){8,}") || String.IsNullOrWhiteSpace(Regex.Replace(airLine[2], @"[0-9-.]+:([1][.0]+)[,]*", ""))
                                             ? Colors.DarkRed : Colors.Black);
                                     myBlock2.ToolTip = airLine[2].Replace(",", Environment.NewLine);
@@ -897,11 +927,11 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                                     TextBlock myBlock3;
                                     if (oldVal != "")
                                     {
-                                        myBlock3 = addTextBlock("Old val: " + oldVal, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black);
+                                        myBlock3 = addTextBlock(CsvHelper.trans("air_old_val") + ": " + oldVal, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black);
                                         myBlock3.ToolTip = oldVal.Replace(",", Environment.NewLine);
                                     } else
                                     {
-                                        myBlock3 = addTextBlock("Default val: " + defVal, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black);
+                                        myBlock3 = addTextBlock(CsvHelper.trans("air_default_val") + ": " + defVal, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black);
                                         myBlock3.ToolTip = defVal.Replace(",", Environment.NewLine);
                                     }
 
@@ -934,7 +964,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 }
                 else
                 {
-                    toolTip = "AIR tables loading failed";
+                    toolTip = CsvHelper.trans("air_loading_failed");
                 }
             }
 
@@ -943,8 +973,8 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
             if (values > 0)
             {
-                myPanel.ToolTip = "Select valid AIR values to insert into CFG files. When you finish, AIR file can be removed." + Environment.NewLine + "But if some CFG values are missing - game may crash or aircraft will not appear in the list.";
-                btn.Content = "Insert AIR values*";
+                myPanel.ToolTip = CsvHelper.trans("air_import_notice");
+                btn.Content = CsvHelper.trans("air_insert_values");
                 btn.Click += InsertAirValues;
             }
             else
@@ -968,7 +998,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             {
                 Button btn2 = new Button();
                 btn2 = SetButtonAtts(btn2);
-                btn2.Content = "Remove AIR file";
+                btn2.Content = CsvHelper.trans("air_remove");
                 btn2.Click += backupAirFile;
                 myPanel.Children.Add(btn2);
             }
@@ -1045,7 +1075,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                     string[] values = new string[1000];
                     int i = 0;
 
-                    foreach (var checkboxLabel in getCheckedOptions(parentPanel))
+                    foreach (var checkboxLabel in getCheckedOptions(parentPanel, "", true))
                     {
                         values[i] = checkboxLabel;
                         i++;
@@ -1109,10 +1139,10 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
                 if (lightsBroken > 0)
                 {
-                    btn.Content = "Convert lights";
+                    btn.Content = CsvHelper.trans("systems_convert_lights");
                     btn.Click += FixLightsClick;
 
-                    TextBlock notice = addTextBlock("To make lights work in MSFS, legacy lights values should be converted in new format. Light type and coordinates will be preserved.",
+                    TextBlock notice = addTextBlock(CsvHelper.trans("systems_convert_lights_notice"),
                        HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
                     notice.TextWrapping = TextWrapping.Wrap;
                     notice.Width = 600;
@@ -1123,17 +1153,17 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 }
                 else
                 {
-                    string[] contactPoints = CfgHelper.getContactPoints(aircraftDirectory, "1");
-                    if (CfgHelper.getTaxiLights(aircraftDirectory) == 0 && contactPoints.Length > 0)
+                    List<string> contactPoints = CfgHelper.getContactPoints(aircraftDirectory, "1");
+                    if (CfgHelper.getTaxiLights(aircraftDirectory) == 0 && contactPoints.Count > 0)
                     {
                         foreach (var point in contactPoints)
                             if (!String.IsNullOrEmpty(point))
                                 SystemsData = AddCheckBox(SystemsData, point, Colors.DarkOrange, lightsToInsert++);
 
-                        btn.Content = "Insert taxi lights";
+                        btn.Content = CsvHelper.trans("systems_insert_lights");
                         btn.Click += InsertLightsClick;
 
-                        TextBlock notice = addTextBlock("You can attach taxi lights to landing gears automatically." + Environment.NewLine + "Lights position will be inaccurate and may require manual adjustments.",
+                        TextBlock notice = addTextBlock(CsvHelper.trans("systems_insert_lights_notice"),
                             HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
                         notice.Margin = new Thickness(0, 10, 0, 10);
                         notice.TextWrapping = TextWrapping.Wrap;
@@ -1144,7 +1174,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                     }
                     else
                     {
-                        btn.Content = "No lights issues";
+                        btn.Content = CsvHelper.trans("systems_no_light_issues");
                         btn.IsEnabled = false;
 
                         tabSystems.Foreground = new SolidColorBrush(Colors.DarkGreen);
@@ -1232,7 +1262,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                                     string y = fsxData[3].Replace(" ", "").Trim() + (!fsxData[3].Contains('.') ? ".0" : "");
                                     if (double.TryParse(x, out double xVal) && double.TryParse(y, out double yVal) && double.TryParse(z, out double zVal))
                                     {
-                                        string newLight = "Type:6#Index:0#LocalPosition:" + xVal.ToString() + "," + zVal.ToString() + "," + (yVal + 2.0).ToString() + "#LocalRotation:0,0,0#EffectFile:LIGHT_ASOBO_Taxi#PotentiometerIndex:1#EmMesh:LIGHT_ASOBO_Taxi";
+                                        string newLight = "Type:6#Index:0#LocalPosition:" + (xVal + 2.0).ToString() + "," + zVal.ToString() + "," + (yVal + 2.0).ToString() + "#LocalRotation:0,0,0#EffectFile:LIGHT_ASOBO_Taxi#PotentiometerIndex:1#EmMesh:LIGHT_ASOBO_Taxi";
                                         CfgHelper.setCfgValue(aircraftDirectory, "lightdef." + i, newLight, "systems.cfg", "[LIGHTS]");
                                         i++;
                                     }
@@ -1305,7 +1335,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             if (CfgHelper.cfgFileExists("flight_model.cfg") || CfgHelper.cfgFileExists("aircraft.cfg"))
             {
                 int contactPointsBroken = 0;
-                string[] contactPoints = CfgHelper.getContactPoints(aircraftDirectory);
+                List<string> contactPoints = CfgHelper.getContactPoints(aircraftDirectory, "1");
                 string[] possiblyDamaged = new string[100];
                 int possiblyDamagedCounter = 0;
 
@@ -1336,13 +1366,11 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                                         Math.Pow(testTwo[4] - testOne[4], 2),
                                     0.5);
 
-                                if (distance <= 4)
+                                //Console.WriteLine(firstContactPoint + " " + secondContactPoint + " distance: " + distance.ToString());
+                                double minDistance = 3.0;
+                                if (distance > 0 && distance < minDistance)
                                 {
-                                    Color color;
-                                    if (distance <= 2)
-                                        color = Colors.DarkRed;
-                                    else
-                                        color = Colors.DarkOrange;
+                                    Color color = Colors.DarkOrange;
 
                                     FlightModelData = AddCheckBox(FlightModelData, firstContactPoint, color, contactPointsBroken++);
                                     FlightModelData = AddCheckBox(FlightModelData, secondContactPoint, color, contactPointsBroken);
@@ -1352,7 +1380,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                                     myPanel.VerticalAlignment = VerticalAlignment.Top;
                                     myPanel.Margin = new Thickness(30, 0, 0, 10);
 
-                                    TextBlock myBlock = addTextBlock(distance.ToString("N2") + "ft between landing gear points", HorizontalAlignment.Left, VerticalAlignment.Top, color);
+                                    TextBlock myBlock = addTextBlock(string.Format(CsvHelper.trans("fm_contact_point_data"), distance.ToString("N2")), HorizontalAlignment.Left, VerticalAlignment.Top, color);
                                     myPanel.Children.Add(myBlock);
                                     FlightModelData.Children.Add(myPanel);
                                 }
@@ -1376,21 +1404,21 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
                 if (contactPointsBroken > 0)
                 {
-                    btn.Content = "Fix contact points duplicates";
+                    btn.Content = CsvHelper.trans("fm_fix_contact_points");
                     btn.Click += FixContactsClick;
 
-                    TextBlock notice = addTextBlock("Several contact points, attached to single retractable langing gears, can make it non functional. Script will combine neightbour points in single one. If you have no problems with landing gears in the game - leave these checkboxes untouched.",
+                    TextBlock notice = addTextBlock(CsvHelper.trans("fm_fix_contact_points_notice"),
                        HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
                     notice.TextWrapping = TextWrapping.Wrap;
                     notice.Width = 600;
                     notice.Margin = new Thickness(0, 10, 0, 10);
                     FlightModelData.Children.Insert(0, notice);
 
-                    tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkRed);
+                    //tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkRed);
                 }
                 else
                 {
-                    btn.Content = "No contact points issues";
+                    btn.Content = CsvHelper.trans("fm_contact_points_issues");
                     btn.IsEnabled = false;
 
                     tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkGreen);
@@ -1402,7 +1430,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 string lastPoint = "";
                 if (possiblyDamagedCounter > 0)
                 {
-                    TextBlock notice = addTextBlock("Contact points that possibly formatted incorrectly, press Edit button and fix values manually.",
+                    TextBlock notice = addTextBlock(CsvHelper.trans("fm_contact_points_issues_notice"),
                        HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
                     notice.TextWrapping = TextWrapping.Wrap;
                     notice.Width = 600;
@@ -1454,21 +1482,21 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
                 if (criticalIssues > 0)
                 {
-                    btn3.Content = "Fix flight model issues";
+                    btn3.Content = CsvHelper.trans("fm_fix_flight_model");
                     btn3.Click += FixFlightModelClick;
 
-                    /*TextBlock notice = addTextBlock("Missing sensitive values may cause unpredictable result in the air. However, these values automatic calculation is inaccurate and may require manual adjustments.",
+                    TextBlock notice = addTextBlock(CsvHelper.trans("fm_fix_flight_model_notice"),
                        HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
                     notice.TextWrapping = TextWrapping.Wrap;
                     notice.Width = 600;
                     notice.Margin = new Thickness(0, 10, 0, 10);
-                    FlightModelData.Children.Insert(0, notice);*/
+                    FlightModelIssues.Children.Insert(0, notice);
 
                     tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkRed);
                 }
                 else
                 {
-                    btn3.Content = "No flight model issues";
+                    btn3.Content = CsvHelper.trans("fm_no_flight_model_issues");
                     btn3.IsEnabled = false;
                 }
 
@@ -1504,8 +1532,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                         double num;
                         string stringNewVal = (Double.TryParse(length, out num) ? 1.1 * num : 50).ToString();
                         CfgHelper.setCfgValue(aircraftDirectory, val, stringNewVal, "flight_model.cfg");
-                        message += val + " value was calculated as " + stringNewVal + " from wing_span, you'll need to adjust it manually." + Environment.NewLine +
-                            "If after " + val + " insertion center of gravity will be broken, adjust first (longitudinal) value of empty_weight_cg_position (increase to move CG forward, decrease - backwad)" + Environment.NewLine + Environment.NewLine;
+                        message += string.Format(CsvHelper.trans("fm_value_generated_notice"), val, stringNewVal, val) + Environment.NewLine + Environment.NewLine;
                     }
                     else if (val == "fuselage_diameter")
                     {
@@ -1515,7 +1542,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                         double num2;
                         string stringNewVal = Math.Max(5, (Double.TryParse(length, out num) && Double.TryParse(length, out num2) ? num * num2 / 666 : 5)).ToString();
                         CfgHelper.setCfgValue(aircraftDirectory, val, stringNewVal, "flight_model.cfg");
-                        message += val + " value was calculated as " + stringNewVal + " from wing_span and max_gross_weight, you'll need to adjust it manually" + Environment.NewLine + Environment.NewLine;
+                        message += string.Format(CsvHelper.trans("fm_value_generated_notice2"), val, stringNewVal) + Environment.NewLine + Environment.NewLine;
                     }
 
                     i++;
@@ -1544,7 +1571,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 if (fsxData.Length >= 4)
                 {
                     Regex digRregex = new Regex("[0-9.-]+");
-                    if (digRregex.IsMatch(fsxNum) && fsxData[0].Replace(" ", "").Trim() == "1")
+                    if (digRregex.IsMatch(fsxNum))
                     {
                         double[] msfsData = new double[fsxData.Length + 1];
                         int.TryParse(fsxNum.Contains('.') ? fsxNum.Trim('"').Split('.')[0] : fsxNum.Trim('"'), NumberStyles.Any, CultureInfo.InvariantCulture, out int numInt);
@@ -1561,7 +1588,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                                 msfsData[i + 1] = num;
                             else
                             {
-                                Console.WriteLine("Bad contact point coordinate: '" + fsxData[i].Replace(" ", "").Trim() + "'");
+                                Console.WriteLine(string.Format(CsvHelper.trans("fm_bad_contact_point"), fsxData[i].Replace(" ", "").Trim()));
                                 return new double[] { 1 };
                             }
                         }
@@ -1593,7 +1620,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                         if (panel.Children[0].GetType() == typeof(CheckBox))
                         {
                             CheckBox a = (CheckBox)panel.Children[0];
-                            if ((string)a.Content != "Toggle all")
+                            if ((string)a.Content != CsvHelper.trans("toggle_all"))
                             {
                                 string val = a.Content.ToString();
 
@@ -1611,18 +1638,54 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
                                         if (testOne.Length >= 3 && testTwo.Length >= 3)
                                         {
-                                            testTwo[2] = ((testOne[2] + testTwo[2]) / 2);
-                                            testTwo[3] = ((testOne[3] + testTwo[3]) / 2);
-                                            testTwo[4] = ((testOne[4] + testTwo[4]) / 2);
+                                            /*double minDistance = 3.0;
+                                            double distance = Math.Pow(
+                                                    Math.Pow(testTwo[2] - testOne[2], 2) +
+                                                    Math.Pow(testTwo[3] - testOne[3], 2) +
+                                                    Math.Pow(testTwo[4] - testOne[4], 2),
+                                                0.5);
+                                            
+                                            double[] magnitude1 = new double[] { testTwo[2] - testOne[2], testTwo[3] - testOne[3], testTwo[4] - testOne[4] };
+                                            double max1 = 0;
+                                            foreach (double mag in magnitude1)
+                                                if (Math.Abs(mag) > max1)
+                                                    max1 = Math.Abs(mag);
 
-                                            string value = String.Join(", ", testTwo);
-                                            int index = value.IndexOf(",");
-                                            value = index >= 0 ? value.Substring(index + 1) : value;
+                                            double[] magnitude2 = new double[] { testOne[2] - testTwo[2], testOne[3] - testTwo[3], testOne[4] - testTwo[4] };
+                                            double max2 = 0;
+                                            foreach (double mag in magnitude2)
+                                                if (Math.Abs(mag) > max2)
+                                                    max2 = Math.Abs(mag);
 
-                                            CfgHelper.setCfgValueStatus(aircraftDirectory, "point." + testTwo[0], "flight_model.cfg", "[CONTACT_POINTS]", false);
-                                            CfgHelper.setCfgValue(aircraftDirectory, "point." + testOne[0], value, "flight_model.cfg", "[CONTACT_POINTS]");
+                                            if (max1 > 0 && max2 > 0)
+                                            {
+                                                testOne[2] -= magnitude1[0] / max1 * (minDistance - distance) / 2.0;
+                                                testOne[3] -= magnitude1[1] / max1 * (minDistance - distance) / 2.0;
+                                                testOne[4] -= magnitude1[2] / max1 * (minDistance - distance) / 2.0;
+
+                                                testTwo[2] -= magnitude2[0] / max2 * (minDistance - distance) / 2.0;
+                                                testTwo[3] -= magnitude2[1] / max2 * (minDistance - distance) / 2.0;
+                                                testTwo[4] -= magnitude2[2] / max2 * (minDistance - distance) / 2.0;*/
+
+
+                                            testOne[2] = testTwo[2] = ((testOne[2] + testTwo[2]) / 2);
+                                            testOne[3] = testTwo[3] = ((testOne[3] + testTwo[3]) / 2);
+                                            testOne[4] = testTwo[4] = ((testOne[4] + testTwo[4]) / 2);
+                                            
+                                            string value1 = String.Join(", ", testOne);
+                                            int index = value1.IndexOf(",");
+                                            value1 = index >= 0 ? value1.Substring(index + 1) : value1;
+
+                                            string value2 = String.Join(", ", testTwo);
+                                            index = value2.IndexOf(",");
+                                            value2 = index >= 0 ? value2.Substring(index + 1) : value2;
+
+                                            CfgHelper.setCfgValue(aircraftDirectory, "point." + testOne[0], value1, "flight_model.cfg", "[CONTACT_POINTS]");
+                                            CfgHelper.setCfgValue(aircraftDirectory, "point." + testTwo[0], value2, "flight_model.cfg", "[CONTACT_POINTS]");
 
                                             i++;
+
+                                            //}
                                         }
                                     }
 
@@ -1674,12 +1737,16 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                         {
                             if (secton[0] == '-')
                             {
+                                string engine_type = CfgHelper.getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]");
+                                if (engine_type.Contains('.'))
+                                    engine_type = engine_type.Split('.')[0];
+
                                 if (secton.Contains("[FUEL_QUANTITY]") || secton.Contains("[AIRSPEED]") || secton.Contains("[RPM]") ||
                                     secton.Contains("[THROTTLE_LEVELS]") || secton.Contains("[FLAPS_LEVELS]") ||
                                     secton.Contains("[CONTROLS.") /*|| secton.Contains("[FUELSYSTEM.")*/ || secton.Contains("[SIMVARS.") ||
-                                    (secton.Contains("[PROPELLER]") || secton.Contains("[PISTON_ENGINE]")) && CfgHelper.getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]") == "0" ||
-                                    (secton.Contains("[PROPELLER]") || secton.Contains("[TURBOPROP_ENGINE]") || secton.Contains("[TURBINEENGINEDATA]")) && CfgHelper.getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]") == "5" ||
-                                    (secton.Contains("[TURBINEENGINEDATA]") || secton.Contains("[JET_ENGINE]")) && CfgHelper.getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]") == "1" ||
+                                    (secton.Contains("[PROPELLER]") || secton.Contains("[PISTON_ENGINE]")) && engine_type == "0" ||
+                                    (secton.Contains("[PROPELLER]") || secton.Contains("[TURBOPROP_ENGINE]") || secton.Contains("[TURBINEENGINEDATA]")) && engine_type == "5" ||
+                                    (secton.Contains("[TURBINEENGINEDATA]") || secton.Contains("[JET_ENGINE]")) && engine_type == "1" ||
                                     !String.IsNullOrEmpty(airFilename) && File.Exists(aircraftDirectory + "\\" + airFilename.Replace(".air", ".txt")) && secton.Contains("[AERODYNAMICS]")
                                     /*|| secton.Contains("ENGINE PARAMETERS.")*/
                                     )
@@ -1710,12 +1777,12 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                         StackPanel myPanel = new StackPanel();
                         Button btn = new Button();
                         btn = SetButtonAtts(btn);
-                        btn.Content = "Insert selected CFG sections";
+                        btn.Content = CsvHelper.trans("cfg_insert_sections");
                         btn.Click += InsertSectionsClick;
                         myPanel.Children.Add(btn);
                         parentPanel.Children.Add(myPanel);
 
-                        TextBlock notice = addTextBlock("Sections, highlighted in red, responsible for external view instruments. Choose \"YES\" on the pop up to insert external instruments, you may need to adjust new values manually.",
+                        TextBlock notice = addTextBlock("",
                            HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
                         notice.TextWrapping = TextWrapping.Wrap;
                         notice.Width = 600;
@@ -1723,12 +1790,12 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
                         if (filename == "cockpit.cfg")
                         {
-                            notice.Text = "Sections, highlighted in red, responsible for external view instruments. Choose \"YES\" on the pop up to insert external instruments, you may need to adjust new values manually.";
+                            notice.Text = CsvHelper.trans("cfg_insert_cockpit_sections_notice");
                             parentPanel.Children.Insert(0, notice);
                         }
                         else if (filename == "runway.flt")
                         {
-                                notice.Text = "This section responsible for avionics state on the runway. If you have problem with landing gears, engines, parking brake right after you start the game on the ground - choose only critical or all available options. However, these fixes does not affect avionics state when you starting flight in the air.";
+                                notice.Text = CsvHelper.trans("cfg_insert_flt_sections_notice");
                             parentPanel.Children.Insert(0, notice);
                         }
                     }
@@ -1775,7 +1842,8 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
                 if (i > 0)
                 {
-                    MessageBoxResult messageBoxResult = MessageBox.Show("All variables will have default values, it may affect aircraft behaviour in the game" + Environment.NewLine + "Press YES to insert and activate default values" + Environment.NewLine + "Press NO to insert and deactivate default values" + Environment.NewLine + "Press CANCEL to abort insertion", i + " section" + (i > 1 ? "s" : "") + " will be inserted into " + targetFilename, System.Windows.MessageBoxButton.YesNoCancel);
+                    MessageBoxResult messageBoxResult = MessageBox.Show(CsvHelper.trans("cfg_insert_sections_notice"), 
+                        string.Format(i > 1 ? CsvHelper.trans("cfg_insert_sections_header") : CsvHelper.trans("cfg_insert_section_header") , i, targetFilename), System.Windows.MessageBoxButton.YesNoCancel);
                     if (messageBoxResult != MessageBoxResult.Cancel)
                     {
                         CfgHelper.insertSections(aircraftDirectory, sourceFilename, targetFilename, sections, messageBoxResult == MessageBoxResult.Yes);
@@ -1825,16 +1893,16 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
             if (texturesToConvert > 0)
             {
-                btn.Content = "BMP to DDS by ImageTools";
+                btn.Content = CsvHelper.trans("textures_imagetools");
                 btn.Click += ConvertTexturesClick;
 
-                btn2.Content = "BMP to DDS by nvdxt";
+                btn2.Content = CsvHelper.trans("textures_nvdxt");
                 btn2.Click += ConvertTexturesClick;
 
                 tabTextures.Foreground = new SolidColorBrush(Colors.DarkRed);
                 myPanel2.Children.Add(btn);
 
-                TextBlock notice = addTextBlock("In most cases BMP textures should be converted into DDS format, but not always. If some of the textures can't be converted by any of available tools, you need to make it manually.",
+                TextBlock notice = addTextBlock(CsvHelper.trans("textures_convert_notice"),
                    HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
                 notice.TextWrapping = TextWrapping.Wrap;
                 notice.Width = 600;
@@ -1843,7 +1911,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             }
             else
             {
-                btn2.Content = "No textures issues";
+                btn2.Content = CsvHelper.trans("textures_no_issues");
                 btn2.IsEnabled = false;
                 tabTextures.Foreground = new SolidColorBrush(Colors.DarkGreen);
             }
@@ -1885,7 +1953,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             {
                 Application.Current.Dispatcher.Invoke(() => {
                     if (sender.GetType() == typeof(Button))
-                        ((Button)sender).Content = i + " of " + count + " textures converted";
+                        ((Button)sender).Content = string.Format(CsvHelper.trans("textures_conversion_process"), i, count);
                 });
 
 
@@ -1935,6 +2003,40 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
         // MODELS START
         public void SummaryModels()
         {
+            /*MissingLiveryModels.Children.Clear();
+
+            List<string> missingLiveryModels = CfgHelper.getMissingLiveryModels(aircraftDirectory);
+            if (missingLiveryModels.Count > 0)
+            {
+                int missingModels = 0;
+                foreach (string missingLiveryModel in missingLiveryModels)
+                {
+                    MissingLiveryModels = AddCheckBox(MissingLiveryModels, missingLiveryModel, Colors.DarkRed, missingModels++);
+                }
+
+                StackPanel myPanel1 = new StackPanel();
+
+                Button btn1 = new Button();
+                btn1 = SetButtonAtts(btn1);
+
+                btn1.Content = CsvHelper.trans("Create livery model.cfg files");
+                btn1.Click += CreateLiveryModelsClick;
+
+                TextBlock notice = addTextBlock(CsvHelper.trans("These liveries does not have associated model.cfg file. If you have problems with some of listed liveries selection, choose them and press button below."),
+                    HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
+                notice.TextWrapping = TextWrapping.Wrap;
+                notice.Width = 600;
+                notice.Margin = new Thickness(0, 10, 0, 10);
+                MissingLiveryModels.Children.Insert(0, notice);
+
+                tabModel.Foreground = new SolidColorBrush(Colors.DarkRed);
+
+                myPanel1.Children.Add(btn1);
+                MissingLiveryModels.Children.Add(myPanel1);
+
+                MissingLiveryModels.Children.Add(sectiondivider());
+            }*/
+
             ModelsList.Children.Clear();
 
             int modelsWithoutBackup = 0;
@@ -1968,7 +2070,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                                 ModelsList = AddCheckBox(ModelsList, fileName, Colors.Black, modelsToConvert++);
 
                             if (!contents.Contains("MDLXMDLH"))
-                                warnings.Add(fileName + " format is not compatible with MSFS, 3D model may not be loaded by the game" + Environment.NewLine);
+                                warnings.Add(string.Format(CsvHelper.trans("model_format_is_not_compatible"), fileName) + Environment.NewLine);
                         }
                     }
                 }
@@ -1983,10 +2085,10 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
             if (modelsToConvert > 0)
             {
-                btn.Content = "Remove interior clickable switches";
+                btn.Content = CsvHelper.trans("model_remove_clickable");
                 btn.Click += RemoveSwitchesClick;
 
-                TextBlock notice = addTextBlock("This is fix for the crash issue that no longer appear in latest version of the game. However, you can use it to remove clickable rectangles from the cockpit completely.",
+                TextBlock notice = addTextBlock(CsvHelper.trans("model_remove_clickable_notice"),
                    HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
                 notice.TextWrapping = TextWrapping.Wrap;
                 notice.Width = 600;
@@ -1995,7 +2097,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             }
             else
             {
-                btn.Content = modelsFound > 0 ? "No models with clickable switches" : "No interior models found";
+                btn.Content = modelsFound > 0 ? CsvHelper.trans("model_no_clickable_switches") : CsvHelper.trans("model_no_interior_model");
                 btn.IsEnabled = false;
             }
 
@@ -2012,12 +2114,12 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             }
 
             ModelsList.Children.Add(sectiondivider());
-        } 
-
+        }
+        
         private void RemoveSwitchesClick(object sender, RoutedEventArgs e)
         {
             // COUNT
-            MessageBoxResult messageBoxResult = MessageBox.Show("You will be no longer able to use clickable elements inside of the cockpit. You can restore original interior model by clicking Restore Backup button.", "You are going to remove clickable switches", System.Windows.MessageBoxButton.YesNo);
+            MessageBoxResult messageBoxResult = MessageBox.Show(CsvHelper.trans("model_remove_clickable_warning"), CsvHelper.trans("model_remove_clickable_warning_header"), System.Windows.MessageBoxButton.YesNo);
             if (messageBoxResult == MessageBoxResult.Yes)
             {
                 foreach (var checkboxLabel in getCheckedOptions(ModelsList))
@@ -2086,7 +2188,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                         }
                         else
                         {
-                            MessageBox.Show("Clickable switches removal from " + checkboxLabel + " failed");
+                            MessageBox.Show(string.Format(CsvHelper.trans("model_clickable_removal_failed"), checkboxLabel));
                         }
                     }
                 }
@@ -2129,7 +2231,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                         }
                     }
 
-                    TextBlock notice = addTextBlock("You can toggle available sound samples and then press Update button below the list. Physically, files stay on the hard drive and can be enabled anytime later.",
+                    TextBlock notice = addTextBlock(CsvHelper.trans("sounds_toggle_notice"),
                        HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
                     notice.TextWrapping = TextWrapping.Wrap;
                     notice.Width = 600;
@@ -2145,12 +2247,12 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
             if (soundsFound > 0)
             {
-                btn.Content = "Update sounds list";
+                btn.Content = CsvHelper.trans("sounds_update");
                 btn.Click += UpdateSoundsClick;
             }
             else
             {
-                btn.Content = "No sounds lists found";
+                btn.Content = CsvHelper.trans("sounds_not_found");
                 btn.IsEnabled = false;
             }
 
@@ -2167,7 +2269,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             {
                 StackPanel myPanel3 = new StackPanel();
 
-                TextBlock gammaCorr = addTextBlock("Tone volume (0 - silent; 30 - normal; 100 - loud)", HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black);
+                TextBlock gammaCorr = addTextBlock(string.Format(CsvHelper.trans("sounds_tone_volume"), "0", "30", "100"), HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black);
                 gammaCorr.Margin = new Thickness(0, 10, 0, 0);
                 myPanel3.Children.Add(gammaCorr);
 
@@ -2184,7 +2286,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
                 Button btn1 = new Button();
                 btn1 = SetButtonAtts(btn1);
-                btn1.Content = "Insert glider variometer tone";
+                btn1.Content = CsvHelper.trans("sounds_insert_tone");
                 btn1.Click += InsertVarioClick;
                 myPanel3.Children.Add(btn1);
                 SoundList.Children.Add(myPanel3);
@@ -2193,7 +2295,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 StackPanel myPanel3 = new StackPanel();
                 Button btn1 = new Button();
                 btn1 = SetButtonAtts(btn1);
-                btn1.Content = "Remove glider variometer tone";
+                btn1.Content = CsvHelper.trans("sounds_remove_tone");
                 btn1.Click += DeleteSoundXmlClick;
                 myPanel3.Children.Add(btn1);
                 SoundList.Children.Add(myPanel3);
@@ -2210,7 +2312,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
         {
             if (Directory.Exists(aircraftDirectory + "\\sound\\") && File.Exists(aircraftDirectory + "\\sound\\sound.xml"))
             {
-                MessageBoxResult messageBoxResult = MessageBox.Show("File \"\\sound\\sound.xml\" will be deleted. If it variometer tone only - you can insert it again after this file will be removed.", "Warning", System.Windows.MessageBoxButton.YesNo);
+                MessageBoxResult messageBoxResult = MessageBox.Show(CsvHelper.trans("sounds_remove_notice"), CsvHelper.trans("sounds_warning"), System.Windows.MessageBoxButton.YesNo);
                 if (messageBoxResult == MessageBoxResult.Yes)
                 {
                     try
@@ -2316,7 +2418,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             if (Directory.GetFiles(aircraftDirectory, "*.dll", SearchOption.AllDirectories).Length > 0 || Directory.GetFiles(aircraftDirectory, "*.gau", SearchOption.AllDirectories).Length > 0)
             {
                 TextBlock dllWarning = new TextBlock();
-                dllWarning.Text = "Aircraft folder contains DLL/GAU files - anvionics and/or animation may not work in the game";
+                dllWarning.Text = CsvHelper.trans("panel_dll_detected");
                 dllWarning.Foreground = new SolidColorBrush(Colors.DarkRed);
                 myPanel1.Children.Add(dllWarning);
                 tabPanel.Foreground = new SolidColorBrush(Colors.DarkRed);
@@ -2326,11 +2428,11 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             btn1 = SetButtonAtts(btn1);
             if (cabsToConvert > 0)
             {
-                btn1.Content = "Extract panel gauges resources";
+                btn1.Content = CsvHelper.trans("panel_extract_gauges");
                 btn1.Click += extractCabClick;
             } else
             {
-                btn1.Content = "No panel resources found";
+                btn1.Content = CsvHelper.trans("panel_no_panel");
                 btn1.IsEnabled = false;
             }
             myPanel1.Children.Add(btn1);
@@ -2340,11 +2442,11 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             btn3 = SetButtonAtts(btn3);
             if (!Directory.Exists(Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\"))
             {
-                btn3.Content = "Extract default FSX gauges resources";
+                btn3.Content = CsvHelper.trans("panel_extract_fsx_resources");
                 btn3.Click += extractDefaultCabsClick;
             } else
             {
-                btn3.Content = "Default FSX gauges resources extracted";
+                btn3.Content = CsvHelper.trans("panel_fsx_extracted");
                 btn3.IsEnabled = false;
             }
             myPanel1.Children.Add(btn3);
@@ -2363,19 +2465,19 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
             if (panelsToConvert > 0)
             {
-                btn2.Content = "Import panel gauges";
+                btn2.Content = CsvHelper.trans("panel_import_gauges");
                 btn2.Click += importPanelGaugeClick;
 
                 if (this.FindName("ForceBackground") != null)
                     UnregisterName("ForceBackground");
                 CheckBox checkBox = new CheckBox();
                 RegisterName("ForceBackground", checkBox);
-                checkBox.Content = "Force gauge background image (check it if you get black holes on gauges places)";
+                checkBox.Content = CsvHelper.trans("panel_force_gauge_background");
                 checkBox.MaxWidth = 600;
                 checkBox.HorizontalAlignment = HorizontalAlignment.Left;
                 myPanel2.Children.Add(checkBox);
 
-                TextBlock gammaCorr = addTextBlock("Gamma correction (0 - bright; 1 - normal; 2 - dark)", HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black);
+                TextBlock gammaCorr = addTextBlock(string.Format(CsvHelper.trans("panel_gamma_correction"), "0", "1", "2"), HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black);
                 gammaCorr.Margin = new Thickness(0,10,0,0);
                 myPanel2.Children.Add(gammaCorr);
 
@@ -2392,7 +2494,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             }
             else
             {
-                btn2.Content = "No panels gauges found";
+                btn2.Content = CsvHelper.trans("panel_not_found");
                 btn2.IsEnabled = false;
             }
 
@@ -2428,7 +2530,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 {
                     Application.Current.Dispatcher.Invoke(() => {
                         if (sender.GetType() == typeof(Button))
-                            ((Button)sender).Content = "Extracting " + Path.GetFileName(mainFile);
+                            ((Button)sender).Content = string.Format(CsvHelper.trans("panel_extracting_cab"),Path.GetFileName(mainFile));
                     });
 
                     try
@@ -2447,7 +2549,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("Exception " + e);
+                        Console.WriteLine("Exception " + e.Message);
                     }
                 }
             }
@@ -2464,10 +2566,10 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
             if (selectedPath != Environment.SpecialFolder.MyDocuments.ToString())
             {
-                MessageBoxResult messageBoxResult = MessageBox.Show("Current FSX path is " + selectedPath + Environment.NewLine + Environment.NewLine +
-                    "Press YES to extract CAB files from this folder (DLL/GAU files not supported)" + Environment.NewLine + 
-                    "Press NO to select FSX installation folder" + Environment.NewLine +
-                    "Press CANCEL to abort", "CAB files extractions", System.Windows.MessageBoxButton.YesNoCancel);
+                MessageBoxResult messageBoxResult = MessageBox.Show(string.Format(CsvHelper.trans("panel_current_fsx_path"), selectedPath) + Environment.NewLine + Environment.NewLine +
+                    CsvHelper.trans("panel_fsx_extract_notice1") + Environment.NewLine +
+                    CsvHelper.trans("panel_fsx_extract_notice2") + Environment.NewLine +
+                    CsvHelper.trans("panel_fsx_extract_notice3"), CsvHelper.trans("panel_fsx_header"), MessageBoxButton.YesNoCancel);
                 if (messageBoxResult == MessageBoxResult.Cancel)
                 {
                     selectedPath = "";
@@ -2487,7 +2589,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 }
                 else
                 {
-                    MessageBox.Show("Gauges or SimObjects\\Airplanes folder not found in " + selectedPath);
+                    MessageBox.Show(string.Format(CsvHelper.trans("panel_gauges_not_found"), selectedPath));
                 }
             }
         }
@@ -2509,7 +2611,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 {
                     Application.Current.Dispatcher.Invoke(() => {
                         if (sender.GetType() == typeof(Button))
-                            ((Button)sender).Content = "Extracting " + Path.GetFileName(cabFile);
+                            ((Button)sender).Content = string.Format(CsvHelper.trans("panel_extracting_cab {0}"), Path.GetFileName(cabFile));
                     });
 
                     Console.WriteLine("Extracting " + cabFile);
@@ -2525,7 +2627,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                         cab.Unpack(extractDirectory);
                     } catch (Exception e)
                     {
-                        Console.WriteLine("Exception " + e);
+                        Console.WriteLine("Exception " + e.Message);
                     }
                 }
 
@@ -2586,7 +2688,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 }
             } else
             {
-                MessageBox.Show("Directory not found " + projectDirectory + @"\SimObjects\Airplanes\");
+                MessageBox.Show(string.Format(CsvHelper.trans("directory_not_found"), projectDirectory + @"\SimObjects\Airplanes\"));
                 return "";
             }
         }
@@ -2607,11 +2709,21 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             btn.VerticalAlignment = VerticalAlignment.Top;
             btn.BorderBrush = new SolidColorBrush(Color.FromRgb(90, 90, 255));
             btn.Background = new SolidColorBrush(Color.FromRgb(190, 221, 255));
+            if (btn.Name != null && !String.IsNullOrEmpty(btn.Name.ToString()))
+                btn.Content = CsvHelper.trans(btn.Name.ToString());
 
             return btn;
         }
 
-        private void CfgBackupClick(object sender, RoutedEventArgs e)
+        public TextBlock SetHeaderAtts (TextBlock header, bool large = true)
+        {
+            if (header.Name != null && !String.IsNullOrEmpty(header.Name.ToString()))
+                header.Text = CsvHelper.trans(header.Name.ToString());
+
+            return header;
+        }
+
+            private void CfgBackupClick(object sender, RoutedEventArgs e)
         {
             Button btn = (Button)sender;
 
@@ -2628,7 +2740,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
                     if (File.Exists(backupFile))
                     {
-                        MessageBoxResult messageBoxResult = MessageBox.Show("All changes in " + filename + " made since backup will be erased", "You are going to restore " + filename, System.Windows.MessageBoxButton.YesNo);
+                        MessageBoxResult messageBoxResult = MessageBox.Show(string.Format(CsvHelper.trans("restore_backup_notice"), filename), string.Format(CsvHelper.trans("restore_backup_header"), filename), MessageBoxButton.YesNo);
                         if (messageBoxResult == MessageBoxResult.Yes)
                         {
                             CfgHelper.lastChangeTimestamp = DateTime.UtcNow.Ticks;
@@ -2648,7 +2760,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                     {
                         CfgHelper.lastChangeTimestamp = DateTime.UtcNow.Ticks;
                         File.Copy(mainFile, backupFile);
-                        btn.Content = "Restore backup";
+                        btn.Content = CsvHelper.trans("restore_backup");
                     }
                 }
             }
@@ -2692,7 +2804,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     TargetFolder = dialog.FileName + "\\";
-                    btnTargetFolderPath.Text = "Destination: " + TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()) + "\\";
+                    btnTargetFolderPath.Text = string.Format(CsvHelper.trans("destination_path"), TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()) + "\\");
                 }
             }
             catch (Exception exc)
@@ -2705,7 +2817,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
         {
             if (TargetFolder != "")
             {
-                btnTargetFolderPath.Text = "Destination: " + TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()) + "\\";
+                btnTargetFolderPath.Text = string.Format(CsvHelper.trans("destination_path"), TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()) + "\\");
             }
         }
 
@@ -2727,7 +2839,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                     if (File.Exists(selectedPath + "\\aircraft.cfg"))
                     {
                         SourceFolder = selectedPath + "\\";
-                        btnSourceFolderPath.Text = "Source: " + SourceFolder;
+                        btnSourceFolderPath.Text = string.Format(CsvHelper.trans("source_path"), SourceFolder);
 
                         // POPULATE INPUT FIELDS
                         string content = File.ReadAllText(selectedPath + "\\aircraft.cfg");
@@ -2747,7 +2859,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                     else
                     {
                         SourceFolder = "";
-                        MessageBox.Show("Folder " + selectedPath + " does not contain aircraft.cfg");
+                        MessageBox.Show(string.Format(CsvHelper.trans("aircraft_not_found_in"), selectedPath));
                     }
                 }
             } catch (Exception exc)
@@ -2760,17 +2872,17 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
         {
             // VALIDATE FIELDS
             if (TargetFolder == "" || SourceFolder == "")
-                MessageBox.Show("You have to select both source (FSX) ans destination (MSFS) folders");
+                MessageBox.Show(CsvHelper.trans("import_folders_not_selected"));
             else if (String.IsNullOrWhiteSpace(PackageTitle.Text) || String.IsNullOrWhiteSpace(PackageDir.Text) || String.IsNullOrWhiteSpace(PackageManufacturer.Text) || String.IsNullOrWhiteSpace(PackageAuthor.Text) ||
                 String.IsNullOrWhiteSpace(PackageVer1.Text) || String.IsNullOrWhiteSpace(PackageVer2.Text) || String.IsNullOrWhiteSpace(PackageVer3.Text) ||
                 String.IsNullOrWhiteSpace(PackageMinVer1.Text) || String.IsNullOrWhiteSpace(PackageMinVer2.Text) || String.IsNullOrWhiteSpace(PackageMinVer3.Text))
-                MessageBox.Show("You have to fill in all fields");
+                MessageBox.Show(CsvHelper.trans("import_fields_are_empty"));
             else if (Directory.Exists(TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()) + "\\"))
             {
-                MessageBox.Show("Aircraft already exists in folder " + TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()));
+                MessageBox.Show(string.Format(CsvHelper.trans("import_already_exists"), TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim())));
             } else if (SourceFolder == TargetFolder + XmlHelper.sanitizeString(PackageDir.Text.ToLower().Trim()) + "\\")
             {
-                MessageBox.Show("You can't set same forlder for source and destination");
+                MessageBox.Show(CsvHelper.trans("import_same_directory"));
             }
             else
             {
@@ -2788,16 +2900,16 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
 
             if (filesCount > 0)
             {
-                btnScan.Content = filesCount + " files added in JSON";
+                btnScan.Content = string.Format(CsvHelper.trans("json_files_added"), filesCount);
             } else
             {
-                btnScan.Content = "No files added in JSON";
+                btnScan.Content = CsvHelper.trans("json_no_files_added");
             }
 
             var t = Task.Run(async delegate
             {
                 await Task.Delay(2000);
-                Dispatcher.Invoke(() => btnScan.Content = "Rescan aircraft files");
+                Dispatcher.Invoke(() => btnScan.Content = CsvHelper.trans("json_rescan"));
                 return;
             });
         }
@@ -2823,7 +2935,8 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 myPanel2.Margin = new Thickness(0, 0, 0, 5);
 
                 CheckBox ToggleCheckBox = new CheckBox();
-                ToggleCheckBox.Content = "Toggle all";
+                ToggleCheckBox.Content = CsvHelper.trans("toggle_all");
+                ToggleCheckBox.Tag = CsvHelper.trans("toggle_all");
                 ToggleCheckBox.MaxWidth = 600;
                 ToggleCheckBox.HorizontalAlignment = HorizontalAlignment.Left;
                 ToggleCheckBox.Foreground = new SolidColorBrush(Colors.Black);
@@ -2897,7 +3010,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex.ToString());
-                        MessageBox.Show("CVT folder removal was failed");
+                        MessageBox.Show(CsvHelper.trans("cvt_remove_failed"));
                     }
                 }
             }
@@ -2917,7 +3030,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
-                    MessageBox.Show("Backup creation is failed");
+                    MessageBox.Show(CsvHelper.trans("backup_creation_failed"));
                 }
             }
 
@@ -2986,21 +3099,21 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                     btn = new Button();
                     btn2 = new Button();
                     btn = SetButtonAtts(btn);
-                    btn.Content = "Update automatically";
+                    btn.Content = CsvHelper.trans("update_auto");
                     btn.Click += UpdateAutomaticallyClick;
 
                     btn2 = SetButtonAtts(btn2);
-                    btn2.Content = "Update manually";
+                    btn2.Content = CsvHelper.trans("update_manually");
                     btn2.Click += UpdateManuallyClick;
 
-                    myBlock.Text = "Update ver" + updateVersion + " available";
+                    myBlock.Text = string.Format(CsvHelper.trans("update_available"), updateVersion);
                     myBlock.Foreground = new SolidColorBrush(Colors.DarkRed);
 
                     tabAbout.Foreground = new SolidColorBrush(Colors.DarkRed);
                 }
                 else
                 {
-                    myBlock.Text = "You are using latest program version (" + pubVer + ")";
+                    myBlock.Text = string.Format(CsvHelper.trans("update_current_version"), pubVer);
                     myBlock.Foreground = new SolidColorBrush(Colors.Black);
                 }
 
@@ -3025,7 +3138,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 _webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(OnDownloadCompleted);
 
                 StackPanel myPanel = new StackPanel();
-                TextBlock myBlock = addTextBlock("Applying update ver" + updateVersion, HorizontalAlignment.Center, VerticalAlignment.Top, Colors.Black);
+                TextBlock myBlock = addTextBlock(string.Format(CsvHelper.trans("update_applying_version"), updateVersion), HorizontalAlignment.Center, VerticalAlignment.Top, Colors.Black);
                 myPanel.Children.Add(myBlock);
                 AboutContent.Children.Add(myPanel);
 
@@ -3052,7 +3165,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                     } catch (Exception ex)
                     {
                         Console.WriteLine(ex.ToString());
-                        MessageBox.Show("Can't delete backup file");
+                        MessageBox.Show(CsvHelper.trans("update_cant_delete_backup"));
                     }
                 }
 
@@ -3065,7 +3178,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                     while (true) { if (sw.ElapsedMilliseconds > 1000 || !File.Exists(EXE_PATH)) break; }
 
                     if (File.Exists(EXE_PATH))
-                        MessageBox.Show("Can't delete old EXE file");
+                        MessageBox.Show(CsvHelper.trans("update_cant_delete_exe"));
                     
                     Extract extract = new Extract();
                     extract.Run(TEMP_FILE, EXE_PATH, AppDomain.CurrentDomain.BaseDirectory + "\\");
@@ -3083,7 +3196,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 Environment.Exit(0);
 
                 StackPanel myPanel = new StackPanel();
-                TextBlock myBlock = addTextBlock("Update failed", HorizontalAlignment.Center, VerticalAlignment.Top, Colors.Black);
+                TextBlock myBlock = addTextBlock(CsvHelper.trans("update_failed"), HorizontalAlignment.Center, VerticalAlignment.Top, Colors.Black);
                 myPanel.Children.Add(myBlock);
                 AboutContent.Children.Add(myPanel);
             }
@@ -3130,7 +3243,7 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
             return sectn;
         }
 
-        private List<string> getCheckedOptions(StackPanel panel, string additionalCondition = "")
+        private List<string> getCheckedOptions(StackPanel panel, string additionalCondition = "", bool tagValue = false)
         {
             List<string> values = new List<string>();
 
@@ -3142,10 +3255,11 @@ currentMode + " requires \"aircraft.cfg\" file to be split on parts, so MSFS wil
                 if (((StackPanel)pnl).Children.Count > 0 && ((StackPanel)pnl).Children[0].GetType() == typeof(CheckBox))
                 {
                     CheckBox a = (CheckBox)((StackPanel)pnl).Children[0];
-                    if (((CheckBox)((StackPanel)pnl).Children[0]).IsChecked == true && (string)((CheckBox)((StackPanel)pnl).Children[0]).Content.ToString() != "Toggle all" &&
-                        ( additionalCondition == "" || ((CheckBox)((StackPanel)pnl).Children[0]).Content.ToString().Contains(additionalCondition) ) )
+                    string content = tagValue ? a.Tag.ToString() : a.Content.ToString();
+                    if (((CheckBox)((StackPanel)pnl).Children[0]).IsChecked == true && content != CsvHelper.trans("toggle_all") &&
+                        ( additionalCondition == "" || content.Contains(additionalCondition) ) )
                     {
-                        values.Add((string)a.Content);
+                        values.Add(content);
                     }
                 }
             }

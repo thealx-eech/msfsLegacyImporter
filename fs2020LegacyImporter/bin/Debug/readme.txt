@@ -1,19 +1,20 @@
 [SECURITY_NOTICE]
 
-EXE file of this application is unsigned, so your Windows Defender or another antivirus software may be triggered. Sometimes it even block EXE file as malware (before or after archive extraction), it happen because of signatures comparison technology that does not analyse real program functionality but searching matches in binary data.
+EXE file of this application is unsigned, so your Windows Defender or another antivirus software may be triggered. Sometimes it even block EXE file as malware (before or after archive extraction), it happen because of signatures comparison technology that does not analyze real program functionality but searching matches in binary data.
 Each update build was submit into Microsoft Security Intelligence service to make sure it will be not blocked by Windows Defender, but it take days until cloud database, and then your client, will be updated. If you experience such issue - you may try to apply security intelligence manual update following this instruction [https://www.microsoft.com/en-us/wdsi/defenderupdates]  and then try to run application again.
 If you are using some different antivirus software - you can send file for detailed analysis manually which available for most services. Usually it takes 2-4 hours to complete, as result EXE file will be whitelisted after next signatures update.
 If it still does not work and you do not trust program developer - don't use it for now and wait for the release version.
 
 [DESCRIPTION]
 
-This program was made to simplify FSX aircraft import into MSFS. Two levels of import available - Legacy (Ethusiast Mode) and Modern (Developer Mode). First one providing list of fixes for various critical issues, lights and textures conversion, 2D gauges import. Second also have tools for CFG files manipulations and AIR file import. Please read LICENSE.TXT file content for both levels.
+This is complex tool for importing Microsoft Flight Simulator X (FSX, 2006) aircraft into Microsoft Flight Simulator (MSFS, 2020). It does apply all required actions for successful import (like files copying, manifest file generation, critical issues fixing, 2D gauges conversion and other minor stuff). Two levels of import available - Basic and Full. First one providing list of fixes for various critical issues, lights and textures conversion, 2D gauges import. Second also have tools for CFG files manipulations and AIR file import.
+Program still in development stage, but you can participate in testing and report about any issues you have. MSFS engine has its own limitations in Legacy aircraft support, be sure you are importing native FSX aircraft (not FS9 or P3D) before reporting issue.
 
 [PROVIDED_FEATURES]
 
 - copy files from FSX to MSFS Community folder with proper structure
 - generate layout.json file with list of files
-- generate manifest.json file based on loaded from aircraft pacage data (manual edit possible)
+- generate manifest.json file based on loaded from aircraft package data (manual edit possible)
 - load existing legacy or native MSFS aircraft
 - split AIRCRAFT.CFG on relative CFG files
 - insert missing values into imported CFG file(s)
@@ -51,7 +52,7 @@ This program was made to simplify FSX aircraft import into MSFS. Two levels of i
 [INSTALLATION]
 
 - download the latest version archive from https://www.nexusmods.com/microsoftflightsimulator/mods/117
-- unpack files into some folder, launch EXE
+- unpack files into some folder, launch "msfsLegacyImporter.exe"
 
 [UNINSTALL]
 
@@ -66,12 +67,17 @@ This program was made to simplify FSX aircraft import into MSFS. Two levels of i
 
 https://www.youtube.com/watch?v=Tt_6Vsp9xZY
 
-https://www.youtube.com/watch?v=TuuVtgpfjTM
+https://www.youtube.com/watch?v=wNFbwr3KstE
+
+https://www.youtube.com/watch?v=O80P73twn5E
+
+https://www.youtube.com/watch?v=L77aG5UABS4
+
+https://www.youtube.com/watch?v=g00a3mDRZIA
 
 [NOTICE]
 
-Since MSFS release, bug with legacy aircrafts exists - if you met some other player with same aircraft and exactly the same AC folder name (inside SimObjects), game will crash for any of you. So it is not recommended to play imported airplanes online.
-
+Since MSFS release, bug with legacy aircrafts exists - if you met some other player with same aircraft and exactly the same AC folder name (inside of SimObjects), game will crash for any of you. So it is not recommended to play imported airplanes online.
 
 [CFG_PARSER]
 
@@ -126,9 +132,10 @@ To avoid parsing issues, keep files formatting properly (comment symbol is ";", 
 
 6. FlightModel
 
-6.1 List of gears contact points that positioned too close (usually cause "stuck landing gear" bug)
-6.2 When both points of same pair selected, they will be merged by average position calculation
+6.1 List of gears contact points that positioned too close (usually cause "stuck landing gear" bug).
+6.2 When both points of same pair selected, they will be moved in their middle position.
 6.3 If some points will be not properly formatted (like missing comma), they will be listed in red color. Manual fix required.
+6.4 If no landing/taxi lights exists, you can attach taxi lights to contact points (+2ft higher +2ft forwards)
 6.4 Missing critical flight model values list, some of them required only after AIR file import
 6.4 AIR data import table same as in 3.4-3.8
 6.5 To import all flight model values, you'll need to add AERODYNAMICS section. You may choose either option - insert default values or leave them disabled, but in second case you'll need to fix and enable them manually otherwise game will crash (all values inside of this section except "_table" are critical).
