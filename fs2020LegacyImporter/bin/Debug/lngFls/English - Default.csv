@@ -1,0 +1,187 @@
+slug,translation,original
+COMMON,,
+file_edited_outside,,File {0} was edited outside of the program\nAircraft data should be reloaded
+file_edited,,CFG file change detected
+restore_backup,,Restore Backup
+AircraftBackupButton,,Make Backup
+EnginesBackupButton,,Make Backup
+FlightModelBackupButton,,Make Backup
+CockpitBackupButton,,Make Backup
+SystemsBackupButton,,Make Backup
+RunwayBackupButton,,Make Backup
+ModelBackupButton,,Make Backup
+PanelBackupButton,,Make Backup
+AircraftEditButton,,Edit
+EnginesEditButton,,Edit
+FlightModelEditButton,,Edit
+CockpitEditButton,,Edit
+SystemsEditButton,,Edit
+RunwayEditButton,,Edit
+backup_creation_failed,,Backup creation is failed
+directory_not_found,,Directory not found {0}
+restore_backup_notice,,All changes in {0} made since backup will be erased
+restore_backup_header,,You are going to restore {0}
+destination_path,,Destination: {0}
+source_path,,Source: {0}
+aircraft_not_found_in,,Folder {0} does not contain aircraft.cfg
+toggle_all,,Toggle all
+cvt_remove_failed,,CVT folder removal was failed
+btnOpenFile,,Browse
+load_imported_header,,Load imported FSX (Legacy) or MSFS (Native) aircraft
+load_imported_notice,,Set path of imported FSX aircraft or native MSFS aircaft
+MainMenuButton,,Main Menu
+IMPORT,,
+import_folders_not_selected,,You have to select both source (FSX) ans destination (MSFS) folders
+import_fields_are_empty,,You have to fill in all fields
+import_already_exists,,Aircraft already exists in folder {0}
+import_same_directory,,You can't set same folder for source and destination
+btnSourceFolder,,FSX aircraft directory
+btnTargetFolder,,MSFS Community directory
+btnImportSubmit,,Import
+new_import_header,,Import new FSX aircraft
+new_import_notice,,"Set path of FSX aircraft directory first (not the root of installed FSX), then set MSFS Community folder path"
+JSON,,
+json_no_files_added,,No files added in JSON
+btnScan,,Rescan aircraft files
+json_files_added,,{0} files added in JSON
+update_layout_header,,Update LAYOUT.JSON file of current aircraft
+INIT TAB,,
+init_curr_aircraft,,Current aircraft
+init_tabs_click,,Click on tabs to discover available fixes
+init_cfg_tpl_missing,,CFG templates missing
+init_simobject_missing,,"Selected folder {0} should contain SimObjects folder, and layout.json + manifest.json files"
+init_cfg_ignored,,ignored
+init_cfg_missing,,missing
+init_cfg_loaded,,loaded
+init_basic_mode,,Basic import mode
+init_mode_active,,is active
+init_basic_notice1,,"In Basic import mode you will have most features available, even if they will be applied to the single config file – ""aircraft.cfg""."
+init_basic_notice2,,"This way MSFS will treat aircraft as Legacy, so flight model and engine configs will be loaded in compatibility mode. It is the easiest way to avoid engines, avionics and aerodynamics issues."
+init_basic_notice3,,"However, MSFS compatibility code itself has issues that can't be fixed by changing config values. Also modern values (such as external view gauges) are not supported and can't be used."
+init_basic_notice4,,"*Even if aircraft, imported in this mode, may have only minor issues, do not publish such half-finished planes as release."
+init_basic_notice5,,If you still wish to share your success - make a video or text tutorial which can be used by other enthusiasts for educational purposes.
+init_full_mode,,Full import mode
+init_full_notice1,,"Full import mode requires ""aircraft.cfg"" file to be split on parts, so MSFS will treat this aircraft as Native."
+init_full_notice2,,"In this case more complicated requirements will be applied to existing values and you will experience various issues that can be fixed by applying available fixes or editing config data. It is strongly recommended to perform AIR data import, remove air file, and add all missing variables manually to finalize import process."
+init_full_notice3,,"*If you are the owner of the aircraft, or get permission to publish the import result, for free or for payment, you have to credit this tool in the release description."
+init_full_notice4,,Feel free to contact me about any issues you will have with your project (contacts in About tab).
+init_full_enable,,Enable Full import mode
+init_parse_cfg,,Parse AIRCRAFT.CFG
+AIRCRAFT TAB,,
+aircraft_parameter_invalid,,aircraft parameter invalid
+aircraft_parameter_missing,,aircraft parameter missing
+aircraft_add_missing_parameters,,Try to add missing aircraft parameters
+aircraft_missing_parameter_notice,,"Missing performance values will be searched in aircraft description. Invalid aircraft type value highlighted in red color, it should be fixed otherwise aircraft will not appear in main menu list."
+aircraft_cfg_not_found,,aircraft.cfg not found in aircraft directory
+aircraft_cfg_split_failed,,CFG split failed
+aircraft_split_notice,,"aircraft.cfg file will be split on parts, so MSFS will treat this aircraft as Native. This operation can't be undone, current config file will be saved as "".aircraft.cfg"""
+aircraft_split_header,,AIRCRAFT.CFG conversion warning
+ENGINES TAB,,
+engines_fix_issues,,Fix engines issues
+engines_issues_notice,,"Invalid engine value should be fixed, otherwise aircraft will be ignored by flight model code and stay frozen even in the air."
+engines_no_issues,,No engines issues
+engines_power,,Adjust engines power
+AIR FUNCTIONS,,
+air_tbl_not_found,,No AIR conversion tables found
+air_tbl_not_found_notice,,"File {0} does not exists.\nExtract folder ""airTbls"" from program archive into same directory, where EXE is stored."
+airupdate_not_found,,AirUpdate.exe not found
+airupdate_not_found_notice,,AirUpdate not found in Importer folder.\nClick this button to download and unpack archive from www.mudpond.org
+air_dump_not_found,,No exported AIR data found
+air_dump_notice,,File {0} does not exists.\nClick this button to launch AirUpdate and follow these steps:
+air_dump_notice1,,"1. ""Select Air File"""
+air_dump_notice2,,"2. Navigate to ""{0}"""
+air_dump_notice3,,3. Select AIR file
+air_dump_notice4,,"4. Check ""Full dump"" option"
+air_dump_notice5,,"5. Press ""Dump"" button"
+air_dump_notice6,,6. Close AirUpdate
+air_no_values_to_import,,No AIR values available for import
+air_no_values_to_import_notice,,AIR and CFG values identical. You can try to insert\nmissing sections without default values activation.
+air_new_val,,New val
+air_old_val,,Old val
+air_default_val,,Default val
+air_loading_failed,,AIR tables loading failed
+air_import_notice,,"Select valid AIR values to insert into CFG files. When you finish, AIR file can be removed.\nBut if some CFG values are missing - game may crash or aircraft will not appear in the list."
+air_insert_values,,*Insert AIR values
+air_remove,,Remove AIR file
+SYSTEMS TAB,,
+systems_convert_lights,,Convert lights
+systems_convert_lights_notice,,"To make lights work in MSFS, legacy lights values should be converted in new format. Light type and coordinates will be preserved."
+systems_insert_lights,,Insert taxi lights
+systems_insert_lights_notice,,You can attach taxi lights to landing gears automatically.\nLights position will be inaccurate and may require manual adjustments.
+systems_no_light_issues,,No lights issues
+FLIGHT MODEL TAB,,
+fm_contact_point_data,,{0}ft between landing gear points
+fm_fix_contact_points,,Fix contact points duplicates
+fm_fix_contact_points_notice,,"Several contact points, attached to single retractable landing gear, can make it non functional. Script will move neighbor points in same position. If you have no problems with landing gears in the game - leave these checkboxes untouched."
+fm_contact_points_issues,,No contact points issues
+fm_contact_points_issues_notice,,"Contact points that possibly formatted incorrectly, press Edit button and fix values manually."
+fm_fix_flight_model,,Fix flight model issues
+fm_fix_flight_model_notice,,"Missing sensitive values may cause unpredictable result in the air. However, these values automatic calculation is inaccurate and may require manual adjustments."
+fm_no_flight_model_issues,,No flight model issues
+fm_value_generated_notice,,"{0} value was calculated as {1} from wing_span, you'll need to adjust it manually.\nIf after {2} insertion center of gravity will be broken, adjust first (longitudinal) value of empty_weight_cg_position (increase to move CG forward, decrease - backward)"
+fm_value_generated_notice2,,"{0} value was calculated as {1} from wing_span and max_gross_weight, you'll need to adjust it manually"
+fm_bad_contact_point,,Bad contact point coordinate: '{0}'
+CFG SECTIONS,,
+cfg_insert_sections,,Insert selected CFG sections
+cfg_insert_cockpit_sections_notice,,"Sections, highlighted in red, responsible for external view instruments. Choose ""YES"" on the pop up to insert external instruments, you may need to adjust new values manually."
+cfg_insert_flt_sections_notice,,"This section responsible for avionics state on the runway. If you have problem with landing gears, engines, parking brake right after you start the game on the ground - choose only critical or all available options. However, these fixes does not affect avionics state when you starting flight in the air."
+cfg_insert_sections_notice,,"All variables will have default values, it may affect aircraft behaviour in the game\nPress YES to insert and activate default values\nPress NO to insert and deactivate default values\nPress CANCEL to abort insertion"
+cfg_insert_sections_header,,{0} sections will be inserted into {1}
+cfg_insert_section_header,,{0} section will be inserted into {1}
+TEXTURES TAB,,
+textures_convert_notice,,"In most cases BMP textures should be converted into DDS format, but not always. If some of the textures can't be converted by any of available tools, you need to make it manually."
+textures_no_issues,,No textures issues
+textures_imagetools,,BMP to DDS by ImageTools
+textures_nvdxt,,BMP to DDS by nvdxt
+textures_conversion_process,,{0} of {1} textures converted
+MODEL TAB,,
+model_format_is_not_compatible,,"{0} format is not compatible with MSFS, 3D model may not be loaded by the game"
+model_remove_clickable,,Remove interior clickable switches
+model_remove_clickable_notice,,"This is fix for the crash issue that no longer appear in latest version of the game. However, you can use it to remove clickable rectangles from the cockpit completely."
+model_no_clickable_switches,,No models with clickable switches
+model_no_interior_model,,No interior models found
+model_remove_clickable_warning,,You will be no longer able to use clickable elements inside of the cockpit. You can restore original interior model by clicking Restore Backup button.
+model_remove_clickable_warning_header,,You are going to remove clickable switches
+model_clickable_removal_failed,,Clickable switches removal from {0} failed
+SOUNDS TAB,,
+sounds_toggle_notice,,"You can toggle available sound samples and then press Update button below the list. Physically, files stay on the hard drive and can be enabled anytime later."
+sounds_update,,Update sounds list
+sounds_not_found,,No sounds lists found
+sounds_tone_volume,,Tone volume ({0} - silent; {1} - normal; {2} - loud)
+sounds_insert_tone,,Insert glider variometer tone
+sounds_remove_tone,,Remove glider variometer tone
+sounds_warning,,Warning
+sounds_remove_notice,,"File ""\sound\sound.xml"" will be deleted. If it variometer tone only - you can insert it again after this file will be removed."
+PANEL TAB,,
+panel_dll_detected,,Aircraft folder contains DLL/GAU files - avionics and/or animation may not work in the game
+panel_extract_gauges,,Extract panel gauges resources
+panel_no_panel,,No panel resources found
+panel_extract_fsx_resources,,Extract default FSX gauges resources
+panel_fsx_extracted,,Default FSX gauges resources extracted
+panel_import_gauges,,Import panel gauges
+panel_force_gauge_background,,Force gauge background image (check it if you get black holes on gauges places)
+panel_gamma_correction,,Gamma correction ({0} - bright; {1} - normal; {2} - dark)
+panel_not_found,,No panels gauges found
+panel_extracting_cab,,Extracting {0}
+panel_current_fsx_path,,Current FSX path is {0}
+panel_fsx_extract_notice1,,Press YES to extract CAB files from this folder (DLL/GAU files not supported)
+panel_fsx_extract_notice2,,Press NO to select FSX installation folder
+panel_fsx_extract_notice3,,Press CANCEL to abort
+panel_fsx_header,,FSX CAB files extractions
+panel_gauges_not_found,,Gauges or SimObjects\Airplanes folder not found in {0}
+TextExpressionButton,,Test FSX Expressions converter
+ABOUT TAB,,
+about_colored_header,,Colored labels
+about_links_header,,Links and credits
+about_colored_green,,enabled value/section or no issues detected
+about_colored_orange,,"disabled value/section but probably not required, possible issues but need to be checked ingame"
+about_colored_red,,"wrong values or missing sections, some critical issues detected and should be fixed for normal gameflow"
+UPDATE FUNCTIONS,,
+update_auto,,Update automatically
+update_manually,,Update manually
+update_current_version,,You are using latest program version ({0})
+update_applying_version,,Applying update ver{0}
+update_cant_delete_backup,,Can't delete backup file
+update_cant_delete_exe,,Can't delete old EXE file
+update_failed,,Update failed
+update_available,,Update ver{0} available

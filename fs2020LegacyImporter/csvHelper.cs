@@ -249,6 +249,12 @@ namespace msfsLegacyImporter
 
         public void initializeLanguages(ComboBox LangSelector)
         {
+            if (!Directory.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\lngFls\\"))
+            {
+                try { Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "\\lngFls\\"); } catch { MessageBox.Show("Failed to create languages folder"); }
+            }
+
+
             string userLanguagefile = AppDomain.CurrentDomain.BaseDirectory + "\\lngFls\\userLanguage";
             string language = "English - Default";
             if (File.Exists(userLanguagefile))
@@ -332,10 +338,7 @@ namespace msfsLegacyImporter
             }
 
             if (userLanguage == null)
-                MessageBox.Show("Language file " + language + ".csv is empty.");
-
-            if (defaultLanguage == null)
-                MessageBox.Show("Language file english.csv not found.");
+                MessageBox.Show("Language file " + language + ".csv is empty or does not exists.");
         }
 
         public string trans(string slug)
