@@ -30,6 +30,8 @@ btnOpenFile,,Browse
 load_imported_header,,Load imported FSX (Legacy) or MSFS (Native) aircraft
 load_imported_notice,,Set path of imported FSX aircraft or native MSFS aircaft
 MainMenuButton,,Main Menu
+imageLeftTooltip,,"Click it to start new import, you will need unpacked FSX aircraft files\non your disk or installed Flight Simulator X"
+imageRightTooltip,,"Click it to load imported FSX (Legacy) or MSFS (Native) aircraft,\nusually they are stored in Community folder"
 IMPORT,,
 import_folders_not_selected,,You have to select both source (FSX) ans destination (MSFS) folders
 import_fields_are_empty,,You have to fill in all fields

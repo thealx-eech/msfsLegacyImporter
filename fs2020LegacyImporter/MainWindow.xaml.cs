@@ -151,8 +151,8 @@ namespace msfsLegacyImporter
             about_colored_green = SetHeaderAtts(about_colored_green);
             about_colored_orange = SetHeaderAtts(about_colored_orange);
             about_colored_red = SetHeaderAtts(about_colored_red);
-
-
+            imageLeftTooltip = SetHeaderAtts(imageLeftTooltip);
+            imageRightTooltip = SetHeaderAtts(imageRightTooltip);
         }
         private void languageUpdated(object sender, System.EventArgs e)
         {
@@ -228,7 +228,9 @@ namespace msfsLegacyImporter
                 if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
                 {
                     setAircraftDirectory(dialog.FileName);
-                    showInitPage("loaded");
+                    
+                    if (aircraftDirectory != "")
+                        showInitPage("loaded");
                 }
             }
             catch (Exception exc)
@@ -373,7 +375,7 @@ namespace msfsLegacyImporter
                                 item.Visibility = Visibility.Collapsed;
                             break;
                         case "tabRunway":
-                            if (CfgHelper.cfgFileExists("engines.cfg") && CfgHelper.cfgFileExists("flight_model.cfg"))
+                            if (CfgHelper.cfgFileExists("engines.cfg") || CfgHelper.cfgFileExists("aircraft.cfg") /*&& CfgHelper.cfgFileExists("flight_model.cfg")*/)
                                 item.Visibility = Visibility.Visible;
                             else
                                 item.Visibility = Visibility.Collapsed;
@@ -756,9 +758,14 @@ namespace msfsLegacyImporter
                 if (engine_type == "2" || engine_type == "3" || engine_type == "4" || engine_type == "")
                     EnginesData = AddCheckBox(EnginesData, "engine_type = " + (engine_type != "" ? engine_type : "missing"), Colors.DarkRed, criticalIssues++);
 
+                string engine0 = CfgHelper.getCfgValue("engine.0", "engines.cfg", "[GENERALENGINEDATA]");
+                if (engine0 == "")
+                    EnginesData = AddCheckBox(EnginesData, "engine.0 = missing", Colors.DarkRed, criticalIssues++);
+
                 string afterburner_available = CfgHelper.getCfgValue("afterburner_available", "engines.cfg", "[TURBINEENGINEDATA]");
                 if (afterburner_available != "" && afterburner_available != "0")
                     EnginesData = AddCheckBox(EnginesData, "afterburner_available = " + afterburner_available, Colors.DarkRed, criticalIssues++);
+
 
                 StackPanel myPanel2 = new StackPanel();
 
@@ -804,7 +811,10 @@ namespace msfsLegacyImporter
                 {
                     string[] val = checkboxLabel.Split('=');
 
-                    CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg");
+                    if (val[0].Trim() == "engine.0")
+                        CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0,0,0", "engines.cfg", "[GENERALENGINEDATA]");
+                    else
+                        CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg");
                     i++;
                 }
             }
@@ -1795,7 +1805,7 @@ namespace msfsLegacyImporter
                         }
                         else if (filename == "runway.flt")
                         {
-                                notice.Text = CsvHelper.trans("cfg_insert_flt_sections_notice");
+                            notice.Text = CsvHelper.trans("cfg_insert_flt_sections_notice");
                             parentPanel.Children.Insert(0, notice);
                         }
                     }
@@ -2718,7 +2728,12 @@ namespace msfsLegacyImporter
         public TextBlock SetHeaderAtts (TextBlock header, bool large = true)
         {
             if (header.Name != null && !String.IsNullOrEmpty(header.Name.ToString()))
-                header.Text = CsvHelper.trans(header.Name.ToString());
+            {
+                if (header.ToolTip != null)
+                    header.ToolTip = CsvHelper.trans(header.Name.ToString());
+                else
+                    header.Text = CsvHelper.trans(header.Name.ToString());
+            }
 
             return header;
         }

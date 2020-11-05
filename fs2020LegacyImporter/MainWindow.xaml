@@ -75,6 +75,8 @@
                     </EventTrigger>
                 </TextBlock.Triggers>
             </TextBlock>
+            <TextBlock Name="imageLeftTooltip" HorizontalAlignment="Left" Margin="10 5 10 0" Foreground="#FFBEDDFF" Grid.Column="0" FontSize="24" ToolTip="imageLeftTooltip">*</TextBlock>
+            <TextBlock Name="imageRightTooltip" HorizontalAlignment="Left" Margin="10 5 10 0" Foreground="#FFBEDDFF" Grid.Column="1" FontSize="24" ToolTip="imageRightTooltip">*</TextBlock>
             <ComboBox Name="LangSelector" Grid.ColumnSpan="2" HorizontalAlignment="Right" FontSize="18" Height="30" VerticalAlignment="bottom" Width="auto" Margin="15 15 30 15">
             </ComboBox>
         </Grid>
