@@ -16,11 +16,26 @@ namespace msfsLegacyImporter
         private double[] prevPoint;
         private double prevAngle;
         private int rotationDirection;
-        string logfile;
+        string logfile = "";
+        string logcontent = "";
         string[] imagesExceptions = new string[]
         {
             "hsi_hsi_reflection",
-            "compass_compass_highlight"
+            "compass_compass_highlight",
+            "AN_24_GROZA_BLIK",
+            //"HUD_pfd_background"
+        };
+        string[] imagesForceTransparancy = new string[]
+        {
+            "pfd_attitude_inner_att_mask",
+            "pfd_attitude_sky_ground_strip_mask",
+            "compass_strip_mask"
+        };
+
+        string[][] positionExceptions = new string[][]
+        {
+            new string[] { "HUD_pfd_attitude_ladder", "-25", "-198" },
+            new string[] { "HUD_Heading_pointer", "95", "12" }
         };
 
         private string gaugeGroup;
@@ -32,6 +47,7 @@ namespace msfsLegacyImporter
         private string yPos;
         private string gaugeWidth;
         private string gaugeHeight;
+        private string scaleUp;
         private string panelDir;
         private int index;
         private string html;
@@ -42,24 +58,18 @@ namespace msfsLegacyImporter
         private string errors;
 
 
-        public void insertFsxGauge(object sender, string aircraftDirectory, string projectDirectory, string chkContent, float GammaSlider, bool ForceBackground, cfgHelper CfgHelper, fsxVarHelper FsxVarHelper, jsonHelper JSONHelper)
+        public void insertFsxGauge(object sender, string aircraftDirectory, string projectDirectory, string chkContent, float[] atts, cfgHelper CfgHelper, fsxVarHelper FsxVarHelper, jsonHelper JSONHelper)
         {
             string mainFile = aircraftDirectory + "\\" + (string)chkContent;
             string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
 
-            logfile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileNameWithoutExtension(mainFile) + ".log.txt";
-
             if (!File.Exists(mainFile))
-            {
                 return;
-            }
 
             // PREPARE LOG FILE
+            logfile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileNameWithoutExtension(mainFile) + ".log.txt";
             errors = "";
-            try {
-                File.WriteAllLines(logfile, new string[0]);
-            }
-            catch { }
+            logcontent = "";
 
             string htmlTpl = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "panelTpl\\panel.html");
             string cssTpl = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "panelTpl\\panel.css");
@@ -102,12 +112,15 @@ namespace msfsLegacyImporter
                         continue;
                     }
 
-                    acSlug = Regex.Replace(Path.GetFileName(aircraftDirectory).Replace("\\", "").Trim().ToLower(), @"[^0-9A-Za-z ,\.\-_]", "").Replace(" ", "_");
+                    acSlug = Regex.Replace(Path.GetFileName(aircraftDirectory).Replace("\\", "").Trim().ToLower() + "_" + Path.GetDirectoryName(chkContent), @"[^0-9A-Za-z ,.\-_]", "").Replace(" ", "_").Replace(".", "_");
                     materialName = "gauges_" + texture.Replace("$", "").ToLower();
                     int[] size = pixel_size != null && pixel_size.Contains(',') &&
                         int.TryParse(pixel_size.Split(',')[0].Trim(), out int num1) && int.TryParse(pixel_size.Split(',')[1].Trim(), out int num2) ?
                         new int[] { num1, num2 } : new int[] { 0, 0 };
-                    msfsLegacyImporter.cfgHelper.CfgSection newPanelSection = new msfsLegacyImporter.cfgHelper.CfgSection(true, panelSection.Name.Replace("VCOCKPIT", "VPainting"), new List<msfsLegacyImporter.cfgHelper.CfgLine>());
+                    int[] size2 = size_mm != null && pixel_size.Contains(',') &&
+                        int.TryParse(size_mm.Split(',')[0].Trim(), out int num11) && int.TryParse(size_mm.Split(',')[1].Trim(), out int num22) ?
+                        new int[] { num11, num22 } : new int[] { 0, 0 };
+                    cfgHelper.CfgSection newPanelSection = new msfsLegacyImporter.cfgHelper.CfgSection(true, panelSection.Name.Replace("VCOCKPIT", "VPainting"), new List<msfsLegacyImporter.cfgHelper.CfgLine>());
 
                     // PROCESS GAUGES LIST
                     for (int i = 0; i < 1000; i++)
@@ -147,7 +160,19 @@ namespace msfsLegacyImporter
                     {
                         html = "";
                         css = "";
-                        js = "";
+                        js = Environment.NewLine;
+
+                        if (atts[4] == 1)
+                        {
+                            js += "       // TAXI LIGHTS CONTROL" + Environment.NewLine;
+                            js += "       if (SimVar.GetSimVarValue(\"IS GEAR RETRACTABLE\", \"Boolean\")) {" + Environment.NewLine;
+                            js += "         var gears_extracted = SimVar.GetSimVarValue(\"GEAR HANDLE POSITION\", \"Boolean\");" + Environment.NewLine;
+                            js += "         if (SimVar.GetSimVarValue(\"LIGHT TAXI\", \"bool\") && !gears_extracted)" + Environment.NewLine;
+                            js += "            SimVar.SetSimVarValue(\"K:TOGGLE_TAXI_LIGHTS\", \"bool\", false)" + Environment.NewLine;
+                            js += "         else if (!SimVar.GetSimVarValue(\"LIGHT TAXI\", \"bool\") && gears_extracted)" + Environment.NewLine;
+                            js += "            SimVar.SetSimVarValue(\"K:TOGGLE_TAXI_LIGHTS\", \"bool\", true)" + Environment.NewLine;
+                            js += "       }" + Environment.NewLine;
+                        }
 
                         string baseFolder = /*projectDirectory.TrimEnd('\\')*/ Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\";
                         InstrumentFolder = baseFolder + "html_ui\\Pages\\VLivery\\liveries\\Legacy\\" + acSlug + "\\";
@@ -160,7 +185,7 @@ namespace msfsLegacyImporter
                             if (File.Exists(Path.GetDirectoryName(mainFile) + "\\" + file))
                             {
                                 Bitmap bmp = new Bitmap(Path.GetDirectoryName(mainFile) + "\\" + file);
-                                bmp = setBitmapGamma(bmp, GammaSlider);
+                                bmp = setBitmapGamma(bmp, atts[0], false);
                                 bmp.Save(InstrumentFolder + Path.GetFileNameWithoutExtension(file) + ".png", ImageFormat.Png);
                             }
                             else
@@ -181,8 +206,10 @@ namespace msfsLegacyImporter
                                 gaugeSanitizedName = "g" + gaugeSanitizedName;
                             xPos = gaugeData[1].Trim().Trim('"');
                             yPos = gaugeData[2].Trim().Trim('"');
-                            gaugeWidth = gaugeData[3].Trim().Trim('"');
-                            gaugeHeight = gaugeData[4].Trim().Trim('"');
+                            gaugeWidth = gaugeData.Length >= 4 ? gaugeData[3].Trim().Trim('"') : "0";
+                            gaugeHeight = gaugeData.Length >= 5 ? gaugeData[4].Trim().Trim('"') : gaugeWidth;
+                            scaleUp = gaugeData.Length >= 7 ? gaugeData[6].Trim().Trim('"') : "1";
+
 
                             //SET BUTTON LABEL
                             Application.Current.Dispatcher.Invoke(() => {
@@ -232,9 +259,18 @@ namespace msfsLegacyImporter
                                 html += "		<div id=\"" + gaugeSanitizedName + "\">" + Environment.NewLine;
                                 css += materialName + "-element #Mainframe #" + gaugeSanitizedName + " {" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine + "		left: " + xPos + "px;" + Environment.NewLine + "		top: " + yPos + "px;" + Environment.NewLine;
 
+                                // MACRO
+                                foreach (var macro in gaugeXml.Elements("Macro"))
+                                {
+                                    if (macro.Attribute("Name") != null && !string.IsNullOrEmpty(macro.Value))
+                                        js += "		var " + macro.Attribute("Name").Value + " = " + FsxVarHelper.fsx2msfsSimVar(macro.Value, this, false) + ";" + Environment.NewLine;
+                                    else if (macro.Attribute("Name") != null)
+                                        js += "		var " + macro.Attribute("Name").Value + " = \"\";" + Environment.NewLine;
+                                }
+
                                 // SET BG IMAGE IF NECESSARY
                                 XElement mainImage = gaugeXml.Element("Image");
-                                if (String.IsNullOrEmpty(Path.GetFileNameWithoutExtension(file)) || ForceBackground)
+                                if (String.IsNullOrEmpty(Path.GetFileNameWithoutExtension(file)) || atts[1] == 1)
                                 {
                                     if (mainImage != null && mainImage.Attribute("Name") != null)
                                     {
@@ -253,14 +289,13 @@ namespace msfsLegacyImporter
                                             if (File.Exists(sourceFile))
                                             {
                                                 Bitmap bmp = new Bitmap(sourceFile);
-                                                                                                 
-                                                bmp = setBitmapGamma(bmp, GammaSlider);
+                                                bmp = setBitmapGamma(bmp, atts[0],
+                                                    mainImage.Element("Transparent") != null && mainImage.Element("Transparent").Value == "True" ||
+                                                        mainImage.Attribute("Alpha") != null && mainImage.Attribute("Alpha").Value == "Yes" ||
+                                                        imagesForceTransparancy.Contains(Path.GetFileNameWithoutExtension(sourceFile)));
 
                                                 if (imgSize[0] == "0" && imgSize[1] == "0")
                                                     imgSize = new string[] { bmp.Width.ToString(), bmp.Height.ToString() };
-
-                                                if (mainImage.Element("Transparent") != null && mainImage.Element("Transparent").Value == "True")
-                                                    bmp.MakeTransparent(System.Drawing.Color.FromArgb(255, 0, 0, 0));
 
                                                 bmp.Save(InstrumentFolder + MainImageFilename + ".png", ImageFormat.Png);
 
@@ -285,13 +320,22 @@ namespace msfsLegacyImporter
                                 if (GaugeSize[0] == "0" && GaugeSize[1] == "0")
                                     writeLog("ERROR: " + "Gauge with zero size!");
 
-                                if (GaugeSize[0] != "0" && GaugeSize[1] != "0" && imgSize[0] != "0" && imgSize[1] != "0") // SCALE GAUGE IF NECESSARY
+                                if (atts[6] == 1 && GaugeSize[0] != "0" && GaugeSize[1] != "0" && imgSize[0] != "0" && imgSize[1] != "0") // SCALE GAUGE IF NECESSARY
                                 {
                                     css += "		width: " + imgSize[0] + "px;" + Environment.NewLine + "		height: " + imgSize[1] + "px;" + Environment.NewLine;
-                                    css += Environment.NewLine + "		transform: scale(calc(" + GaugeSize[0] + " / " + imgSize[0] + "), calc(" + GaugeSize[1] + " / " + imgSize[1] + "));" + Environment.NewLine + "		transform-origin: 0 0;" + Environment.NewLine;
+                                    css += Environment.NewLine + "		transform: scale(calc(" + scaleUp + " * " + GaugeSize[0] + " / " + imgSize[0] + "), calc(" + scaleUp + " * " + GaugeSize[1] + " / " + imgSize[1] + "));" + Environment.NewLine + "		transform-origin: 0 0;" + Environment.NewLine;
                                 } else
                                 {
                                     css += "		width: " + GaugeSize[0] + "px;" + Environment.NewLine + "		height: " + GaugeSize[1] + "px;" + Environment.NewLine;
+                                    if (scaleUp != "1")
+                                        css += Environment.NewLine + "		transform: scale(" + scaleUp + ");" + Environment.NewLine + "		transform-origin: 0 0;" + Environment.NewLine;
+                                }
+
+                                // SCALE UP/DOWN IF GAUGE SIZE NOT MATCH PANEL SIZE
+                                if (atts[3] < 1 && (size2[0] != 0 && size2[0].ToString() != gaugeWidth || size2[1] != 0 && size2[1].ToString() != gaugeHeight))
+                                {
+                                    writeLog("Scaling up panel from " + gaugeWidth + " " + gaugeHeight + " to " + size2[0] + " " + size2[1]);
+                                    css += "		transform: scale(calc(" + scaleUp + " * " + size2[0].ToString() + " / " + gaugeWidth + "), calc(" + scaleUp + " * " + size2[1].ToString() + " / " + gaugeHeight + ")); transform-origin: 0 0; " + Environment.NewLine;
                                 }
 
                                 css += "}" + Environment.NewLine;
@@ -310,7 +354,7 @@ namespace msfsLegacyImporter
                                     index = -1;
                                     foreach (XElement gaugeElement in gaugeElements)
                                     {
-                                        processGaugeElement(gaugeElement, FsxVarHelper, GammaSlider, 0 );
+                                        processGaugeElement(gaugeElement, FsxVarHelper, atts, 0 );
                                     }
                                 }
 
@@ -343,6 +387,22 @@ namespace msfsLegacyImporter
                             js = jsTpl.Replace("[INSTRUMENTS]", js);
                             js = js.Replace("[MATERIALNAME]", materialName);
 
+                            /*
+		// BLUR FIX START
+		var skipFrames = 1;
+
+		this.querySelector("#Mainframe").style.opacity = "0.99";
+		this.curTime += 1;
+
+		if (this.curTime == skipFrames + 1) {
+			this.curTime = 0;
+			this.querySelector("#Mainframe").style.opacity = "1";
+		} else {
+			return;
+		} 
+		// BLUR FIX END
+                            */
+
                             // SAVE FILES
                             File.WriteAllText(InstrumentFolder + materialName + ".html", html);
                             File.WriteAllText(InstrumentFolder + materialName + ".css", css);
@@ -362,29 +422,31 @@ namespace msfsLegacyImporter
                             newPanelFile.Sections.Add(newPanelSection);
                         }
 
-                        if (errors != "")
+                        if (atts[2] != 1 && errors != "")
                             MessageBox.Show(errors + "You can try to unpack FSX gauges resources first or report it to program author (links in About tab)", materialName + " conversion errors");
                     }
                 }
             }
 
+            saveLog();
+
             CfgHelper.saveCfgFile(aircraftDirectory, newPanelFile);
         }
 
-        private void processGaugeElement(XElement gaugeElement, fsxVarHelper FsxVarHelper, float GammaSlider, int depth)
+        private void processGaugeElement(XElement gaugeElement, fsxVarHelper FsxVarHelper, float[] atts, int depth)
         {
             index++;
 
-            XElement Image = gaugeElement.Elements("Image").FirstOrDefault();
-            XElement FloatPosition = gaugeElement.Elements("FloatPosition").FirstOrDefault();
+            XElement Image = gaugeElement.Element("Image");
+            XElement FloatPosition = gaugeElement.Element("FloatPosition");
             if (FloatPosition == null)
-                FloatPosition = gaugeElement.Elements("Position").FirstOrDefault();
-            XElement Rotation = gaugeElement.Elements("Rotation").FirstOrDefault();
+                FloatPosition = gaugeElement.Element("Position");
+            XElement Rotation = gaugeElement.Element("Rotation");
             if (Rotation == null)
-                Rotation = gaugeElement.Elements("Rotate").FirstOrDefault();
-            XElement Shift = gaugeElement.Elements("Shift").FirstOrDefault();
-            XElement GaugeText = gaugeElement.Elements("GaugeText").FirstOrDefault();
-            XElement MaskImage = gaugeElement.Elements("MaskImage").FirstOrDefault();
+                Rotation = gaugeElement.Element("Rotate");
+            XElement Shift = gaugeElement.Element("Shift");
+            XElement GaugeText = gaugeElement.Element("GaugeText");
+            XElement MaskImage = gaugeElement.Element("MaskImage");
             XElement Axis = null;
             XElement Transparent = null;
 
@@ -397,7 +459,7 @@ namespace msfsLegacyImporter
 
             string slug = gaugeElement.Attribute("id") != null ? gaugeSanitizedName + "_" + gaugeElement.Attribute("id").Value : "";
 
-            if (Image != null)
+            if (Image != null && Image.Attribute("Name") != null)
                 slug = gaugeSanitizedName + "_" + Path.GetFileNameWithoutExtension(Image.Attribute("Name").Value).Trim();
             else if (GaugeText != null && GaugeText.Attribute("id") != null)
                 slug = gaugeSanitizedName + "_" + GaugeText.Attribute("id").Value.Trim();
@@ -424,12 +486,13 @@ namespace msfsLegacyImporter
                 if (File.Exists(sourceFile1) && !imagesExceptions.Contains(Path.GetFileNameWithoutExtension(targetFile1)))
                 {
                     Bitmap bmp = new Bitmap(sourceFile1);
+                    bmp = setBitmapGamma(bmp, atts[0], atts[5] == 1 ||
+                        MaskImage.Element("Transparent") != null && MaskImage.Element("Transparent").Value == "True" ||
+                            MaskImage.Attribute("Alpha") != null && MaskImage.Attribute("Alpha").Value == "Yes" ||
+                            imagesForceTransparancy.Contains(Path.GetFileNameWithoutExtension(sourceFile1)));
                     string[] maskSize = new string[] { bmp.Width.ToString(), bmp.Height.ToString() };
                     if (MaskImage.Attribute("ImageSizes") != null)
                         maskSize = getXYvalue(MaskImage, false);
-
-                    if (MaskImage.Element("Transparent") != null && MaskImage.Element("Transparent").Value == "True")
-                        bmp.MakeTransparent(System.Drawing.Color.FromArgb(255, 0, 0, 0));
 
                     bmp.Save(targetFile1, ImageFormat.Png);
 
@@ -453,11 +516,13 @@ namespace msfsLegacyImporter
             }
 
             // READ MACRO
-            js += Environment.NewLine + "		/* " + slug.ToUpper() + " */" + Environment.NewLine;
+            js += Environment.NewLine + "		/* " + sanitizedSlug.ToUpper() + " */" + Environment.NewLine;
             foreach (var macro in gaugeElement.Elements("Macro"))
             {
                 if (macro.Attribute("Name") != null && !string.IsNullOrEmpty(macro.Value))
                     js += "		var " + macro.Attribute("Name").Value + " = "+ FsxVarHelper.fsx2msfsSimVar(macro.Value, this, false) +";" + Environment.NewLine;
+                else if (macro.Attribute("Name") != null)
+                    js += "		var " + macro.Attribute("Name").Value + " = \"\";" + Environment.NewLine;
             }
 
 
@@ -480,36 +545,40 @@ namespace msfsLegacyImporter
                 AxisPositionValues = getXYvalue(Axis);
 
                 // GENERATE IMAGE
-                string ImageSource = probablyFixBmpName(Image.Attribute("Name").Value);
-                string sourceFile = panelDir + "\\" + ImageSource;
-                if (!File.Exists(sourceFile)) // TRY 1024 SUBFOLDER
-                    sourceFile = panelDir + "\\1024\\" + ImageSource;
-                string targetFile = InstrumentFolder + slug + ".png";
-
-                if (!imagesExceptions.Contains(Path.GetFileNameWithoutExtension(targetFile)))
+                if (Image.Attribute("Name") != null)
                 {
-                    if (File.Exists(sourceFile))
+                    string ImageSource = probablyFixBmpName(Image.Attribute("Name").Value);
+                    string sourceFile = panelDir + "\\" + ImageSource;
+                    if (!File.Exists(sourceFile)) // TRY 1024 SUBFOLDER
+                        sourceFile = panelDir + "\\1024\\" + ImageSource;
+                    string targetFile = InstrumentFolder + slug + ".png";
+
+                    if (!imagesExceptions.Contains(Path.GetFileNameWithoutExtension(targetFile)))
                     {
-                        Bitmap bmp = new Bitmap(sourceFile);
-                        bmp = setBitmapGamma(bmp, GammaSlider);
-                        
-                        if (imgSize == null)
-                            imgSize = new string[] { bmp.Width.ToString(), bmp.Height.ToString() };
+                        if (File.Exists(sourceFile))
+                        {
+                            Bitmap bmp = new Bitmap(sourceFile);
+                            bmp = setBitmapGamma(bmp, atts[0],
+                                (Transparent == null && MaskImage == null) ||
+                                Transparent != null && Transparent.Value != "False" ||
+                                MaskImage != null && (MaskImage.Attribute("Alpha") == null || MaskImage.Attribute("Alpha").Value != "No") ||
+                                imagesForceTransparancy.Contains(Path.GetFileNameWithoutExtension(sourceFile)));
 
-                        if (Transparent == null || Image.Element("Transparent").Value != "False")
-                            bmp.MakeTransparent(System.Drawing.Color.FromArgb(255, 0, 0, 0));
+                            if (imgSize == null)
+                                imgSize = new string[] { bmp.Width.ToString(), bmp.Height.ToString() };
 
-                        bmp.Save(targetFile, ImageFormat.Png);
+                            bmp.Save(targetFile, ImageFormat.Png);
+                        }
+                        else
+                        {
+                            string msg = "Gauge image " + panelDir + "\\" + ImageSource + " not found";
+                            //errors += msg + Environment.NewLine + Environment.NewLine;
+                            writeLog("ERROR: " + msg);
+
+                            Image = null;
+                        }
+
                     }
-                    else
-                    {
-                        string msg = "Gauge image " + panelDir + "\\" + ImageSource + " not found";
-                        //errors += msg + Environment.NewLine + Environment.NewLine;
-                        writeLog("ERROR: " + msg);
-
-                        Image = null;
-                    }
-
                 }
             }
 
@@ -523,15 +592,18 @@ namespace msfsLegacyImporter
             else
                 css += Environment.NewLine + "		width: 100%;" + Environment.NewLine + "		height: 100%;" + Environment.NewLine;
 
-            if (MaskImage != null)
+            if (getPosException(slug) != null)
+                css += "		left: " + getPosException(slug)[0] + "px;" + Environment.NewLine + "		top: " + getPosException(slug)[1] + "px;" + Environment.NewLine;
+            else if (MaskImage != null)
                 css += "		left: - " + AxisPositionValues[0] + "px;" + Environment.NewLine + "		top: - " + AxisPositionValues[1] + "px;" + Environment.NewLine;
             else if (FloatPosition == null && AxisPositionValues[0] != "0" && AxisPositionValues[1] != "0")
                 css += "		left: calc(50% - " + AxisPositionValues[0] + "px);" + Environment.NewLine + "		top: calc(50% - " + AxisPositionValues[1] + "px);" + Environment.NewLine;
             else
                 css += "		left: calc(" + FloatPositionValues[0] + "px - " + AxisPositionValues[0] + "px);" + Environment.NewLine + "		top: calc(" + FloatPositionValues[1] + "px - " + AxisPositionValues[1] + "px);" + Environment.NewLine;
-            css += "		transform-origin: " + AxisPositionValues[0] + "px " + AxisPositionValues[1] + "px;" + Environment.NewLine + "	}" + Environment.NewLine;
+            css += "		transform-origin: " + AxisPositionValues[0] + "px " + AxisPositionValues[1] + "px;" + Environment.NewLine;
             js += "		var " + sanitizedSlug + " = this.querySelector(\"#" + sanitizedSlug + "\");" + Environment.NewLine;
             js += "		if (typeof " + sanitizedSlug + " !== \"undefined\") {" + Environment.NewLine;
+            js += "		  var transform = '';" + Environment.NewLine + Environment.NewLine;
 
             if (!String.IsNullOrEmpty(visibilityCond)) { js += "		  " + sanitizedSlug + ".style.display = " + visibilityCond + " ? \"block\" : \"none\";" + Environment.NewLine + Environment.NewLine; }
 
@@ -547,7 +619,7 @@ namespace msfsLegacyImporter
 
                 if (Expression != null)
                 {
-                    js += "		  {" + Environment.NewLine;
+                    js += "		  {" + Environment.NewLine + Environment.NewLine;
 
                     expressionRoutin(Expression, FsxVarHelper);
 
@@ -588,8 +660,6 @@ namespace msfsLegacyImporter
                         js += "			    Maximum = NonlinearityTable[NonlinearityTable.length-1][0];" + Environment.NewLine;
                         js += "			    ExpressionResult = Math.min(ExpressionResult, Maximum);" + Environment.NewLine;
 
-                        //js += "				var p1 = { x: " + FloatPositionValues[0] + ", y: " + FloatPositionValues[1] + " };" + Environment.NewLine;
-                        //js += "				var prevAngle = { x: 0, y: 0 };" + Environment.NewLine;
                         js += "				var prevAngle = 0;" + Environment.NewLine;
 
                         js += "				var result = 0;" + Environment.NewLine;
@@ -597,17 +667,14 @@ namespace msfsLegacyImporter
 
                         js += "				for (var i = 0; i < NonlinearityTable.length; i++) {" + Environment.NewLine;
                         js += "					var NonlinearityEntry = NonlinearityTable[i][0];" + Environment.NewLine;
-                        //js += "					var NonlinearityAngle = { x: NonlinearityTable[i][1], y: NonlinearityTable[i][2] };" + Environment.NewLine;
                         js += "					var NonlinearityAngle = NonlinearityTable[i][1];" + Environment.NewLine;
                         js += "					if (NonlinearityAngle < 0) { NonlinearityAngle += 360 };" + Environment.NewLine;
                         js += "					if (ExpressionResult == NonlinearityEntry || prevAngle == NonlinearityAngle && ExpressionResult > prevVal && ExpressionResult < NonlinearityEntry) {" + Environment.NewLine;
-                        //js += "						result = Math.atan2(NonlinearityAngle.y - p1.y, NonlinearityAngle.x - p1.x) * 180 / Math.PI + 90;" + Environment.NewLine;
                         js += "						result = NonlinearityAngle;" + Environment.NewLine;
                         js += "						break;" + Environment.NewLine;
                         js += "					}" + Environment.NewLine;
                         js += "					else if (ExpressionResult > prevVal && ExpressionResult < NonlinearityEntry ) {" + Environment.NewLine;
                         js += "						var coef = 1 - (NonlinearityEntry - ExpressionResult) / (NonlinearityEntry - prevVal);" + Environment.NewLine + Environment.NewLine;
-                        //js += "						result = Math.atan2(prevAngle.y + coef * (NonlinearityAngle.y - prevAngle.y) - p1.y, prevAngle.x + coef * (NonlinearityAngle.x - prevAngle.x) - p1.x) * 180 / Math.PI + 90;" + Environment.NewLine;
                         js += "						result = prevAngle + coef * (NonlinearityAngle - prevAngle);" + Environment.NewLine;
                         js += "						break;" + Environment.NewLine;
                         js += "					}" + Environment.NewLine;
@@ -618,13 +685,13 @@ namespace msfsLegacyImporter
                         js += "					while (result < 0)" + Environment.NewLine;
                         js += "						result += 360;" + Environment.NewLine + Environment.NewLine;
 
-                        js += "				" + sanitizedSlug + ".style.transform = 'rotate(' + (result + PointsTo) + 'deg)';" + Environment.NewLine;
+                        js += "				transform += 'rotate(' + (result + PointsTo) + 'deg) ';" + Environment.NewLine;
                         js += "			}" + Environment.NewLine + Environment.NewLine;
                     }
                     // LINEAR
                     else
                     {
-                        js += "			" + sanitizedSlug + ".style.transform = 'rotate(' + (ExpressionResult * 180 / Math.PI + PointsTo) + 'deg)';" + Environment.NewLine;
+                        js += "			transform += 'rotate(' + (ExpressionResult * 180 / Math.PI + PointsTo) + 'deg) ';" + Environment.NewLine;
                     }
                     js += "		  }" + Environment.NewLine;
                 }
@@ -682,21 +749,19 @@ namespace msfsLegacyImporter
                     // LINEAR
                     else
                     {
-                        // GET SCALE
+                        // GET SCALE 
                         double[] scale = new double[] { 1.0, 0.0 };
                         XElement Scale = Shift.Elements("Scale").FirstOrDefault();
                         string[] ScaleValues = getXYvalue(Scale);
                         if (Scale != null && Double.TryParse(ScaleValues[0], out double scaleX) && Double.TryParse(ScaleValues[1], out double scaleY))
                             scale = new double[] { scaleX, scaleY };
 
-                        js += "			" + sanitizedSlug + ".style.transform = 'translate(' + (ExpressionResult * " + scale[0] + ") + 'px, ' + (ExpressionResult * " + scale[1] + ") + 'px)';" + Environment.NewLine;
+                        js += "			transform += 'translate(' + (ExpressionResult * " + scale[0] + ") + 'px, ' + (ExpressionResult * " + scale[1] + ") + 'px) ';" + Environment.NewLine;
                     }
 
                     js += "		  }" + Environment.NewLine;
                 }
             }
-
-            js += "		}" + Environment.NewLine;
 
             // TEXT
             if (GaugeText != null)
@@ -740,25 +805,14 @@ namespace msfsLegacyImporter
                 XElement VerticalAlign = GaugeText.Element("VerticalAlign");
                 XElement WidthFit = GaugeText.Element("WidthFit");
 
-                string value = FsxVarHelper.fsx2msfsGaugeString(GaugeString.Value, this);
+                string value = FsxVarHelper.fsx2msfsGaugeString(GaugeString.Value.Trim(), this);
 
                 string[] GaugeSize = getXYvalue(Size, false);
 
-                css += materialName + "-element #Mainframe #" + sanitizedSlug + " {" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine;
-
-                //if (MaskImage != null)
-                //css += "		left: - " + AxisPositionValues[0] + "px;" + Environment.NewLine + "		top: - " + AxisPositionValues[1] + "px;" + Environment.NewLine;
-                //else
-                //css += "		left: calc(" + FloatPositionValues[0] + "px - " + GaugeSize[0] + "px / 2);" + Environment.NewLine + "		top: calc(" + FloatPositionValues[1] + "px - " + GaugeSize[1] + "px / 2);" + Environment.NewLine;
-                css += "		left: " + FloatPositionValues[0] + "px;" + Environment.NewLine + "		top: " + FloatPositionValues[1] + "px;" + Environment.NewLine;
-                //css += "		transform-origin: " + AxisPositionValues[0] + "px " + AxisPositionValues[1] + "px;" + Environment.NewLine + "	}" + Environment.NewLine;
-
                 //if (id != null) { css += "		rule: " + id.Value + ";" + Environment.NewLine; }
                 //if (Alpha != null) { css += "		rule: " + Alpha.Value + ";" + Environment.NewLine; }
-                if (Axis != null) { css += "		transform-origin: " + getXYvalue(Axis)[0] + "px " + getXYvalue(Axis)[1] + "px;" + Environment.NewLine; }
+                //if (Axis != null) { css += "		transform-origin: " + getXYvalue(Axis)[0] + "px " + getXYvalue(Axis)[1] + "px;" + Environment.NewLine; }
                 if (BackgroundColor != null) { css += "		background-color: " + BackgroundColor.Value.Replace("0x", "#") + ";" + Environment.NewLine; }
-                //* if (BackgroundColorScript != null) { css += "		rule: " + BackgroundColorScript.Value + ";" + Environment.NewLine; }
-                //* if (BlinkCode != null) { css += "		rule: " + BlinkCode.Value + ";" + Environment.NewLine; }
                 if (Bold != null && Bold.Value == "True") { css += "		font-weight: bold;" + Environment.NewLine; }
                 //if (Bright != null) { css += "		rule: " + Bright.Value + ";" + Environment.NewLine; }
                 //if (Caption != null) { css += "		rule: " + Caption.Value + ";" + Environment.NewLine; }
@@ -768,11 +822,9 @@ namespace msfsLegacyImporter
                 if (FontFace != null) { css += "		font-family: \"" + FontFace.Value + "\";" + Environment.NewLine; }
                 //if (FontFaceLocalize != null) { css += "		rule: " + FontFaceLocalize.Value + ";" + Environment.NewLine; }
                 if (FontColor != null) { css += "		color: " + FontColor.Value.Replace("0x", "#") + ";" + Environment.NewLine; }
-                //* if (FontColorScript != null) { css += "		rule: " + FontColorScript.Value + ";" + Environment.NewLine; }
                 if (FontHeight != null) { css += "		font-size: " + FontHeight.Value + "px;" + Environment.NewLine; }
-                //++ if (FontHeightScript != null) { css += "		rule: " + FontHeightScript.Value + ";" + Environment.NewLine; }
+                if (FontHeightScript != null) { css += "		font-size: " + FontHeightScript.Value + "px;" + Environment.NewLine; }
                 if (FontWeight != null) { css += "		font-weight: " + FontWeight.Value + ";" + Environment.NewLine; }
-                //if (GaugeString != null) { css += "		rule: " + GaugeString.Value + ";" + Environment.NewLine; }
                 //if (HilightColor != null) { css += "		rule: " + HilightColor.Value + ";" + Environment.NewLine; }
                 if (HorizontalAlign != null) { css += "		text-align: " + HorizontalAlign.Value + ";" + Environment.NewLine; }
                 if (Italic != null && Italic.Value == "True") { css += "		font-style: italic;" + Environment.NewLine; }
@@ -782,9 +834,8 @@ namespace msfsLegacyImporter
                 //if (Multiline != null) { css += "		rule: " + Multiline.Value + ";" + Environment.NewLine; }
                 //if (PointsTo != null) { css += "		rule: " + PointsTo.Value + ";" + Environment.NewLine; }
                 //if (ScrollY != null) { css += "		rule: " + ScrollY.Value + ";" + Environment.NewLine; }
-                css += "		width: " + GaugeSize[0] + "px;" + Environment.NewLine + "		height: " + GaugeSize[1] + "px;" + Environment.NewLine;
-                //* if (HeightScript != null) { css += "		rule: " + HeightScript.Value + ";" + Environment.NewLine; }
-                //* if (WidthScript != null) { css += "		rule: " + WidthScript.Value + ";" + Environment.NewLine; }
+                if (GaugeSize[0] != "0" && GaugeSize[1] != "0")
+                    css += "		width: " + GaugeSize[0] + "px;" + Environment.NewLine + "		height: " + GaugeSize[1] + "px;" + Environment.NewLine;
                 if (StrikeThrough != null && StrikeThrough.Value == "True") { css += "		text-decoration: line-through;" + Environment.NewLine; }
                 //if (Tabs != null) { css += "		rule: " + Tabs.Value + ";" + Environment.NewLine; }
                 if (TextTransparent != null && TextTransparent.Value == "True") { css += "		background: transparent;" + Environment.NewLine; }
@@ -792,22 +843,26 @@ namespace msfsLegacyImporter
                 if (VerticalAlign != null) { css += "		vertical-align: " + VerticalAlign.Value + ";" + Environment.NewLine; }
                 if (WidthFit != null && WidthFit.Value == "True") { css += "		font-size: 4vw;;" + Environment.NewLine; }
 
+                //* if (BlinkCode != null) { css += "		rule: " + BlinkCode.Value + ";" + Environment.NewLine; }
+                if (HeightScript != null) { js += "			" + sanitizedSlug + ".style.height = " + FsxVarHelper.fsx2msfsGaugeString(HeightScript.Value.Trim(), this) + " + \"px\";" + Environment.NewLine; }
+                if (WidthScript != null) { js += "			" + sanitizedSlug + ".style.width = " + FsxVarHelper.fsx2msfsGaugeString(WidthScript.Value.Trim(), this) + " + \"px\";" + Environment.NewLine; }
+                if (FontColorScript != null) { js += "			" + sanitizedSlug + ".style.color = " + hexToString(FsxVarHelper.fsx2msfsGaugeString(FontColorScript.Value.Trim(), this)) + ";" + Environment.NewLine; }
+                if (BackgroundColorScript != null) { js += "			" + sanitizedSlug + ".style.backgroundColor = " + hexToString(FsxVarHelper.fsx2msfsGaugeString(BackgroundColorScript.Value.Trim(), this)) + ";" + Environment.NewLine; }
+                if (GaugeString != null && !string.IsNullOrEmpty(value)) { js += "			" + sanitizedSlug + ".innerHTML = " + value + ";" + Environment.NewLine + Environment.NewLine; }
 
 
-                css += " }" + Environment.NewLine;
-
-                js += Environment.NewLine + "		/* " + slug.ToUpper() + " */" + Environment.NewLine;
-                js += "		var " + sanitizedSlug + " = this.querySelector(\"#" + sanitizedSlug + "\");" + Environment.NewLine;
-                js += "		if (typeof " + sanitizedSlug + " !== \"undefined\") {" + Environment.NewLine;
-                if (GaugeString != null) { js += "			" + sanitizedSlug + ".innerHTML = " + value + ";" + Environment.NewLine; }
-                js += "		}" + Environment.NewLine;
             }
+
+            js += "		  if (transform != '')" + Environment.NewLine;
+            js += "		    " + sanitizedSlug + ".style.transform = transform; " + Environment.NewLine + Environment.NewLine;
+            js += "		}" + Environment.NewLine;
+            css += "	}" + Environment.NewLine;
 
             // PROCESS CHILDREN
             var gaugeElements = gaugeElement.Elements("Element");
             foreach (XElement childElement in gaugeElements)
             {
-                processGaugeElement(childElement, FsxVarHelper, GammaSlider, depth + 1);
+                processGaugeElement(childElement, FsxVarHelper, atts, depth + 1);
             }
 
             // END ELEMENT CONTAINER
@@ -820,6 +875,15 @@ namespace msfsLegacyImporter
                 for (int i = 0; i < depth; i++) { html += "	"; }
                 html += "			</div>" + Environment.NewLine;
             }
+        }
+
+        private string hexToString(string hex)
+        {
+            hex = hex.Replace("0x", "#").Trim();
+            if (hex[0] == '#' && hex.Length == 7)
+                hex = "\"" + hex + "\"";
+            //hex = Regex.Replace(hex.Replace("0x", "#"), @"(#[A-Fa-f0-9]{6})", "\"$1\""); 
+            return hex;
         }
 
         private void expressionRoutin(XElement Expression, fsxVarHelper FsxVarHelper)
@@ -964,8 +1028,13 @@ namespace msfsLegacyImporter
         {
             if (Size != null)
             {
-                if (Size.Attribute("X") != null && !String.IsNullOrEmpty(Size.Attribute("X").Value) && Size.Attribute("Y") != null && !String.IsNullOrEmpty(Size.Attribute("Y").Value))
-                    return new string[] { Size.Attribute("X").Value.Trim(), Size.Attribute("Y").Value.Trim() };
+                if (Size.Attribute("X") != null && !String.IsNullOrEmpty(Size.Attribute("X").Value) || Size.Attribute("Y") != null && !String.IsNullOrEmpty(Size.Attribute("Y").Value))
+                {
+                    return new string[] {
+                        Size.Attribute("X") != null && !String.IsNullOrEmpty(Size.Attribute("X").Value) ? Size.Attribute("X").Value.Trim() : "0",
+                        Size.Attribute("Y") != null && !String.IsNullOrEmpty(Size.Attribute("Y").Value) ? Size.Attribute("Y").Value.Trim() : "0"
+                    };
+                }
                 else if (Size.Attribute("ImageSizes") != null && !String.IsNullOrEmpty(Size.Attribute("ImageSizes").Value) && Size.Attribute("ImageSizes").Value.Contains(','))
                     return new string[] { Size.Attribute("ImageSizes").Value.Split(',')[0].Trim(), Size.Attribute("ImageSizes").Value.Split(',')[1].Trim() };
                 else if (!String.IsNullOrEmpty(Size.Value) && Size.Value.Contains(','))
@@ -978,25 +1047,39 @@ namespace msfsLegacyImporter
                 //return new string[] { "500", "500" };
         }
 
-        private Bitmap setBitmapGamma(Bitmap bmp, float gamma)
+        private Bitmap setBitmapGamma(Bitmap oldBmp, float gamma, bool transparent)
         {
-            ImageAttributes attributes = new ImageAttributes();
-            attributes.SetGamma(gamma);
+            // ARGB CONVERSION
+            Bitmap newBmp;
+            Bitmap bmp;
+            newBmp = new Bitmap(oldBmp);
+            bmp = newBmp.Clone(new Rectangle(0, 0, newBmp.Width, newBmp.Height), PixelFormat.Format32bppArgb);
 
-            System.Drawing.Point[] points =
+            // TRANSPARENCY CHECK
+            if (transparent)
+                bmp = MakeTransparent(bmp);
+
+            // SET GAMMA
+            if (gamma != 1.0f)
             {
-                new System.Drawing.Point(0, 0),
-                new System.Drawing.Point(bmp.Width, 0),
-                new System.Drawing.Point(0, bmp.Height),
-            };
-            Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-            Bitmap newBmp = new Bitmap(bmp.Width, bmp.Height);
-            using (Graphics graphics = Graphics.FromImage(newBmp))
-            {
-                graphics.DrawImage(bmp, points, rect, GraphicsUnit.Pixel, attributes);
+                ImageAttributes attributes = new ImageAttributes();
+                attributes.SetGamma(gamma);
+
+                System.Drawing.Point[] points =
+                {
+                    new System.Drawing.Point(0, 0),
+                    new System.Drawing.Point(bmp.Width, 0),
+                    new System.Drawing.Point(0, bmp.Height),
+                };
+                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+                newBmp = new Bitmap(bmp.Width, bmp.Height);
+                using (Graphics graphics = Graphics.FromImage(newBmp))
+                {
+                    graphics.DrawImage(bmp, points, rect, GraphicsUnit.Pixel, attributes);
+                }
             }
 
-            return newBmp;
+            return bmp;
         }
 
         private string probablyFixBmpName(string name)
@@ -1009,25 +1092,58 @@ namespace msfsLegacyImporter
 
         public void writeLog(string lines)
         {
-            if (!String.IsNullOrEmpty(logfile) && File.Exists(logfile))
+            logcontent += lines + Environment.NewLine;
+        }
+
+        public void saveLog()
+        {
+            Console.WriteLine("Saving log content into " + logfile);
+
+            if (!String.IsNullOrEmpty(logfile) && !String.IsNullOrEmpty(logcontent))
             {
                 try
                 {
-                    using (StreamWriter sw = File.AppendText(logfile))
-                    {
-                        sw.WriteLine(lines);
-                    }
+                    File.WriteAllText(logfile, logcontent);
                 }
                 catch { }
-            } else
+            }
+            else
             {
-                Console.WriteLine(lines);
+                Console.WriteLine(logcontent);
             }
         }
 
+
         public string sanitizeString(string val)
         {
-            return Regex.Replace(val, @"[^0-9A-Za-z ,_\-]", "").Replace(" ", "_").Replace("-", "_");
+            return Regex.Replace(val, @"[^0-9A-Za-z ,_\-]", "").Replace(" ", "_").Replace("-", "_").Replace(",", "_");
+        }
+
+        private Bitmap MakeTransparent(Bitmap bmp/*, string sourceFile*/)
+        {
+            //            writeLog("Processing image: " + Path.GetFileNameWithoutExtension(sourceFile) + " (" + bmp.GetPixel(0, 0).ToString() + ")");
+
+            if (bmp.GetPixel(0, 0) == Color.FromArgb(255, 255, 255, 255))
+                bmp.MakeTransparent(Color.FromArgb(255, 255, 255, 255));
+            else {
+                bmp.MakeTransparent(Color.FromArgb(255, 1, 1, 1));
+                bmp.MakeTransparent(Color.FromArgb(255, 0, 0, 0));
+            }
+
+            return bmp;
+        }
+
+        private string[] getPosException (string slug)
+        {
+            for (int x = 0; x < positionExceptions.GetLength(0); x++)
+            {
+                if (Equals(positionExceptions[x][0], slug))
+                {
+                    return new string[] { positionExceptions[x][1], positionExceptions[x][2] };
+                }
+            }
+
+            return null;
         }
     }
 }

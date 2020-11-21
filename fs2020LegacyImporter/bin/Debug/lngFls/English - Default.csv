@@ -3,6 +3,7 @@ COMMON,,
 file_edited_outside,,File {0} was edited outside of the program\nAircraft data should be reloaded
 file_edited,,CFG file change detected
 restore_backup,,Restore Backup
+make_backup,,Make Backup
 AircraftBackupButton,,Make Backup
 EnginesBackupButton,,Make Backup
 FlightModelBackupButton,,Make Backup
@@ -28,7 +29,7 @@ toggle_all,,Toggle all
 cvt_remove_failed,,CVT folder removal was failed
 btnOpenFile,,Browse
 load_imported_header,,Load imported FSX (Legacy) or MSFS (Native) aircraft
-load_imported_notice,,Set path of imported FSX aircraft or native MSFS aircaft
+load_imported_notice,,Set path of imported FSX aircraft or native MSFS aircraft
 MainMenuButton,,Main Menu
 imageLeftTooltip,,"Click it to start new import, you will need unpacked FSX aircraft files\non your disk or installed Flight Simulator X"
 imageRightTooltip,,"Click it to load imported FSX (Legacy) or MSFS (Native) aircraft,\nusually they are stored in Community folder"
@@ -96,15 +97,17 @@ air_dump_notice3,,3. Select AIR file
 air_dump_notice4,,"4. Check ""Full dump"" option"
 air_dump_notice5,,"5. Press ""Dump"" button"
 air_dump_notice6,,6. Close AirUpdate
-air_no_values_to_import,,No AIR values available for import
-air_no_values_to_import_notice,,AIR and CFG values identical. You can try to insert\nmissing sections without default values activation.
+air_no_values_to_import,,No AIR values require import
+air_no_values_to_import_notice,,AIR and CFG values identical. You can try to insert [AERODYNAMICS] section if it missing without values activation.
 air_new_val,,New val
-air_old_val,,Old val
+air_old_val,,Current val
 air_default_val,,Default val
 air_loading_failed,,AIR tables loading failed
 air_import_notice,,"Select valid AIR values to insert into CFG files. When you finish, AIR file can be removed.\nBut if some CFG values are missing - game may crash or aircraft will not appear in the list."
-air_insert_values,,*Insert AIR values
+air_insert_values,,Insert AIR values
 air_remove,,Remove AIR file
+air_delete_warning_header,,AIR file remove warning
+air_delete_warning_notice,,"You are going to remove AIR file. Be sure you have imported it values properly. You may experience game crashed because not all engines and flight model data contained in AIR file, so you have to add missing data manually (search for lines started with "";-"", remove these symbols and adjust line value manually if necessary).\nIf you fail to make it work, rename file ""{0}"" into ""{1}"" and regenerate JSON file so game will read its data again."
 SYSTEMS TAB,,
 systems_convert_lights,,Convert lights
 systems_convert_lights_notice,,"To make lights work in MSFS, legacy lights values should be converted in new format. Light type and coordinates will be preserved."
@@ -127,7 +130,7 @@ CFG SECTIONS,,
 cfg_insert_sections,,Insert selected CFG sections
 cfg_insert_cockpit_sections_notice,,"Sections, highlighted in red, responsible for external view instruments. Choose ""YES"" on the pop up to insert external instruments, you may need to adjust new values manually."
 cfg_insert_flt_sections_notice,,"This section responsible for avionics state on the runway. If you have problem with landing gears, engines, parking brake right after you start the game on the ground - choose only critical or all available options. However, these fixes does not affect avionics state when you starting flight in the air."
-cfg_insert_sections_notice,,"All variables will have default values, it may affect aircraft behaviour in the game\nPress YES to insert and activate default values\nPress NO to insert and deactivate default values\nPress CANCEL to abort insertion"
+cfg_insert_sections_notice,,"All variables will have default values\nPress YES to insert and activate default values, it may affect aircraft behaviour in the game\nPress NO to insert and deactivate default values\nPress CANCEL to abort insertion"
 cfg_insert_sections_header,,{0} sections will be inserted into {1}
 cfg_insert_section_header,,{0} section will be inserted into {1}
 TEXTURES TAB,,
@@ -162,11 +165,20 @@ panel_extract_fsx_resources,,Extract default FSX gauges resources
 panel_fsx_extracted,,Default FSX gauges resources extracted
 panel_import_gauges,,Import panel gauges
 panel_force_gauge_background,,Force gauge background image (check it if you get black holes on gauges places)
+panel_ignore_errors,,"Hide conversion errors popups (they still will be logged in "".Panel.log.txt"" file)"
+panel_disable_logging,,"Disable logging ("".Panel.log.txt"" file will be not created/updated)"
 panel_gamma_correction,,Gamma correction ({0} - bright; {1} - normal; {2} - dark)
+panel_preserve_size,,Leave panel size as it set in XML files (uncheck if gauges appear smaller than should)
+panel_scale_up_gauge,,Scale gauge up to fit image size (uncheck if gauges too large)
+panel_taxi_lights_switch,,"Insert taxi lights automatic switch (turninig off when gears lever in upper position, on - lower)"
 panel_not_found,,No panels gauges found
+panel_transparent_mask,,Force mask background transparency (uncheck if gauges elements missing black backgrounds)
+panel_extract_ac_cabs_notice,,"Before gauges conversion can be applied, panel data extraction should be performed. Content of CAB files inside of aircraft panel folder(s) will be extracted and then used by the program as data source (usually XML and BMP files). Sometimes, panel folder does not contain any CAB files as gauges sources already extracted so you don't need to do anything.\nIf you want to edit some of the images or gauges parameters, you need apply changes to the content of extracted folders, not conversion results."
+panel_extract_fsx_cabs_notice,,"If you have Flight SImulator X installed, you can apply default panel sources extraction, so if any of add-on aircraft using default gauges, program will be able to load its data and use for conversion. All extracted files will be stored in the ""\Community\legacy-vcockpits-instruments\.FSX"" directory.\nIf you have no FSX installed just leave this option untouched, but some gauges may be not converted successfully. You may ask your friends to share this folder with you, you don't need whole game for this purpose."
+panel_convert_gauges_notice,,"Panels conversion script will parse "".panel.cfg"" file(s), then load all required XMLs and convert their data into modern format - HTML/JS/CSS. You can see some options under panels list that will affect conversion results.\nIt is recommended to check them all, however you can disable some of them to solve minor issues. If conversion failed and you can't see any/some gauges at all in the cockpit - these option will not help, it may happen because these gauges contained in DLL/GAU files and can't be extracted, or converted script(s) has an error inside that probably will be fixed in next program update."
 panel_extracting_cab,,Extracting {0}
 panel_current_fsx_path,,Current FSX path is {0}
-panel_fsx_extract_notice1,,Press YES to extract CAB files from this folder (DLL/GAU files not supported)
+panel_fsx_extract_notice1,,Press YES to extract CAB files from this folder (DLL/GAU files not supported and will be ignored)
 panel_fsx_extract_notice2,,Press NO to select FSX installation folder
 panel_fsx_extract_notice3,,Press CANCEL to abort
 panel_fsx_header,,FSX CAB files extractions
@@ -178,6 +190,7 @@ about_links_header,,Links and credits
 about_colored_green,,enabled value/section or no issues detected
 about_colored_orange,,"disabled value/section but probably not required, possible issues but need to be checked ingame"
 about_colored_red,,"wrong values or missing sections, some critical issues detected and should be fixed for normal gameflow"
+about_translation_header,,UI Translation
 UPDATE FUNCTIONS,,
 update_auto,,Update automatically
 update_manually,,Update manually

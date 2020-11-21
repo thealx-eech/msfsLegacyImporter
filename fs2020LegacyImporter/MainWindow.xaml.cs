@@ -151,6 +151,7 @@ namespace msfsLegacyImporter
             about_colored_green = SetHeaderAtts(about_colored_green);
             about_colored_orange = SetHeaderAtts(about_colored_orange);
             about_colored_red = SetHeaderAtts(about_colored_red);
+            about_translation_header = SetHeaderAtts(about_translation_header);
             imageLeftTooltip = SetHeaderAtts(imageLeftTooltip);
             imageRightTooltip = SetHeaderAtts(imageRightTooltip);
         }
@@ -402,12 +403,15 @@ namespace msfsLegacyImporter
                 {
                     btn.Visibility = Visibility.Visible;
 
+                    SetButtonAtts(btn, false);
+
                     if (!String.IsNullOrEmpty(btn.Tag.ToString()))
                     {
                         string filenames = btn.Tag.ToString();
                         if (!btn.Tag.ToString().Contains(','))
                             filenames += ',';
 
+                        bool backup_not_found = false;
                         foreach (var filename in filenames.Split(','))
                         {
                             if (!String.IsNullOrEmpty(filename))
@@ -418,13 +422,11 @@ namespace msfsLegacyImporter
                                     string mainFile = aircraftDirectory + "\\" + filename;
                                     string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
 
-                                    if (File.Exists(backupFile))
+                                    if (!File.Exists(backupFile))
                                     {
-                                        btn.Content = CsvHelper.trans("restore_backup");
+                                        backup_not_found = true;
                                         break;
                                     }
-                                    else
-                                        btn.Content = CsvHelper.trans("make_backup");
                                 }
                                 else
                                 {
@@ -432,9 +434,20 @@ namespace msfsLegacyImporter
                                 }
                             }
                         }
-                    }
 
-                    SetButtonAtts(btn, false);
+                        if (FindName(btn.Name) != null) {
+                            if (!backup_not_found)
+                            {
+                                ((Button)FindName(btn.Name)).Content = CsvHelper.trans("restore_backup");
+                                Console.WriteLine("Backup of " + btn.Tag.ToString() + " FOUND");
+                            }
+                            else
+                            {
+                                ((Button)FindName(btn.Name)).Content = CsvHelper.trans("make_backup");
+                                Console.WriteLine("Backup of " + btn.Tag.ToString() + " NOT FOUND");
+                            }
+                        }
+                    }
                 } else
                     btn.Visibility = Visibility.Hidden;
             }
@@ -490,39 +503,31 @@ namespace msfsLegacyImporter
                     TextBlock myBlock = null;
                     if (file == ".unknown.cfg" && File.Exists(aircraftDirectory + "\\" + file))
                     {
-                        myBlock = addTextBlock(file + ": "+ CsvHelper.trans("init_cfg_ignored"), HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkOrange);
+                        myBlock = addTextBlock(file + ": "+ CsvHelper.trans("init_cfg_ignored"), HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkOrange, new Thickness(0));
                     }
                     else if (file == ".unknown.cfg")
                     {
-                        myBlock = addTextBlock("", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkOrange);
+                        myBlock = addTextBlock("", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkOrange, new Thickness(0));
                     }
                     else if (!File.Exists(aircraftDirectory + "\\" + file))
                     {
-                        myBlock = addTextBlock(file + ": "+ CsvHelper.trans("init_cfg_missing"), HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkRed);
+                        myBlock = addTextBlock(file + ": "+ CsvHelper.trans("init_cfg_missing"), HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkRed, new Thickness(0));
                         status = 0;
                     }
                     else
                     {
-                        myBlock = addTextBlock(file + ": " + CsvHelper.trans("init_cfg_loaded"), HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkGreen);
+                        myBlock = addTextBlock(file + ": " + CsvHelper.trans("init_cfg_loaded"), HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkGreen, new Thickness(0));
                         presentedFiles.Add(file);
                     }
 
                     presentedFilesLabels.Add(myBlock);
                 }
 
-                TextBlock modeHeader = addTextBlock("", HorizontalAlignment.Center, VerticalAlignment.Top, Colors.Black);
-                modeHeader.Margin = new Thickness(0, 10, 0, 0);
-                modeHeader.TextWrapping = TextWrapping.Wrap;
+                TextBlock modeHeader = addTextBlock("", HorizontalAlignment.Center, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 0), TextWrapping.Wrap);
                 modeHeader.FontSize = 21;
-
-                TextBlock modeDescr = addTextBlock("", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black);
-                modeDescr.Margin = new Thickness(0, 10, 0, 0);
-                modeDescr.TextWrapping = TextWrapping.Wrap;
+                TextBlock modeDescr = addTextBlock("", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 0), TextWrapping.Wrap);
                 modeDescr.FontSize = 14;
-
-                TextBlock modeDescr2 = addTextBlock("", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black);
-                modeDescr2.Margin = new Thickness(0, 10, 0, 0);
-                modeDescr2.TextWrapping = TextWrapping.Wrap;
+                TextBlock modeDescr2 = addTextBlock("", HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 0), TextWrapping.Wrap);
                 modeDescr2.FontSize = 14;
 
                 if (presentedFiles.Count == 1 && presentedFiles.Contains("aircraft.cfg"))
@@ -535,7 +540,7 @@ namespace msfsLegacyImporter
                     CsvHelper.trans("init_basic_notice1") + Environment.NewLine +
                     CsvHelper.trans("init_basic_notice2") + Environment.NewLine +
                     CsvHelper.trans("init_basic_notice3") + Environment.NewLine + Environment.NewLine +
-                    CsvHelper.trans("init_basic_notice4") +
+                    CsvHelper.trans("init_basic_notice4") + Environment.NewLine +
                     CsvHelper.trans("init_basic_notice5") + Environment.NewLine;
                     myPanel.Children.Add(modeDescr);
                 }
@@ -616,11 +621,11 @@ namespace msfsLegacyImporter
                             {
                                 if (requiredValue == "ui_typerole")
                                 {
-                                    AircraftPerformance = AddCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " " + CsvHelper.trans("aircraft_parameter_invalid"), Colors.DarkRed, i++);
+                                    AircraftPerformance = AddGroupCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " " + CsvHelper.trans("aircraft_parameter_invalid"), Colors.DarkRed, i++);
                                     tabAircraft.Foreground = new SolidColorBrush(Colors.DarkRed);
                                 }
                                 else
-                                    AircraftPerformance = AddCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " " + CsvHelper.trans("aircraft_parameter_missing"), Colors.DarkOrange, i++);
+                                    AircraftPerformance = AddGroupCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " " + CsvHelper.trans("aircraft_parameter_missing"), Colors.DarkOrange, i++);
                             }
                         }
                     }
@@ -633,10 +638,7 @@ namespace msfsLegacyImporter
                 myPanel2.Children.Add(btn);
 
                 TextBlock notice = addTextBlock(CsvHelper.trans("aircraft_missing_parameter_notice"),
-                   HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                notice.TextWrapping = TextWrapping.Wrap;
-                notice.Width = 600;
-                notice.Margin = new Thickness(0, 10, 0, 10);
+                   HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                 AircraftPerformance.Children.Insert(0, notice);
             }
 
@@ -756,15 +758,15 @@ namespace msfsLegacyImporter
 
                 string engine_type = CfgHelper.getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]");
                 if (engine_type == "2" || engine_type == "3" || engine_type == "4" || engine_type == "")
-                    EnginesData = AddCheckBox(EnginesData, "engine_type = " + (engine_type != "" ? engine_type : "missing"), Colors.DarkRed, criticalIssues++);
+                    EnginesData = AddGroupCheckBox(EnginesData, "engine_type = " + (engine_type != "" ? engine_type : "missing"), Colors.DarkRed, criticalIssues++);
 
                 string engine0 = CfgHelper.getCfgValue("engine.0", "engines.cfg", "[GENERALENGINEDATA]");
                 if (engine0 == "")
-                    EnginesData = AddCheckBox(EnginesData, "engine.0 = missing", Colors.DarkRed, criticalIssues++);
+                    EnginesData = AddGroupCheckBox(EnginesData, "engine.0 = missing", Colors.DarkRed, criticalIssues++);
 
                 string afterburner_available = CfgHelper.getCfgValue("afterburner_available", "engines.cfg", "[TURBINEENGINEDATA]");
                 if (afterburner_available != "" && afterburner_available != "0")
-                    EnginesData = AddCheckBox(EnginesData, "afterburner_available = " + afterburner_available, Colors.DarkRed, criticalIssues++);
+                    EnginesData = AddGroupCheckBox(EnginesData, "afterburner_available = " + afterburner_available, Colors.DarkRed, criticalIssues++);
 
 
                 StackPanel myPanel2 = new StackPanel();
@@ -778,10 +780,7 @@ namespace msfsLegacyImporter
                     btn.Click += FixengineClick;
 
                     TextBlock notice = addTextBlock(CsvHelper.trans("engines_issues_notice"),
-                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                    notice.TextWrapping = TextWrapping.Wrap;
-                    notice.Width = 600;
-                    notice.Margin = new Thickness(0, 10, 0, 10);
+                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                     EnginesData.Children.Insert(0, notice);
 
                     tabEngines.Foreground = new SolidColorBrush(Colors.DarkRed);
@@ -858,37 +857,49 @@ namespace msfsLegacyImporter
             string airExported = aircraftDirectory + "\\" + airFilename.Replace(".air", ".txt");
             string conversionTable = AppDomain.CurrentDomain.BaseDirectory + "\\airTbls\\AIR to CFG Master Sheet - " + filename + ".csv";
             string buttonLabel = "";
-            string toolTip = "";
             bool download = false;
             bool launch = false;
 
+            // NO TABLES
             if (!File.Exists(conversionTable))
             {
                 buttonLabel = CsvHelper.trans("air_tbl_not_found");
-                toolTip = string.Format(CsvHelper.trans("air_tbl_not_found_notice"), conversionTable);
+
+                TextBlock notice = addTextBlock(string.Format(CsvHelper.trans("air_tbl_not_found_notice"), conversionTable), HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black,
+                    new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
+                parent.Children.Insert(0, notice);
             }
+            // NO AIRUPDATE
             else if (!File.Exists(AppDomain.CurrentDomain.BaseDirectory + "AirDat\\AirUpdate.exe"))
             {
                 buttonLabel = CsvHelper.trans("airupdate_not_found");
-                toolTip = CsvHelper.trans("airupdate_not_found_notice");
+
+                TextBlock notice = addTextBlock(CsvHelper.trans("airupdate_not_found_notice"), HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black,
+                    new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
+                parent.Children.Insert(0, notice);
+
                 download = true;
             }
+            // NO AIR DUMP
             else if (!File.Exists(airExported))
             {
                 buttonLabel = CsvHelper.trans("air_dump_not_found");
-                toolTip = string.Format(CsvHelper.trans("air_dump_notice"), airExported) + Environment.NewLine +
+
+                TextBlock notice = addTextBlock(string.Format(CsvHelper.trans("air_dump_notice"), airExported) + Environment.NewLine +
                     CsvHelper.trans("air_dump_notice1") + Environment.NewLine +
-                    CsvHelper.trans("air_dump_notice2") + aircraftDirectory+ "\"" + Environment.NewLine + "" +
+                    string.Format(CsvHelper.trans("air_dump_notice2"), aircraftDirectory) + Environment.NewLine + "" +
                     CsvHelper.trans("air_dump_notice3") + Environment.NewLine +
                     CsvHelper.trans("air_dump_notice4") + Environment.NewLine +
                     CsvHelper.trans("air_dump_notice5") + Environment.NewLine +
-                    CsvHelper.trans("air_dump_notice6");
+                    CsvHelper.trans("air_dump_notice6"), HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black,
+                    new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
+                parent.Children.Insert(0, notice);
+
                 launch = true;
             }
+            //CHECK AIR VALUES
             else
             {
-                buttonLabel = CsvHelper.trans("air_no_values_to_import");
-                toolTip = CsvHelper.trans("air_no_values_to_import_notice");
                 // GET FSX->ASOBO TABLE
                 // NAME VALUE
                 var fsx2msfsTable = CsvHelper.processAirTable(conversionTable, new string[] { "Table/Record", "Asobo" });
@@ -916,7 +927,7 @@ namespace msfsLegacyImporter
                                 string defVal = CfgHelper.getCfgValue(attr, filename, "", true);
                                 if (defVal != "" && airLine[2] != oldVal)
                                 {
-                                    parent = AddCheckBox(parent, attr, Colors.Black, values++, attr + "=" + airLine[2]);
+                                    parent = AddGroupCheckBox(parent, attr, Colors.Black, values++, attr + "=" + airLine[2]);
 
                                     Grid DynamicGrid = new Grid();
                                     ColumnDefinition gridCol1 = new ColumnDefinition();
@@ -928,7 +939,7 @@ namespace msfsLegacyImporter
 
                                     TextBlock myBlock2 = addTextBlock(CsvHelper.trans("air_new_val") + ": " + airLine[2], HorizontalAlignment.Left, VerticalAlignment.Top,
                                         airLine[2] == "0" || airLine[2] == "0.0" || Regex.IsMatch(airLine[2], @"(0,){8,}") || String.IsNullOrWhiteSpace(Regex.Replace(airLine[2], @"[0-9-.]+:([1][.0]+)[,]*", ""))
-                                            ? Colors.DarkRed : Colors.Black);
+                                            ? Colors.DarkRed : Colors.Black, new Thickness(0));
                                     myBlock2.ToolTip = airLine[2].Replace(",", Environment.NewLine);
                                     Grid.SetColumn(myBlock2, 0);
                                     Grid.SetRow(myBlock2, 0);
@@ -937,11 +948,11 @@ namespace msfsLegacyImporter
                                     TextBlock myBlock3;
                                     if (oldVal != "")
                                     {
-                                        myBlock3 = addTextBlock(CsvHelper.trans("air_old_val") + ": " + oldVal, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black);
+                                        myBlock3 = addTextBlock(CsvHelper.trans("air_old_val") + ": " + oldVal, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black, new Thickness(0));
                                         myBlock3.ToolTip = oldVal.Replace(",", Environment.NewLine);
                                     } else
                                     {
-                                        myBlock3 = addTextBlock(CsvHelper.trans("air_default_val") + ": " + defVal, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black);
+                                        myBlock3 = addTextBlock(CsvHelper.trans("air_default_val") + ": " + defVal, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.Black, new Thickness(0));
                                         myBlock3.ToolTip = defVal.Replace(",", Environment.NewLine);
                                     }
 
@@ -974,24 +985,34 @@ namespace msfsLegacyImporter
                 }
                 else
                 {
-                    toolTip = CsvHelper.trans("air_loading_failed");
+                    TextBlock notice = addTextBlock(CsvHelper.trans("air_loading_failed"), HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.DarkRed, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
+                    parent.Children.Insert(0, notice);
+                }
+
+                if (values > 0)
+                {
+                    TextBlock notice = addTextBlock(CsvHelper.trans("air_import_notice"), HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
+                    parent.Children.Insert(0, notice);
+
+                    buttonLabel = CsvHelper.trans("air_insert_values");
+                }
+                else
+                {
+                    TextBlock notice = addTextBlock(CsvHelper.trans("air_no_values_to_import_notice"), HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
+                    parent.Children.Insert(0, notice);
+
+                    buttonLabel = CsvHelper.trans("air_no_values_to_import");
                 }
             }
 
             Button btn = new Button();
             btn = SetButtonAtts(btn);
+            btn.Content = buttonLabel;
 
             if (values > 0)
-            {
-                myPanel.ToolTip = CsvHelper.trans("air_import_notice");
-                btn.Content = CsvHelper.trans("air_insert_values");
                 btn.Click += InsertAirValues;
-            }
             else
             {
-                btn.Content = buttonLabel + "*";
-                myPanel.ToolTip = toolTip;
-
                 if (download)
                     btn.Click += GetAirUpdate;
                 else if (launch)
@@ -1121,10 +1142,23 @@ namespace msfsLegacyImporter
             if (airFilename.Length > 1 && airFilename[0] != '.' &&
                 File.Exists(aircraftDirectory + "\\" + airFilename) && !File.Exists(aircraftDirectory + "\\." + airFilename))
             {
-                File.Move(aircraftDirectory + "\\" + airFilename, aircraftDirectory + "\\." + airFilename);
-                File.Move(aircraftDirectory + "\\" + airFilename.Replace(".air", ".txt"), aircraftDirectory + "\\." + airFilename.Replace(".air", ".txt"));
-                JSONHelper.scanTargetFolder(projectDirectory);
-                SummaryUpdate();
+                MessageBoxResult messageBoxResult = MessageBox.Show(string.Format(CsvHelper.trans("air_delete_warning_notice"), "." + airFilename, airFilename), CsvHelper.trans("air_delete_warning_header"), System.Windows.MessageBoxButton.YesNo);
+                if (messageBoxResult == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        if (File.Exists(aircraftDirectory + "\\." + airFilename))
+                            File.Delete(aircraftDirectory + "\\." + airFilename);
+                        File.Move(aircraftDirectory + "\\" + airFilename, aircraftDirectory + "\\." + airFilename);
+                        if (File.Exists(aircraftDirectory + "\\." + airFilename.Replace(".air", ".txt")))
+                            File.Delete(aircraftDirectory + "\\." + airFilename.Replace(".air", ".txt"));
+                        File.Move(aircraftDirectory + "\\" + airFilename.Replace(".air", ".txt"), aircraftDirectory + "\\." + airFilename.Replace(".air", ".txt"));
+                    }
+                    catch { }
+
+                    JSONHelper.scanTargetFolder(projectDirectory);
+                    SummaryUpdate();
+                }
             }
         }
 
@@ -1141,7 +1175,7 @@ namespace msfsLegacyImporter
                 int lightsToInsert = 0;
                 foreach (var light in CfgHelper.getLights(aircraftDirectory))
                     if (!String.IsNullOrEmpty(light))
-                        SystemsData = AddCheckBox(SystemsData, light, Colors.DarkRed, lightsBroken++);
+                        SystemsData = AddGroupCheckBox(SystemsData, light, Colors.DarkRed, lightsBroken++);
 
                 StackPanel myPanel2 = new StackPanel();
                 Button btn = new Button();
@@ -1153,10 +1187,7 @@ namespace msfsLegacyImporter
                     btn.Click += FixLightsClick;
 
                     TextBlock notice = addTextBlock(CsvHelper.trans("systems_convert_lights_notice"),
-                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                    notice.TextWrapping = TextWrapping.Wrap;
-                    notice.Width = 600;
-                    notice.Margin = new Thickness(0, 10, 0, 10);
+                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                     SystemsData.Children.Insert(0, notice);
 
                     tabSystems.Foreground = new SolidColorBrush(Colors.DarkRed);
@@ -1168,16 +1199,13 @@ namespace msfsLegacyImporter
                     {
                         foreach (var point in contactPoints)
                             if (!String.IsNullOrEmpty(point))
-                                SystemsData = AddCheckBox(SystemsData, point, Colors.DarkOrange, lightsToInsert++);
+                                SystemsData = AddGroupCheckBox(SystemsData, point, Colors.DarkOrange, lightsToInsert++);
 
                         btn.Content = CsvHelper.trans("systems_insert_lights");
                         btn.Click += InsertLightsClick;
 
                         TextBlock notice = addTextBlock(CsvHelper.trans("systems_insert_lights_notice"),
-                            HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                        notice.Margin = new Thickness(0, 10, 0, 10);
-                        notice.TextWrapping = TextWrapping.Wrap;
-                        notice.Width = 600;
+                            HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                         SystemsData.Children.Insert(0, notice);
 
                         tabSystems.Foreground = new SolidColorBrush(Colors.DarkOrange);
@@ -1272,7 +1300,7 @@ namespace msfsLegacyImporter
                                     string y = fsxData[3].Replace(" ", "").Trim() + (!fsxData[3].Contains('.') ? ".0" : "");
                                     if (double.TryParse(x, out double xVal) && double.TryParse(y, out double yVal) && double.TryParse(z, out double zVal))
                                     {
-                                        string newLight = "Type:6#Index:0#LocalPosition:" + (xVal + 2.0).ToString() + "," + zVal.ToString() + "," + (yVal + 2.0).ToString() + "#LocalRotation:0,0,0#EffectFile:LIGHT_ASOBO_Taxi#PotentiometerIndex:1#EmMesh:LIGHT_ASOBO_Taxi";
+                                        string newLight = "Type:6#Index:0#LocalPosition:" + (xVal + 1.0).ToString() + "," + zVal.ToString() + "," + (yVal + 2.0).ToString() + "#LocalRotation:0,0,0#EffectFile:LIGHT_ASOBO_Taxi#PotentiometerIndex:1#EmMesh:LIGHT_ASOBO_Taxi";
                                         CfgHelper.setCfgValue(aircraftDirectory, "lightdef." + i, newLight, "systems.cfg", "[LIGHTS]");
                                         i++;
                                     }
@@ -1382,15 +1410,15 @@ namespace msfsLegacyImporter
                                 {
                                     Color color = Colors.DarkOrange;
 
-                                    FlightModelData = AddCheckBox(FlightModelData, firstContactPoint, color, contactPointsBroken++);
-                                    FlightModelData = AddCheckBox(FlightModelData, secondContactPoint, color, contactPointsBroken);
+                                    FlightModelData = AddGroupCheckBox(FlightModelData, firstContactPoint, color, contactPointsBroken++);
+                                    FlightModelData = AddGroupCheckBox(FlightModelData, secondContactPoint, color, contactPointsBroken);
 
                                     StackPanel myPanel = new StackPanel();
                                     myPanel.Height = 16;
                                     myPanel.VerticalAlignment = VerticalAlignment.Top;
                                     myPanel.Margin = new Thickness(30, 0, 0, 10);
 
-                                    TextBlock myBlock = addTextBlock(string.Format(CsvHelper.trans("fm_contact_point_data"), distance.ToString("N2")), HorizontalAlignment.Left, VerticalAlignment.Top, color);
+                                    TextBlock myBlock = addTextBlock(string.Format(CsvHelper.trans("fm_contact_point_data"), distance.ToString("N2")), HorizontalAlignment.Left, VerticalAlignment.Top, color, new Thickness(0));
                                     myPanel.Children.Add(myBlock);
                                     FlightModelData.Children.Add(myPanel);
                                 }
@@ -1418,10 +1446,7 @@ namespace msfsLegacyImporter
                     btn.Click += FixContactsClick;
 
                     TextBlock notice = addTextBlock(CsvHelper.trans("fm_fix_contact_points_notice"),
-                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                    notice.TextWrapping = TextWrapping.Wrap;
-                    notice.Width = 600;
-                    notice.Margin = new Thickness(0, 10, 0, 10);
+                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600 );
                     FlightModelData.Children.Insert(0, notice);
 
                     //tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkRed);
@@ -1441,10 +1466,7 @@ namespace msfsLegacyImporter
                 if (possiblyDamagedCounter > 0)
                 {
                     TextBlock notice = addTextBlock(CsvHelper.trans("fm_contact_points_issues_notice"),
-                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                    notice.TextWrapping = TextWrapping.Wrap;
-                    notice.Width = 600;
-                    notice.Margin = new Thickness(0, 10, 0, 10);
+                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                     myPanel2.Children.Add(notice);
 
                     foreach (string val in possiblyDamaged)
@@ -1452,7 +1474,7 @@ namespace msfsLegacyImporter
                         if (lastPoint != val)
                         {
                             lastPoint = val;
-                            TextBlock myBlock = addTextBlock(val, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkRed);
+                            TextBlock myBlock = addTextBlock(val, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkRed, new Thickness(0));
                             myPanel2.Children.Add(myBlock);
                         }
                     }
@@ -1472,7 +1494,7 @@ namespace msfsLegacyImporter
                 {
                     string value = CfgHelper.getCfgValue(attr, "flight_model.cfg");
                     if (value == "" && !String.IsNullOrEmpty(CfgHelper.getCfgValue(attr, "flight_model.cfg", "", true)))
-                        FlightModelIssues = AddCheckBox(FlightModelIssues, attr + " = " + (value != "" ? value : "missing"), Colors.DarkRed, criticalIssues++);
+                        FlightModelIssues = AddGroupCheckBox(FlightModelIssues, attr + " = " + (value != "" ? value : "missing"), Colors.DarkRed, criticalIssues++);
                 }
 
                 foreach (string attr in new string[] { "elevator_scaling_table", "aileron_scaling_table", "rudder_scaling_table" })
@@ -1481,7 +1503,7 @@ namespace msfsLegacyImporter
                     string result = Regex.Replace(value, @"[0-9-.]+:([1][.0]+)[,]*", "");
                     if ((String.IsNullOrEmpty(value) || String.IsNullOrEmpty(result.Trim())) && !String.IsNullOrEmpty(CfgHelper.getCfgValue(attr, "flight_model.cfg", "", true)))
                     {
-                        FlightModelIssues = AddCheckBox(FlightModelIssues, attr + " = " + (value != "" ? value : "missing"), Colors.DarkRed, criticalIssues++);
+                        FlightModelIssues = AddGroupCheckBox(FlightModelIssues, attr + " = " + (value != "" ? value : "missing"), Colors.DarkRed, criticalIssues++);
                     }
                 }
 
@@ -1496,10 +1518,7 @@ namespace msfsLegacyImporter
                     btn3.Click += FixFlightModelClick;
 
                     TextBlock notice = addTextBlock(CsvHelper.trans("fm_fix_flight_model_notice"),
-                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                    notice.TextWrapping = TextWrapping.Wrap;
-                    notice.Width = 600;
-                    notice.Margin = new Thickness(0, 10, 0, 10);
+                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                     FlightModelIssues.Children.Insert(0, notice);
 
                     tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkRed);
@@ -1761,11 +1780,11 @@ namespace msfsLegacyImporter
                                     /*|| secton.Contains("ENGINE PARAMETERS.")*/
                                     )
                                 {
-                                    AddCheckBox(parentPanel, secton.Substring(1), Colors.DarkRed, sectionsMissing++);
+                                    AddGroupCheckBox(parentPanel, secton.Substring(1), Colors.DarkRed, sectionsMissing++);
                                     requiredMissing++;
                                 }
                                 else
-                                    AddCheckBox(parentPanel, secton.Substring(1), Colors.DarkOrange, sectionsMissing++);
+                                    AddGroupCheckBox(parentPanel, secton.Substring(1), Colors.DarkOrange, sectionsMissing++);
                             }
                             else
                             {
@@ -1774,8 +1793,7 @@ namespace msfsLegacyImporter
                                 myPanel.VerticalAlignment = VerticalAlignment.Top;
                                 myPanel.HorizontalAlignment = HorizontalAlignment.Left;
 
-                                TextBlock myBlock = addTextBlock(secton, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkGreen);
-                                myBlock.Margin = new Thickness(20, 0, 0, 0);
+                                TextBlock myBlock = addTextBlock(secton, HorizontalAlignment.Left, VerticalAlignment.Top, Colors.DarkGreen, new Thickness(20, 0, 0, 0));
                                 myPanel.Children.Add(myBlock);
                                 parentPanel.Children.Add(myPanel);
                             }
@@ -1792,11 +1810,7 @@ namespace msfsLegacyImporter
                         myPanel.Children.Add(btn);
                         parentPanel.Children.Add(myPanel);
 
-                        TextBlock notice = addTextBlock("",
-                           HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                        notice.TextWrapping = TextWrapping.Wrap;
-                        notice.Width = 600;
-                        notice.Margin = new Thickness(0, 10, 0, 10);
+                        TextBlock notice = addTextBlock("", HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
 
                         if (filename == "cockpit.cfg")
                         {
@@ -1885,7 +1899,7 @@ namespace msfsLegacyImporter
                             string fileName = currentFile.Replace(projectDirectory, "");
 
                             if (Path.GetFileName(fileName)[0] != '.')
-                                TexturesList = AddCheckBox(TexturesList, fileName, Colors.DarkRed, texturesToConvert++);
+                                TexturesList = AddGroupCheckBox(TexturesList, fileName, Colors.DarkRed, texturesToConvert++);
                         }
                     }
                 }
@@ -1913,10 +1927,7 @@ namespace msfsLegacyImporter
                 myPanel2.Children.Add(btn);
 
                 TextBlock notice = addTextBlock(CsvHelper.trans("textures_convert_notice"),
-                   HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                notice.TextWrapping = TextWrapping.Wrap;
-                notice.Width = 600;
-                notice.Margin = new Thickness(0, 10, 0, 10);
+                   HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                 TexturesList.Children.Insert(0, notice);
             }
             else
@@ -2021,7 +2032,7 @@ namespace msfsLegacyImporter
                 int missingModels = 0;
                 foreach (string missingLiveryModel in missingLiveryModels)
                 {
-                    MissingLiveryModels = AddCheckBox(MissingLiveryModels, missingLiveryModel, Colors.DarkRed, missingModels++);
+                    MissingLiveryModels = AddGroupCheckBox(MissingLiveryModels, missingLiveryModel, Colors.DarkRed, missingModels++);
                 }
 
                 StackPanel myPanel1 = new StackPanel();
@@ -2033,10 +2044,7 @@ namespace msfsLegacyImporter
                 btn1.Click += CreateLiveryModelsClick;
 
                 TextBlock notice = addTextBlock(CsvHelper.trans("These liveries does not have associated model.cfg file. If you have problems with some of listed liveries selection, choose them and press button below."),
-                    HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                notice.TextWrapping = TextWrapping.Wrap;
-                notice.Width = 600;
-                notice.Margin = new Thickness(0, 10, 0, 10);
+                    HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                 MissingLiveryModels.Children.Insert(0, notice);
 
                 tabModel.Foreground = new SolidColorBrush(Colors.DarkRed);
@@ -2077,7 +2085,7 @@ namespace msfsLegacyImporter
 
                             string contents = File.ReadAllText(modelFile);
                             if (contents.Contains("MREC"))
-                                ModelsList = AddCheckBox(ModelsList, fileName, Colors.Black, modelsToConvert++);
+                                ModelsList = AddGroupCheckBox(ModelsList, fileName, Colors.Black, modelsToConvert++);
 
                             if (!contents.Contains("MDLXMDLH"))
                                 warnings.Add(string.Format(CsvHelper.trans("model_format_is_not_compatible"), fileName) + Environment.NewLine);
@@ -2099,10 +2107,7 @@ namespace msfsLegacyImporter
                 btn.Click += RemoveSwitchesClick;
 
                 TextBlock notice = addTextBlock(CsvHelper.trans("model_remove_clickable_notice"),
-                   HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                notice.TextWrapping = TextWrapping.Wrap;
-                notice.Width = 600;
-                notice.Margin = new Thickness(0, 10, 0, 10);
+                   HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                 ModelsList.Children.Insert(0, notice);
             }
             else
@@ -2120,7 +2125,7 @@ namespace msfsLegacyImporter
             if (warnings.Count > 0)
             {
                 foreach (var warning in warnings)
-                    ModelsList.Children.Add(addTextBlock(warning, HorizontalAlignment.Center, VerticalAlignment.Center, Colors.DarkRed));
+                    ModelsList.Children.Add(addTextBlock(warning, HorizontalAlignment.Center, VerticalAlignment.Center, Colors.DarkRed, new Thickness(0)));
             }
 
             ModelsList.Children.Add(sectiondivider());
@@ -2228,24 +2233,21 @@ namespace msfsLegacyImporter
                         {
                             /*if (soundFile[0] != '-' && (soundFile.Contains("[GEAR_DOWN]") || soundFile.Contains("[GEAR_UP]")))
                             {
-                                SoundList = AddCheckBox(SoundList, soundFile, Colors.DarkRed, soundsFound++, "", true);
+                                SoundList = AddGroupCheckBox(SoundList, soundFile, Colors.DarkRed, soundsFound++, "", true);
                                 soundsToDisable++;
                             }
                             else*/
                             {
                                 if (soundFile[0] == '-')
-                                    SoundList = AddCheckBox(SoundList, soundFile.Substring(1), Colors.Black, soundsFound++, "", false);
+                                    SoundList = AddGroupCheckBox(SoundList, soundFile.Substring(1), Colors.Black, soundsFound++, "", false);
                                 else
-                                    SoundList = AddCheckBox(SoundList, soundFile, Colors.Black, soundsFound++, "", true);
+                                    SoundList = AddGroupCheckBox(SoundList, soundFile, Colors.Black, soundsFound++, "", true);
                             }
                         }
                     }
 
                     TextBlock notice = addTextBlock(CsvHelper.trans("sounds_toggle_notice"),
-                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black);
-                    notice.TextWrapping = TextWrapping.Wrap;
-                    notice.Width = 600;
-                    notice.Margin = new Thickness(0, 10, 0, 10);
+                       HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                     SoundList.Children.Insert(0, notice);
                 }
             }
@@ -2279,8 +2281,8 @@ namespace msfsLegacyImporter
             {
                 StackPanel myPanel3 = new StackPanel();
 
-                TextBlock gammaCorr = addTextBlock(string.Format(CsvHelper.trans("sounds_tone_volume"), "0", "30", "100"), HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black);
-                gammaCorr.Margin = new Thickness(0, 10, 0, 0);
+                TextBlock gammaCorr = addTextBlock(string.Format(CsvHelper.trans("sounds_tone_volume"), "0", "30", "100"), HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black,
+                    new Thickness(0, 10, 0, 0));
                 myPanel3.Children.Add(gammaCorr);
 
                 if (this.FindName("VarioVolimeSlider") != null)
@@ -2397,7 +2399,7 @@ namespace msfsLegacyImporter
                         if (!PanelHasBackup)
                             panelsWithoutBackup++;
 
-                        PanelsList = AddCheckBox(PanelsList, fileName, PanelHasBackup ? Colors.Black : Colors.DarkRed, panelsToConvert++);
+                        PanelsList = AddGroupCheckBox(PanelsList, fileName, PanelHasBackup ? Colors.Black : Colors.DarkRed, panelsToConvert++);
 
                         var cabFiles = Directory.EnumerateFiles(Path.GetDirectoryName(panelFile), "*.cab", SearchOption.TopDirectoryOnly);
                         foreach (string cabFile in cabFiles)
@@ -2411,7 +2413,7 @@ namespace msfsLegacyImporter
                                 if (!cabHasBackup)
                                     cabsWithoutBackup++;
 
-                                CabsList = AddCheckBox(CabsList, cabFileName, cabHasBackup ? Colors.Black : Colors.DarkRed, cabsToConvert++);
+                                CabsList = AddGroupCheckBox(CabsList, cabFileName, cabHasBackup ? Colors.Black : Colors.DarkRed, cabsToConvert++);
                             }
                         }
 
@@ -2438,6 +2440,10 @@ namespace msfsLegacyImporter
             btn1 = SetButtonAtts(btn1);
             if (cabsToConvert > 0)
             {
+                TextBlock extractGaugesNotice = addTextBlock(CsvHelper.trans("panel_extract_ac_cabs_notice"),
+                    HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
+                CabsList.Children.Insert(0, extractGaugesNotice);
+
                 btn1.Content = CsvHelper.trans("panel_extract_gauges");
                 btn1.Click += extractCabClick;
             } else
@@ -2452,6 +2458,10 @@ namespace msfsLegacyImporter
             btn3 = SetButtonAtts(btn3);
             if (!Directory.Exists(Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\"))
             {
+                TextBlock extractGaugesNotice = addTextBlock(CsvHelper.trans("panel_extract_fsx_cabs_notice"),
+                    HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
+                myPanel1.Children.Add(extractGaugesNotice);
+
                 btn3.Content = CsvHelper.trans("panel_extract_fsx_resources");
                 btn3.Click += extractDefaultCabsClick;
             } else
@@ -2478,17 +2488,15 @@ namespace msfsLegacyImporter
                 btn2.Content = CsvHelper.trans("panel_import_gauges");
                 btn2.Click += importPanelGaugeClick;
 
-                if (this.FindName("ForceBackground") != null)
-                    UnregisterName("ForceBackground");
-                CheckBox checkBox = new CheckBox();
-                RegisterName("ForceBackground", checkBox);
-                checkBox.Content = CsvHelper.trans("panel_force_gauge_background");
-                checkBox.MaxWidth = 600;
-                checkBox.HorizontalAlignment = HorizontalAlignment.Left;
-                myPanel2.Children.Add(checkBox);
+                myPanel2 = AddSingleCheckBox(myPanel2, CsvHelper.trans("panel_force_gauge_background"), 600, HorizontalAlignment.Left, "ForceBackground");
+                myPanel2 = AddSingleCheckBox(myPanel2, CsvHelper.trans("panel_transparent_mask"), 600, HorizontalAlignment.Left, "TransparentMask");
+                myPanel2 = AddSingleCheckBox(myPanel2, CsvHelper.trans("panel_preserve_size"), 600, HorizontalAlignment.Left, "PreservePanelSize");
+                myPanel2 = AddSingleCheckBox(myPanel2, CsvHelper.trans("panel_scale_up_gauge"), 600, HorizontalAlignment.Left, "ScaleUpGauge");
+                myPanel2 = AddSingleCheckBox(myPanel2, CsvHelper.trans("panel_taxi_lights_switch"), 600, HorizontalAlignment.Left, "TaxiLightsSwitch");
+                myPanel2 = AddSingleCheckBox(myPanel2, CsvHelper.trans("panel_ignore_errors"), 600, HorizontalAlignment.Left, "IgnorePanelErrors");
 
-                TextBlock gammaCorr = addTextBlock(string.Format(CsvHelper.trans("panel_gamma_correction"), "0", "1", "2"), HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black);
-                gammaCorr.Margin = new Thickness(0,10,0,0);
+                TextBlock gammaCorr = addTextBlock(string.Format(CsvHelper.trans("panel_gamma_correction"), "0", "1", "2"), HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black,
+                    new Thickness(0, 10, 0, 0));
                 myPanel2.Children.Add(gammaCorr);
 
                 if (this.FindName("GammaSlider") != null)
@@ -2501,6 +2509,10 @@ namespace msfsLegacyImporter
                 gammaSlider.AutoToolTipPlacement = AutoToolTipPlacement.TopLeft;
                 gammaSlider.AutoToolTipPrecision = 1;
                 myPanel2.Children.Add(gammaSlider);
+
+                TextBlock extractGaugesNotice = addTextBlock(CsvHelper.trans("panel_convert_gauges_notice"),
+                    HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
+                PanelsList.Children.Insert(0, extractGaugesNotice);
             }
             else
             {
@@ -2654,25 +2666,33 @@ namespace msfsLegacyImporter
         {
             fsTabControl.IsEnabled = false;
             importPanelGaugeAsync(sender, getCheckedOptions(PanelsList),
-                FindName("GammaSlider") != null ? (float)((Slider)FindName("GammaSlider")).Value : 1.0f,
-                FindName("ForceBackground") != null ? ((CheckBox)FindName("ForceBackground")).IsChecked == true : false);
+                new float[] {
+                    FindName("GammaSlider") != null ? (float)((Slider)FindName("GammaSlider")).Value : 1,
+                    FindName("ForceBackground") != null && ((CheckBox)FindName("ForceBackground")).IsChecked == true ? 1 : 0,
+                    FindName("IgnorePanelErrors") != null && ((CheckBox)FindName("IgnorePanelErrors")).IsChecked == true ? 1 : 0,
+                    FindName("PreservePanelSize") != null && ((CheckBox)FindName("PreservePanelSize")).IsChecked == true ? 1 : 0,
+                    FindName("TaxiLightsSwitch") != null && ((CheckBox)FindName("TaxiLightsSwitch")).IsChecked == true ? 1 : 0,
+                    FindName("TransparentMask") != null && ((CheckBox)FindName("TransparentMask")).IsChecked == true ? 1 : 0,
+                    FindName("ScaleUpGauge") != null && ((CheckBox)FindName("ScaleUpGauge")).IsChecked == true ? 1 : 0
+                }
+            );
         }
 
-        private async void importPanelGaugeAsync(object sender, List<string> values, float GammaSlider, bool ForceBackground)
+        private async void importPanelGaugeAsync(object sender, List<string> values, float[] atts)
         {
-            await Task.Run(() => importPanelGaugeTask(sender, values, GammaSlider, ForceBackground));
-        }
-
-        private async Task importPanelGaugeTask(object sender, List<string> values, float GammaSlider, bool ForceBackground)
-        {
-            foreach (var value in values)
-            {
-                XmlHelper.insertFsxGauge(sender, aircraftDirectory, projectDirectory, value, GammaSlider, ForceBackground, CfgHelper, FsxVarHelper, JSONHelper);
-            }
+            await Task.Run(() => importPanelGaugeTask(sender, values, atts));
 
             JSONHelper.scanTargetFolder(projectDirectory);
             Application.Current.Dispatcher.Invoke(() => SummaryUpdate());
             Application.Current.Dispatcher.Invoke(() => fsTabControl.IsEnabled = true);
+        }
+
+        private async Task importPanelGaugeTask(object sender, List<string> values, float[] atts)
+        {
+            foreach (var value in values)
+            {
+                XmlHelper.insertFsxGauge(sender, aircraftDirectory, projectDirectory, value, atts, CfgHelper, FsxVarHelper, JSONHelper);
+            }
         }
 
         private void TextExpressionClick(object sender, RoutedEventArgs e)
@@ -2796,13 +2816,18 @@ namespace msfsLegacyImporter
             }
         }
 
-        public TextBlock addTextBlock(string text, HorizontalAlignment ha, VerticalAlignment va, Color clr)
+        public TextBlock addTextBlock(string text, HorizontalAlignment ha, VerticalAlignment va, Color clr, Thickness margin, TextWrapping wrapping = TextWrapping.NoWrap, int width = 0 )
         {
             TextBlock myBlock = new TextBlock();
             myBlock.HorizontalAlignment = ha;
             myBlock.VerticalAlignment = va;
             myBlock.Text = text;
             myBlock.Foreground = new SolidColorBrush(clr);
+            myBlock.Margin = margin;
+            myBlock.TextWrapping = wrapping;
+
+            if (width > 0)
+                myBlock.Width = width;
 
             return myBlock;
         }
@@ -2924,7 +2949,7 @@ namespace msfsLegacyImporter
             var t = Task.Run(async delegate
             {
                 await Task.Delay(2000);
-                Dispatcher.Invoke(() => btnScan.Content = CsvHelper.trans("json_rescan"));
+                Dispatcher.Invoke(() => btnScan.Content = CsvHelper.trans("btnScan"));
                 return;
             });
         }
@@ -2935,7 +2960,7 @@ namespace msfsLegacyImporter
             System.Diagnostics.Process.Start(e.Uri.ToString().Contains("//") ? e.Uri.AbsoluteUri : e.Uri.ToString());
         }
 
-        public StackPanel AddCheckBox(StackPanel mainPanel, string content, Color color, int index = 1, string tag = "", bool isChecked = false)
+        public StackPanel AddGroupCheckBox(StackPanel mainPanel, string content, Color color, int index = 1, string tag = "", bool isChecked = false)
         {
             StackPanel myPanel = new StackPanel();
             myPanel.Height = 17;
@@ -2970,6 +2995,26 @@ namespace msfsLegacyImporter
                 checkBox.Tag = tag;
             myPanel.Children.Add(checkBox);
             mainPanel.Children.Add(myPanel);
+
+            return mainPanel;
+        }
+
+        public StackPanel AddSingleCheckBox(StackPanel mainPanel, string content, int width = 0, HorizontalAlignment alignment = HorizontalAlignment.Left, string name = "")
+        {
+            CheckBox checkBox = new CheckBox();
+            checkBox.Content = content;
+            if (width > 0)
+                checkBox.MaxWidth = width;
+            checkBox.HorizontalAlignment = alignment;
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                if (FindName(name) != null)
+                    UnregisterName(name);
+                RegisterName(name, checkBox);
+            }
+
+            mainPanel.Children.Add(checkBox);
 
             return mainPanel;
         }
@@ -3107,7 +3152,7 @@ namespace msfsLegacyImporter
                 Button btn = null;
                 Button btn2 = null;
                 StackPanel myPanel = new StackPanel();
-                TextBlock myBlock = addTextBlock("", HorizontalAlignment.Center, VerticalAlignment.Top, Colors.DarkGreen);
+                TextBlock myBlock = addTextBlock("", HorizontalAlignment.Center, VerticalAlignment.Top, Colors.DarkGreen, new Thickness(0));
 
                 if (updateVersion != "")
                 {
@@ -3153,7 +3198,7 @@ namespace msfsLegacyImporter
                 _webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(OnDownloadCompleted);
 
                 StackPanel myPanel = new StackPanel();
-                TextBlock myBlock = addTextBlock(string.Format(CsvHelper.trans("update_applying_version"), updateVersion), HorizontalAlignment.Center, VerticalAlignment.Top, Colors.Black);
+                TextBlock myBlock = addTextBlock(string.Format(CsvHelper.trans("update_applying_version"), updateVersion), HorizontalAlignment.Center, VerticalAlignment.Top, Colors.Black, new Thickness(0));
                 myPanel.Children.Add(myBlock);
                 AboutContent.Children.Add(myPanel);
 
@@ -3211,7 +3256,7 @@ namespace msfsLegacyImporter
                 Environment.Exit(0);
 
                 StackPanel myPanel = new StackPanel();
-                TextBlock myBlock = addTextBlock(CsvHelper.trans("update_failed"), HorizontalAlignment.Center, VerticalAlignment.Top, Colors.Black);
+                TextBlock myBlock = addTextBlock(CsvHelper.trans("update_failed"), HorizontalAlignment.Center, VerticalAlignment.Top, Colors.Black, new Thickness(0));
                 myPanel.Children.Add(myBlock);
                 AboutContent.Children.Add(myPanel);
             }

@@ -3,6 +3,7 @@ COMMON,,
 file_edited_outside,Файл {0} был изменён сторонним приложением.\nДанные ЛА должны быть обновлены,File {0} was edited outside of the program\nAircraft data should be reloaded
 file_edited,Обнаружено изменение CFG файла,CFG file change detected
 restore_backup,Восстановить резервную копию,Restore Backup
+make_backup,Создать резервную копию,Make Backup
 AircraftBackupButton,Создать резервную копию,Make Backup
 EnginesBackupButton,Создать резервную копию,Make Backup
 FlightModelBackupButton,Создать резервную копию,Make Backup
@@ -28,8 +29,10 @@ toggle_all,Выбрать всё,Toggle all
 cvt_remove_failed,Ошибка удаление кэша CVT,CVT folder removal was failed
 btnOpenFile,Выбрать,Browse
 load_imported_header,Загрузить импортированный FSX (Legacy) или MSFS (современный) ЛА,Load imported FSX (Legacy) or MSFS (Native) aircraft
-load_imported_notice,Выбрать импортированный или современный ЛА,Set path of imported FSX aircraft or native MSFS aircaft
+load_imported_notice,Выбрать импортированный или современный ЛА,Set path of imported FSX aircraft or native MSFS aircraft
 MainMenuButton,Главное меню,Main Menu
+imageLeftTooltip,"Начать импорт самолёта, вам понадобятся распакованные файлы ЛА для FSX\nна диске или установленная игра Microsoft Flight Simulator X","Click it to start new import, you will need unpacked FSX aircraft files\non your disk or installed Flight Simulator X"
+imageRightTooltip,"Загрузить уже импортированный FSX или родной MSFS самолёт,\nобычно файлы расположены в папке Community","Click it to load imported FSX (Legacy) or MSFS (Native) aircraft,\nusually they are stored in Community folder"
 IMPORT,,
 import_folders_not_selected,Вы должны выбрать исходную папку (ЛА из FSX) и папку назначения (MSFS),You have to select both source (FSX) ans destination (MSFS) folders
 import_fields_are_empty,Вы должны заполнить все поля,You have to fill in all fields
@@ -41,7 +44,7 @@ btnImportSubmit,Импорт,Import
 new_import_header,Импортировать ЛА из FSX,Import new FSX aircraft
 new_import_notice,"Указать путь к ЛА из FSX (не установочную папку FSX), затем выбрать папку назначения (Community)","Set path of FSX aircraft directory first (not the root of installed FSX), then set MSFS Community folder path"
 JSON,,
-json_no_files_added,Ничего не добавлено в JOSN,No files added in JSON
+json_no_files_added,Ничего не добавлено в JSON,No files added in JSON
 btnScan,Обновить список файлов ЛА,Rescan aircraft files
 json_files_added,{0} файлов добавлено в JSON,{0} files added in JSON
 update_layout_header,Обновить файл LAYOUT.JSON текущего ЛА,Update LAYOUT.JSON file of current aircraft
@@ -56,13 +59,13 @@ init_cfg_loaded,загружен,loaded
 init_basic_mode,Режим Базового импорта,Basic import mode
 init_mode_active,активен,is active
 init_basic_notice1,"В режиме Базового импорта Вы будете иметь возможность использовать большинство доступных функций даже если все настройки ЛА в формате FSX и сохранены в единственном файле - ""aircraft.cfg"".","In Basic import mode you will have most features available, even if they will be applied to the single config file – ""aircraft.cfg""."
-init_basic_notice2,"В этом случае ЛА будет загружен игрой в режиме совместимости, т.е. лётная модель и работа дигателей будет контролироваться кодом, унаследованным из FSX. Самый простой способ избежать проблем с работой двигателей, авионики, аэродинамики.","This way MSFS will treat aircraft as Legacy, so flight model and engine configs will be loaded in compatibility mode. It is the easiest way to avoid engines, avionics and aerodynamics issues."
-init_basic_notice3,"В этом случае ЛА будет загружен игрой в режиме совместимости, т.е. лётная модель и работа двигателей будет контролироваться кодом, унаследованным из FSX. Самый простой способ избежать проблем с работой двигателей, авионики, аэродинамики.","However, MSFS compatibility code itself has issues that can't be fixed by changing config values. Also modern values (such as external view gauges) are not supported and can't be used."
+init_basic_notice2,"В этом случае ЛА будет загружен игрой в режиме совместимости, т.е. лётная модель и работа двигателей будет контролироваться кодом, унаследованным из FSX. Самый простой способ избежать проблем с работой двигателей, авионики, аэродинамики.","This way MSFS will treat aircraft as Legacy, so flight model and engine configs will be loaded in compatibility mode. It is the easiest way to avoid engines, avionics and aerodynamics issues."
+init_basic_notice3, ,"However, MSFS compatibility code itself has issues that can't be fixed by changing config values. Also modern values (such as external view gauges) are not supported and can't be used."
 init_basic_notice4,"*Даже если ЛА, импортированный в этом режиме, может иметь минимум недостатков, подобный полуфабрикат может быть использованы только в личных целях и не должен быть опубликован как релиз.","*Even if aircraft, imported in this mode, may have only minor issues, do not publish such half-finished planes as release."
-init_basic_notice5,"Если Вы еще хотите поделиться результатами экспериментов - сделайте видео или текстовой мануал, который будет полезен другим энтузиастам.",If you still wish to share your success - make a video or text tutorial which can be used by other enthusiasts for educational purposes.
+init_basic_notice5,"Если Вы хотите поделиться результатами экспериментов - сделайте видео или текстовой мануал, который будет полезен другим игрокам.",If you still wish to share your success - make a video or text tutorial which can be used by other enthusiasts for educational purposes.
 init_full_mode,Режим Полного импорта,Full import mode
 init_full_notice1,"Для перехода в режим Полного импорта необходимо разделить ""aircraft.cfg"" на части, так что игра будет загружать ЛА как современный.","Full import mode requires ""aircraft.cfg"" file to be split on parts, so MSFS will treat this aircraft as Native."
-init_full_notice2,"В этом случае более жёсткие требования будут применены к существующим данным и Вы можете обнаружить различного рода проблемы, которые могут быть исправлены путем правки значений CFG файлов. Для завершения импорта важно также импортировать данные AIR файла, удалить его и дополнить все недостающие значения CFG файлов вручную.","In this case more complicated requirements will be applied to existing values and you will experience various issues that can be fixed by applying available fixes or editing config data. It is strongly recommended to perform AIR data import, remove air file, and add all missing variables manually to finalize import process."
+init_full_notice2,"В этом случае более жёсткие требования будут применены к параметрам ЛА и Вы можете обнаружить различного рода проблемы, которые могут быть исправлены путем правки значений CFG файлов. Для завершения импорта важно также импортировать данные AIR файла, удалить его и дополнить все недостающие значения CFG файлов вручную.","In this case more complicated requirements will be applied to existing values and you will experience various issues that can be fixed by applying available fixes or editing config data. It is strongly recommended to perform AIR data import, remove air file, and add all missing variables manually to finalize import process."
 init_full_notice3,"*Если Вы являетесь владельцем данного ЛА, или имеете разрешение на публикацию результата импорта, бесплатно или за плату, Вы обязаны указать на странице релиза то, что данная программа была использована для обработки данных.","*If you are the owner of the aircraft, or get permission to publish the import result, for free or for payment, you have to credit this tool in the release description."
 init_full_notice4,"Если с Вашим проектом возникли какие-то сложности, отправьте мне сообщение (контакты во вкладке About).",Feel free to contact me about any issues you will have with your project (contacts in About tab).
 init_full_enable,Включить режим Полного импорта,Enable Full import mode
@@ -74,40 +77,42 @@ aircraft_add_missing_parameters,Попробовать добавить отсу
 aircraft_missing_parameter_notice,"Отсутствующие параметры характеристик будут взяты из текста описания. Неверные параметры выделены красным цветом, они должны быть обязательно исправлены иначе ЛА не появится в списке главного меню.","Missing performance values will be searched in aircraft description. Invalid aircraft type value highlighted in red color, it should be fixed otherwise aircraft will not appear in main menu list."
 aircraft_cfg_not_found,Файл aircraft.cfg не найден в папке ЛА,aircraft.cfg not found in aircraft directory
 aircraft_cfg_split_failed,Ошибка обработки CFG файла,CFG split failed
-aircraft_split_notice,,"aircraft.cfg file will be split on parts, so MSFS will treat this aircraft as Native. This operation can't be undone, current config file will be saved as "".aircraft.cfg"""
+aircraft_split_notice,"Файл aircraft.cfg будет разделён на части, так что игра загрузит этот ЛА как обычный а не совместимый. Эта операция не может быть отменена, текущий файл конфигурации будет сохранён как "".aircraft.cfg""","aircraft.cfg file will be split on parts, so MSFS will treat this aircraft as Native. This operation can't be undone, current config file will be saved as "".aircraft.cfg"""
 aircraft_split_header,Обработка AIRCRAFT.CFG,AIRCRAFT.CFG conversion warning
 ENGINES TAB,,
 engines_fix_issues,Исправить проблемы двигателей,Fix engines issues
-engines_issues_notice,,"Invalid engine value should be fixed, otherwise aircraft will be ignored by flight model code and stay frozen even in the air."
+engines_issues_notice,"Ошибочные параметры двигателей должны быть исправлены, иначе ЛА не будет взаимодействовать с лётной моделью и окажется подвешенным в воздухе","Invalid engine value should be fixed, otherwise aircraft will be ignored by flight model code and stay frozen even in the air."
 engines_no_issues,Проблем с двигателями не найдено,No engines issues
 engines_power,Отрегулировать мощность двигателей,Adjust engines power
 AIR FUNCTIONS,,
 air_tbl_not_found,Таблиц конвертации AIR данных не найдено,No AIR conversion tables found
-air_tbl_not_found_notice,,"File {0} does not exists.\nExtract folder ""airTbls"" from program archive into same directory, where EXE is stored."
+air_tbl_not_found_notice,"Файл {0} не найден.\nРаспакуйте папку ""airTbl"" из установочного архива программы","File {0} does not exists.\nExtract folder ""airTbls"" from program archive into same directory, where EXE is stored."
 airupdate_not_found,Файл AirUpdate.exe не найден,AirUpdate.exe not found
-airupdate_not_found_notice,,AirUpdate not found in Importer folder.\nClick this button to download and unpack archive from www.mudpond.org
+airupdate_not_found_notice,AirUpdate не найден в папке приложения.\nНажмите эту кнопку для загрузки и распаковки архива с сайта www.mudpond.org,AirUpdate not found in Importer folder.\nClick this button to download and unpack archive from www.mudpond.org
 air_dump_not_found,AIR данных ЛА не найдено,No exported AIR data found
-air_dump_notice,,File {0} does not exists.\nClick this button to launch AirUpdate and follow these steps:
-air_dump_notice1,,"1. ""Select Air File"""
-air_dump_notice2,,"2. Navigate to ""{0}"""
-air_dump_notice3,,3. Select AIR file
-air_dump_notice4,,"4. Check ""Full dump"" option"
-air_dump_notice5,,"5. Press ""Dump"" button"
-air_dump_notice6,,6. Close AirUpdate
-air_no_values_to_import,"Не найдено данных AIR, доступных для импорта",No AIR values available for import
-air_no_values_to_import_notice,,AIR and CFG values identical. You can try to insert\nmissing sections without default values activation.
+air_dump_notice,Файл {0} не найден.\nНажмите на кнопку для запуска AirUpdate и следуйте инструкции:,File {0} does not exists.\nClick this button to launch AirUpdate and follow these steps:
+air_dump_notice1,"1. Нажмите ""Select Air File""","1. ""Select Air File"""
+air_dump_notice2,"2. Откройте папку ""{0}""","2. Navigate to ""{0}"""
+air_dump_notice3,3. Выберете файл [имя ЛА].AIR,3. Select AIR file
+air_dump_notice4,"4. Отметьте опцию ""Full dump""","4. Check ""Full dump"" option"
+air_dump_notice5,"5. Нажмите кнопку ""Dump""","5. Press ""Dump"" button"
+air_dump_notice6,6. Закройте программу AirUpdate,6. Close AirUpdate
+air_no_values_to_import,"Не найдено AIR значений, требующих импорта",No AIR values require import
+air_no_values_to_import_notice,"Значения AIR файла и CFG идентичны. Вы можете попробовать добавить секцию [AERODYNAMICS] без активации значений, если она отсутствует.",AIR and CFG values identical. You can try to insert [AERODYNAMICS] section if it missing without values activation.
 air_new_val,Новое знач,New val
-air_old_val,Старое знач,Old val
+air_old_val,Текущее знач,Current val
 air_default_val,Стандартное знач,Default val
 air_loading_failed,Ошибка загрузки AIR таблиц,AIR tables loading failed
-air_import_notice,,"Select valid AIR values to insert into CFG files. When you finish, AIR file can be removed.\nBut if some CFG values are missing - game may crash or aircraft will not appear in the list."
-air_insert_values,*Импортировать AIR данные,*Insert AIR values
+air_import_notice,"Выберете корректные AIR данные для вставки в CFG файлы. После завершения импорта, файл AIR может быть удалён.\nНо если какие-то критичные CFG значения отсутствуют - игра может не запуститься или ЛА не отобразится в списке главного меню.","Select valid AIR values to insert into CFG files. When you finish, AIR file can be removed.\nBut if some CFG values are missing - game may crash or aircraft will not appear in the list."
+air_insert_values,Импортировать AIR данные,Insert AIR values
 air_remove,Удалить AIR файл,Remove AIR file
+air_delete_warning_header,Внимание!,AIR file remove warning
+air_delete_warning_notice,"Вы собираетесь удалить файл AIR. Удостоверьтесь, что все данные из него были выгружены в конфигурацию ЛА. После удаления этого файла некоторые критические значения всё ещё могут отсутствовать, что приведёт к вылету игры. Для устранения этой проблемы проверьте содержимое файлов flight_model.cfg и engines.cfg, при необходимости активируйте нужные значения путём удаления "";-"" в начале имени переменной и корректировки его значения.","You are going to remove AIR file. Be sure you have imported it values properly. You may experience game crashed because not all engines and flight model data contained in AIR file, so you have to add missing data manually (search for lines started with "";-"", remove these symbols and adjust line value manually if necessary).\nIf you fail to make it work, rename file ""{0}"" into ""{1}"" and regenerate JSON file so game will read its data again."
 SYSTEMS TAB,,
 systems_convert_lights,Конвертировать источники света,Convert lights
-systems_convert_lights_notice,,"To make lights work in MSFS, legacy lights values should be converted in new format. Light type and coordinates will be preserved."
+systems_convert_lights_notice,"Для того, чтобы источники света работали после импорта ЛА, необходимо их конвертировать в новый формат. Тип света и координаты будут унаследованы.","To make lights work in MSFS, legacy lights values should be converted in new format. Light type and coordinates will be preserved."
 systems_insert_lights,Вставить рулёжные огни,Insert taxi lights
-systems_insert_lights_notice,,You can attach taxi lights to landing gears automatically.\nLights position will be inaccurate and may require manual adjustments.
+systems_insert_lights_notice,"Вы можете разместить рулёжные огни у точек шасси автоматически.\nЕсли их расположение окажется неточным относительно элементов модели, исправьте координаты вручную.",You can attach taxi lights to landing gears automatically.\nLights position will be inaccurate and may require manual adjustments.
 systems_no_light_issues,Проблем со светом не найдено,No lights issues
 FLIGHT MODEL TAB,,
 fm_contact_point_data,{0}фт между точками шасси,{0}ft between landing gear points
@@ -116,20 +121,20 @@ fm_fix_contact_points_notice,"Несколько точек соприкосно
 fm_contact_points_issues,Проблем с шасси не найдено,No contact points issues
 fm_contact_points_issues_notice,"Точки шасси, которые возможно имеют неверный формат, нажмите кнопку Править и исправьте форматирование вручную","Contact points that possibly formatted incorrectly, press Edit button and fix values manually."
 fm_fix_flight_model,Исправить проблемы с лётной моделью,Fix flight model issues
-fm_fix_flight_model_notice,,"Missing sensitive values may cause unpredictable result in the air. However, these values automatic calculation is inaccurate and may require manual adjustments."
+fm_fix_flight_model_notice,"Некоторые отсутствующие значения могут привести к непредсказуемым последствиям. При автоматической вставке они будут рассчитаны из имеющихся значений и, скорее всего, потребуют корректировки.","Missing sensitive values may cause unpredictable result in the air. However, these values automatic calculation is inaccurate and may require manual adjustments."
 fm_no_flight_model_issues,Проблем с лётной моделью не найдено,No flight model issues
-fm_value_generated_notice,,"{0} value was calculated as {1} from wing_span, you'll need to adjust it manually.\nIf after {2} insertion center of gravity will be broken, adjust first (longitudinal) value of empty_weight_cg_position (increase to move CG forward, decrease - backward)"
-fm_value_generated_notice2,,"{0} value was calculated as {1} from wing_span and max_gross_weight, you'll need to adjust it manually"
+fm_value_generated_notice,"Значение {0} было автоматически рассчитано как {1} из wing_span, его нужно подкорректировать вручную.\nЕсли после вставки {2} центр тяжести ЛА будет нарушен, отрегулируйте первую цифру значения empty_weight_cg_position (увеличить для того, чтобы сдвинуть центр тяжести вперёд, уменьшить - назад)","{0} value was calculated as {1} from wing_span, you'll need to adjust it manually.\nIf after {2} insertion center of gravity will be broken, adjust first (longitudinal) value of empty_weight_cg_position (increase to move CG forward, decrease - backward)"
+fm_value_generated_notice2,"Значение {0} было автоматически рассчитано как {1} из wing_span и max_gross_weight, его нужно отрегулировать вручную.","{0} value was calculated as {1} from wing_span and max_gross_weight, you'll need to adjust it manually"
 fm_bad_contact_point,Ошибка форматирования: {0},Bad contact point coordinate: '{0}'
 CFG SECTIONS,,
 cfg_insert_sections,Вставить выбранные CFG секции,Insert selected CFG sections
 cfg_insert_cockpit_sections_notice,"Секции, выделенные красным, отвечают за приборы внешнего вида. Выберете ДА во всплывающем окне для того, чтобы вставить приборы. Некоторые значения (например минимальная/взлётная скорость) необходимо будет исправить вручную.","Sections, highlighted in red, responsible for external view instruments. Choose ""YES"" on the pop up to insert external instruments, you may need to adjust new values manually."
-cfg_insert_flt_sections_notice,,"This section responsible for avionics state on the runway. If you have problem with landing gears, engines, parking brake right after you start the game on the ground - choose only critical or all available options. However, these fixes does not affect avionics state when you starting flight in the air."
-cfg_insert_sections_notice,,"All variables will have default values, it may affect aircraft behaviour in the game\nPress YES to insert and activate default values\nPress NO to insert and deactivate default values\nPress CANCEL to abort insertion"
-cfg_insert_sections_header,,{0} sections will be inserted into {1}
-cfg_insert_section_header,,{0} section will be inserted into {1}
+cfg_insert_flt_sections_notice,"Эти секции ответственны за состояние авионики самолёта на взлётной полосе. Если у Вас проблемы с невыпущенными шасси, заглохшим двигателем, стояночным тормозом сразу после начала на земле - отметьте только критические или все опции.","This section responsible for avionics state on the runway. If you have problem with landing gears, engines, parking brake right after you start the game on the ground - choose only critical or all available options. However, these fixes does not affect avionics state when you starting flight in the air."
+cfg_insert_sections_notice,"Все добавленные переменные будут иметь стандартные значение.\nВыберите ДА чтобы активировать стандартные значения, это может повлиять на поведение самолёта в игре\nВыберите НЕТ для того, чтобы отключить все вставленные значения.\nНажмите ОТМЕНА для прекращения импорта секций.","All variables will have default values\nPress YES to insert and activate default values, it may affect aircraft behaviour in the game\nPress NO to insert and deactivate default values\nPress CANCEL to abort insertion"
+cfg_insert_sections_header,{0} секций будет вставлено в {1},{0} sections will be inserted into {1}
+cfg_insert_section_header,{0} секция будет вставлена в {1},{0} section will be inserted into {1}
 TEXTURES TAB,,
-textures_convert_notice,,"In most cases BMP textures should be converted into DDS format, but not always. If some of the textures can't be converted by any of available tools, you need to make it manually."
+textures_convert_notice,"В большинстве случаев текстуры в формате BMP должны быть конвертированы в DDS, но не всегда. Если какие-то текстуры не могут быть конвертированы ни одной из доступных утилит, Вы должны сделать это вручную.","In most cases BMP textures should be converted into DDS format, but not always. If some of the textures can't be converted by any of available tools, you need to make it manually."
 textures_no_issues,Проблем с текстурами не найдено,No textures issues
 textures_imagetools,Конвертировать BMP в DDS с ImageTools,BMP to DDS by ImageTools
 textures_nvdxt,Конвертировать BMP в DDS с nvdxt,BMP to DDS by nvdxt
@@ -137,21 +142,21 @@ textures_conversion_process,{0} из {1} конвертировано,{0} of {1}
 MODEL TAB,,
 model_format_is_not_compatible,Модель {0} имеет несовместимый формат и может некорректно отображаться в игре,"{0} format is not compatible with MSFS, 3D model may not be loaded by the game"
 model_remove_clickable,Удалить кликабельные элементы,Remove interior clickable switches
-model_remove_clickable_notice,,"This is fix for the crash issue that no longer appear in latest version of the game. However, you can use it to remove clickable rectangles from the cockpit completely."
+model_remove_clickable_notice,Это исправление вылета игры в более старых версиях и более не требуется. Однако Вы можете использовать его если просто хотите удалить кликабельные элементы.,"This is fix for the crash issue that no longer appear in latest version of the game. However, you can use it to remove clickable rectangles from the cockpit completely."
 model_no_clickable_switches,Модель не содержит кликабельные элементы,No models with clickable switches
 model_no_interior_model,Модель кокпита не найдена,No interior models found
-model_remove_clickable_warning,,You will be no longer able to use clickable elements inside of the cockpit. You can restore original interior model by clicking Restore Backup button.
-model_remove_clickable_warning_header,,You are going to remove clickable switches
+model_remove_clickable_warning,Вам больше не будут доступны кликабельные элементы кокпита. После удаления вы можете вернуть их с помощью кнопки Восстановить в правом верхнем углу.,You will be no longer able to use clickable elements inside of the cockpit. You can restore original interior model by clicking Restore Backup button.
+model_remove_clickable_warning_header,Вы собираетесь удалить кликабельные элементы,You are going to remove clickable switches
 model_clickable_removal_failed,Ошибка удаления кликабельных элементов,Clickable switches removal from {0} failed
 SOUNDS TAB,,
-sounds_toggle_notice,,"You can toggle available sound samples and then press Update button below the list. Physically, files stay on the hard drive and can be enabled anytime later."
+sounds_toggle_notice,Вы можете отключить или включить имеющиеся звуки и нажать Обновить.,"You can toggle available sound samples and then press Update button below the list. Physically, files stay on the hard drive and can be enabled anytime later."
 sounds_update,Обновить статус звуковых сэмплов,Update sounds list
 sounds_not_found,Звуки не найдены,No sounds lists found
 sounds_tone_volume,Громкость тона вариометра ({0} - выключен; {1} - нормальная; {2} - громкая),Tone volume ({0} - silent; {1} - normal; {2} - loud)
 sounds_insert_tone,Включить модуляцию тона вариометра,Insert glider variometer tone
 sounds_remove_tone,Отключить модуляцию тона вариометра,Remove glider variometer tone
 sounds_warning,Внимание,Warning
-sounds_remove_notice,,"File ""\sound\sound.xml"" will be deleted. If it variometer tone only - you can insert it again after this file will be removed."
+sounds_remove_notice,"Файл ""\sound\sound.xml"" будет удалён. Если в нём только конфигурация тона вариометра - Вы сможете вставить его снова сразу после удаления.","File ""\sound\sound.xml"" will be deleted. If it variometer tone only - you can insert it again after this file will be removed."
 PANEL TAB,,
 panel_dll_detected,Папка ЛА содержит DLL/GAU файлы - авионика или анимация могу работать некорректно в игре,Aircraft folder contains DLL/GAU files - avionics and/or animation may not work in the game
 panel_extract_gauges,Распаковать ресурсы приборов,Extract panel gauges resources
@@ -160,14 +165,23 @@ panel_extract_fsx_resources,Распаковать ресурсы приборо
 panel_fsx_extracted,Ресурсы приборов FSX распакованы,Default FSX gauges resources extracted
 panel_import_gauges,Импортировать приборы,Import panel gauges
 panel_force_gauge_background,Добавить фон для всех приборов,Force gauge background image (check it if you get black holes on gauges places)
+panel_ignore_errors,"Не показывать ошибки конвертирования (в любом случае будут сохранены в файле "".Panel.log.txt"")","Hide conversion errors popups (they still will be logged in "".Panel.log.txt"" file)"
+panel_disable_logging,"Не создавать отчёт конвертации (файл "".Panel.log.txt"")","Disable logging ("".Panel.log.txt"" file will be not created/updated)"
 panel_gamma_correction,Коррекция гаммы ({0} - яркий; {1} - нормальный; {2} - тёмный),Gamma correction ({0} - bright; {1} - normal; {2} - dark)
+panel_preserve_size,Сохранить изначальный размер приборов (отключить если они меньше необходимого),Leave panel size as it set in XML files (uncheck if gauges appear smaller than should)
+panel_scale_up_gauge,Подогнать размер прибора под изображение ,Scale gauge up to fit image size (uncheck if gauges too large)
+panel_taxi_lights_switch,"Вставить код управления рулёжными огнями (отключает свет при поднятых шасси, включает - выпущенных)","Insert taxi lights automatic switch (turninig off when gears lever in upper position, on - lower)"
 panel_not_found,Ресурсов приборов не найдено,No panels gauges found
+panel_transparent_mask,"Применить прозрачность ко всем маскам без исключения (отключить если появились ""дыры"" в приборах)",Force mask background transparency (uncheck if gauges elements missing black backgrounds)
+panel_extract_ac_cabs_notice,"Перед тем, как приступить к конвертации приборов, необходимо распаковать ресурсы панелей. Содержимое CAB файлов внутри папки panel будет распаковано (обычно файлы формата XML и BMP) и использовано как источник данных при каждом запуске процесса конвертирования. Иногда установочный архив не содержит CAB файлы т.к. ресурсы панелей уже распакованы, в это случае никаких действий не требуется.\nЕсли Вы хотите отредактировать некоторые изображения или параметры приборов, применять изменения необходимо к файлам внутри этих папок, а не к конечному результату конвертирования.","Before gauges conversion can be applied, panel data extraction should be performed. Content of CAB files inside of aircraft panel folder(s) will be extracted and then used by the program as data source (usually XML and BMP files). Sometimes, panel folder does not contain any CAB files as gauges sources already extracted so you don't need to do anything.\nIf you want to edit some of the images or gauges parameters, you need apply changes to the content of extracted folders, not conversion results."
+panel_extract_fsx_cabs_notice,"Если на Вашем компьютере установлена игра Flight Simulator X, Вы можете применить распаковку ресурсов стандартных панелей, так что если какой-то ЛА использует дефолтные приборы, они будут загружены во время конвертирования. Все распакованные файлы будут сохранены в папке ""\Community\legacy-vcockpits-instruments\.FSX"".\nЕсли у Вас нет установленной FSX, оставьте эту опцию нетронутой. Вы можете попросить друзей поделиться этой папкой, т.к. сама игра для этих целей не требуется.","If you have Flight SImulator X installed, you can apply default panel sources extraction, so if any of add-on aircraft using default gauges, program will be able to load its data and use for conversion. All extracted files will be stored in the ""\Community\legacy-vcockpits-instruments\.FSX"" directory.\nIf you have no FSX installed just leave this option untouched, but some gauges may be not converted successfully. You may ask your friends to share this folder with you, you don't need whole game for this purpose."
+panel_convert_gauges_notice,"Скрипт конвертирования сначала обработает файл(ы) "".panel.cfg"", затем загрузит все необходимые XML файлы и конвертирует их в современный формат - HTML/JS/CSS. Рекомендуется активировать все доступные опции перед конвертированием, однако Вы можете отключить некоторые из них в случае появления каких-то мелких проблем.","Panels conversion script will parse "".panel.cfg"" file(s), then load all required XMLs and convert their data into modern format - HTML/JS/CSS. You can see some options under panels list that will affect conversion results.\nIt is recommended to check them all, however you can disable some of them to solve minor issues. If conversion failed and you can't see any/some gauges at all in the cockpit - these option will not help, it may happen because these gauges contained in DLL/GAU files and can't be extracted, or converted script(s) has an error inside that probably will be fixed in next program update."
 panel_extracting_cab,Распаковка {0},Extracting {0}
 panel_current_fsx_path,Текущий путь установленной FSX: {0},Current FSX path is {0}
-panel_fsx_extract_notice1,,Press YES to extract CAB files from this folder (DLL/GAU files not supported)
-panel_fsx_extract_notice2,,Press NO to select FSX installation folder
-panel_fsx_extract_notice3,,Press CANCEL to abort
-panel_fsx_header,,FSX CAB files extractions
+panel_fsx_extract_notice1,Нажмите ДА для распаковки CAB файлов из это директории (DLL/GAU файлы распакованы не будут),Press YES to extract CAB files from this folder (DLL/GAU files not supported and will be ignored)
+panel_fsx_extract_notice2,Нажмите НЕТ для выбора другой установочной папки FSX,Press NO to select FSX installation folder
+panel_fsx_extract_notice3,Нажмите ОТМЕНА для остановки операции,Press CANCEL to abort
+panel_fsx_header,Распаковка CAB файлов ,FSX CAB files extractions
 panel_gauges_not_found,Папки Gauges или SimObjects\Airplanes не найдены в {0},Gauges or SimObjects\Airplanes folder not found in {0}
 TextExpressionButton,Тестировать конвертер формул,Test FSX Expressions converter
 ABOUT TAB,,
@@ -176,6 +190,7 @@ about_links_header,Ссылки,Links and credits
 about_colored_green,активированные значения/секции или проблем не найдено,enabled value/section or no issues detected
 about_colored_orange,"деактивированные значения/секции, возможные проблемы","disabled value/section but probably not required, possible issues but need to be checked ingame"
 about_colored_red,"неверные значения или отсутствующие важные секции, найдены проблемы","wrong values or missing sections, some critical issues detected and should be fixed for normal gameflow"
+about_translation_header,Перевод,UI Translation
 UPDATE FUNCTIONS,,
 update_auto,Обновить автоматически,Update automatically
 update_manually,Обновить вручную,Update manually
@@ -184,3 +199,4 @@ update_applying_version,Устанавливается обновление ве
 update_cant_delete_backup,Ошибка удаления резервной копии,Can't delete backup file
 update_cant_delete_exe,Ошибка удаления EXE файла,Can't delete old EXE file
 update_failed,Ошибка обновления,Update failed
+update_available,Доступно обновление версии {0},Update ver{0} available

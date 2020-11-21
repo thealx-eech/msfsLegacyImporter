@@ -1,0 +1,202 @@
+slug,translation,original
+COMMON,,
+file_edited_outside,Le fichier {0} a été modifié en dehors du programme \ Les données de l'avion doivent être rechargées,File {0} was edited outside of the program\nAircraft data should be reloaded
+file_edited,modification du fichier CFG detecté,CFG file change detected
+restore_backup,Restaurer la sauvegarde,Restore Backup
+make_backup,Faire une sauvegarde,Make Backup
+AircraftBackupButton,Faire une sauvegarde,Make Backup
+EnginesBackupButton,Faire une sauvegarde,Make Backup
+FlightModelBackupButton,Faire une sauvegarde,Make Backup
+CockpitBackupButton,Faire une sauvegarde,Make Backup
+SystemsBackupButton,Faire une sauvegarde,Make Backup
+RunwayBackupButton,Faire une sauvegarde,Make Backup
+ModelBackupButton,Faire une sauvegarde,Make Backup
+PanelBackupButton,Faire une sauvegarde,Make Backup
+AircraftEditButton,Édite/Modifié,Edit
+EnginesEditButton,Édite/Modifié,Edit
+FlightModelEditButton,Édite/Modifié,Edit
+CockpitEditButton,Édite/Modifié,Edit
+SystemsEditButton,Édite/Modifié,Edit
+RunwayEditButton,Édite/Modifié,Edit
+backup_creation_failed,La création de la sauvegarde a échoué,Backup creation is failed
+directory_not_found,Répertoire non trouvé,Directory not found {0}
+restore_backup_notice,Toutes les modifications apportées à {0} depuis la sauvegarde seront effacées,All changes in {0} made since backup will be erased
+restore_backup_header,Vous allez restaurer le fichier {0},You are going to restore {0}
+destination_path,Destination: {0},Destination: {0}
+source_path,Source: {0},Source: {0}
+aircraft_not_found_in,Repertoire {0} ne contient pas aircraft.cfg,Folder {0} does not contain aircraft.cfg
+toggle_all,Tous Activez,Toggle all
+cvt_remove_failed,Le Répertoire CVT n'a pas pu être effacé ,CVT folder removal was failed
+btnOpenFile,Parcourir,Browse
+load_imported_header,Charger un avion FSX (Legacy) ou MSFS (natif) importé,Load imported FSX (Legacy) or MSFS (Native) aircraft
+load_imported_notice,Définir la trajectoire de l'avion FSX importé ou de l'avion MSFS natif,Set path of imported FSX aircraft or native MSFS aircraft
+MainMenuButton,Menu Principal,Main Menu
+imageLeftTooltip,"Cliquez Ici pour démarrer une nouvelle importation, vous aurez besoin des fichiers d'avions FSX décompressés \n ou sur votre disque ou Flight Simulator X est installé","Click it to start new import, you will need unpacked FSX aircraft files\non your disk or installed Flight Simulator X"
+imageRightTooltip,"Cliquez dessus Ici pour charger les avions importés FSX (Legacy) ou MSFS (Natif), \n en général, ils sont stockés dans le dossier Communauté","Click it to load imported FSX (Legacy) or MSFS (Native) aircraft,\nusually they are stored in Community folder"
+IMPORT,,
+import_folders_not_selected,Vous devez sélectionner les dossiers source (FSX) et destination (MSFS),You have to select both source (FSX) ans destination (MSFS) folders
+import_fields_are_empty,Vous devez remplir tous les champs,You have to fill in all fields
+import_already_exists,L'avion existe déjà dans le dossier {0},Aircraft already exists in folder {0}
+import_same_directory,Vous ne pouvez pas définir le même dossier pour la source et la destination,You can't set same folder for source and destination
+btnSourceFolder,Repertoire Avions FSX,FSX aircraft directory
+btnTargetFolder,Repertoire Avions MSFS,MSFS Community directory
+btnImportSubmit,Importer,Import
+new_import_header,Importer un nouvelle avion FSX,Import new FSX aircraft
+new_import_notice,"Définissez d'abord le chemin du répertoire de l'avion FSX (pas la racine du jeux FSX ), puis définissez le chemin du dossier de la communauté MSFS","Set path of FSX aircraft directory first (not the root of installed FSX), then set MSFS Community folder path"
+JSON,,
+json_no_files_added,Aucun fichiers JSON ajoutés ,No files added in JSON
+btnScan,Analyser à nouveau les fichiers Avion,Rescan aircraft files
+json_files_added,{0} fichiers ajoutés au JSON,{0} files added in JSON
+update_layout_header,Mettre à jour le fichier LAYOUT.JSON de l'avion actuel,Update LAYOUT.JSON file of current aircraft
+INIT TAB,,
+init_curr_aircraft,Avion Actuel,Current aircraft
+init_tabs_click,Cliquez sur les onglets pour découvrir les correctifs disponibles,Click on tabs to discover available fixes
+init_cfg_tpl_missing,Modèles CFG manquants,CFG templates missing
+init_simobject_missing,Le dossier sélectionné {0} doit contenir le dossier SimObjects et les fichiers layout.json + manifest.json,"Selected folder {0} should contain SimObjects folder, and layout.json + manifest.json files"
+init_cfg_ignored,ignoré,ignored
+init_cfg_missing,Manquant,missing
+init_cfg_loaded,chargé,loaded
+init_basic_mode,Mode d'importation Basique,Basic import mode
+init_mode_active,Actif,is active
+init_basic_notice1,"En mode d'importation de base, vous aurez la plupart des fonctionnalités disponibles, même si elles seront appliquées au fichier de configuration unique - ""Aircraft.cfg"".","In Basic import mode you will have most features available, even if they will be applied to the single config file – ""aircraft.cfg""."
+init_basic_notice2,"De cette façon, MSFS traitera les avions comme Legacy, donc le modèle de vol et les configurations de moteur seront chargés en mode de compatibilité. C'est le moyen le plus simple d'éviter les problèmes de moteurs, d'avionique et d'aérodynamique.","This way MSFS will treat aircraft as Legacy, so flight model and engine configs will be loaded in compatibility mode. It is the easiest way to avoid engines, avionics and aerodynamics issues."
+init_basic_notice3,"Cependant, le code de compatibilité MSFS lui-même présente des problèmes qui ne peuvent pas être résolus en modifiant les valeurs de configuration. De plus, les valeurs modernes (telles que les jauges de vue externes) ne sont pas prises en charge et ne peuvent pas être utilisées.","However, MSFS compatibility code itself has issues that can't be fixed by changing config values. Also modern values (such as external view gauges) are not supported and can't be used."
+init_basic_notice4,"* Même si les avions importés dans ce mode peuvent n'avoir que des problèmes mineurs, ne publiez pas ces avions semi-finis svp","*Even if aircraft, imported in this mode, may have only minor issues, do not publish such half-finished planes as release."
+init_basic_notice5,"Si vous souhaitez toujours partager votre succès, créez un Tutoriel  vidéo ou textuel qui pourra être utilisé par d'autres passionnés à des fins éducatives",If you still wish to share your success - make a video or text tutorial which can be used by other enthusiasts for educational purposes.
+init_full_mode,Mode d'importation complet,Full import mode
+init_full_notice1,"Le mode d'importation complet nécessite que le fichier ""Aircraft.cfg"" soit divisé en plusieurs Parties, donc MSFS traitera cet avion comme Natif.","Full import mode requires ""aircraft.cfg"" file to be split on parts, so MSFS will treat this aircraft as Native."
+init_full_notice2,"Dans ce cas, des exigences plus compliquées seront appliquées aux valeurs existantes et vous rencontrerez divers problèmes qui peuvent être résolus en appliquant les correctifs disponibles ou en modifiant les données de configuration. Il est fortement recommandé d'effectuer l'importation de données AIR, de supprimer le fichier air et d'ajouter manuellement toutes les variables manquantes pour finaliser le processus d'importation.","In this case more complicated requirements will be applied to existing values and you will experience various issues that can be fixed by applying available fixes or editing config data. It is strongly recommended to perform AIR data import, remove air file, and add all missing variables manually to finalize import process."
+init_full_notice3,"* Si vous êtes le propriétaire de l'avion, ou obtenez l'autorisation de publier le résultat de l'importation, gratuitement ou moyennant paiement, vous devez créditer cet outil dans la description de la version.","*If you are the owner of the aircraft, or get permission to publish the import result, for free or for payment, you have to credit this tool in the release description."
+init_full_notice4,N'hésitez pas à me contacter pour tout problèmes que vous rencontrerez avec votre projet (contacts dans l'onglet À propos).,Feel free to contact me about any issues you will have with your project (contacts in About tab).
+init_full_enable,Activer Mode Converstion Total,Enable Full import mode
+init_parse_cfg,Analyser AIRCRAFT.CFG,Parse AIRCRAFT.CFG
+AIRCRAFT TAB,,
+aircraft_parameter_invalid,paramètre de l'avion invalide,aircraft parameter invalid
+aircraft_parameter_missing,paramètre de l'avion manquant,aircraft parameter missing
+aircraft_add_missing_parameters,Essayez d'ajouter des paramètres de l'avion manquants,Try to add missing aircraft parameters
+aircraft_missing_parameter_notice,"la description de l'avion. Valeur de type d'avion non valide surlignée en rouge, elle doit être corrigée sinon l'avion n'apparaîtra pas dans la liste du menu principal.","Missing performance values will be searched in aircraft description. Invalid aircraft type value highlighted in red color, it should be fixed otherwise aircraft will not appear in main menu list."
+aircraft_cfg_not_found,Aircraft.cfg introuvable dans le répertoire de l'appareil ,aircraft.cfg not found in aircraft directory
+aircraft_cfg_split_failed,Échec de l'opération division CFG,CFG split failed
+aircraft_split_notice,"Le fichier Aircraft.cfg sera divisé en parties, donc MSFS traitera cet avion comme Natif. Cette opération ne peut pas être annulée, le fichier de configuration actuel sera enregistré sous "".aircraft.cfg""","aircraft.cfg file will be split on parts, so MSFS will treat this aircraft as Native. This operation can't be undone, current config file will be saved as "".aircraft.cfg"""
+aircraft_split_header,Avertissement de conversion AIRCRAFT.CFG,AIRCRAFT.CFG conversion warning
+ENGINES TAB,,
+engines_fix_issues,Résoudre les problèmes de moteurs,Fix engines issues
+engines_issues_notice,"La valeur du moteur invalide doit être corrigée, sinon les avions seront ignorés par le code du modèle de vol et resteront gelés même dans les airs.","Invalid engine value should be fixed, otherwise aircraft will be ignored by flight model code and stay frozen even in the air."
+engines_no_issues,Aucun problème moteur,No engines issues
+engines_power,Ajuster la puissance des moteurs,Adjust engines power
+AIR FUNCTIONS,,
+air_tbl_not_found,Aucune table de conversion AIR trouvée,No AIR conversion tables found
+air_tbl_not_found_notice,"Le fichier {0} n'existe pas.\nExtraire le dossier ""airTbls"" de l'archive du programme dans le même répertoire, où EXE est stocké.","File {0} does not exists.\nExtract folder ""airTbls"" from program archive into same directory, where EXE is stored."
+airupdate_not_found,AirUpdate.exe introuvable,AirUpdate.exe not found
+airupdate_not_found_notice,AirUpdate introuvable dans le dossier Importer.\nCliquez sur ce bouton pour télécharger et décompresser l'archive à partir de www.mudpond.org,AirUpdate not found in Importer folder.\nClick this button to download and unpack archive from www.mudpond.org
+air_dump_not_found,Aucune donnée AIR exportée trouvée,No exported AIR data found
+air_dump_notice,Le fichier {0} n'existe pas.\nCliquez sur ce bouton pour lancer AirUpdate et procédez comme suit:,File {0} does not exists.\nClick this button to launch AirUpdate and follow these steps:
+air_dump_notice1,"1. ""Sélectionner le fichier Air""","1. ""Select Air File"""
+air_dump_notice2,"2. Accédez à ""{0}""","2. Navigate to ""{0}"""
+air_dump_notice3,Sélectionnez le fichier AIR,3. Select AIR file
+air_dump_notice4,"Cochez l'option ""Full dump""","4. Check ""Full dump"" option"
+air_dump_notice5,"Appuyez sur le bouton ""Dump""","5. Press ""Dump"" button"
+air_dump_notice6,Fermez AirUpdate,6. Close AirUpdate
+air_no_values_to_import,Aucune valeur AIR ne nécessite une importation,No AIR values require import
+air_no_values_to_import_notice,Valeurs AIR et CFG identiques. Vous pouvez essayer d'insérer la section [AERODYNAMICS] si elle manque sans activation des valeurs.,AIR and CFG values identical. You can try to insert [AERODYNAMICS] section if it missing without values activation.
+air_new_val,Nouvelle valeur,New val
+air_old_val,Actuelle valeur,Current val
+air_default_val,Valeur par Défaut ,Default val
+air_loading_failed,Échec du chargement des tables AIR,AIR tables loading failed
+air_import_notice,"Sélectionnez des valeurs AIR valides à insérer dans les fichiers CFG. Lorsque vous avez terminé, le fichier AIR peut être supprimé.\nMais si certaines valeurs CFG sont manquantes, le jeu risque de planter ou l'avion n'apparaîtra pas dans la liste.","Select valid AIR values to insert into CFG files. When you finish, AIR file can be removed.\nBut if some CFG values are missing - game may crash or aircraft will not appear in the list."
+air_insert_values,Insérer Valeur Air,Insert AIR values
+air_remove,Supprimer le fichier AIR,Remove AIR file
+air_delete_warning_header,,AIR file remove warning
+air_delete_warning_notice,,"You are going to remove AIR file. Be sure you have imported it values properly. You may experience game crashed because not all engines and flight model data contained in AIR file, so you have to add missing data manually (search for lines started with "";-"", remove these symbols and adjust line value manually if necessary).\nIf you fail to make it work, rename file ""{0}"" into ""{1}"" and regenerate JSON file so game will read its data again."
+SYSTEMS TAB,,
+systems_convert_lights,Convertir les lumières,Convert lights
+systems_convert_lights_notice,"Pour que les lumières fonctionnent dans MSFS, les valeurs des lumières Legacy doivent être converties dans un nouveau format. Le type de lumière et les coordonnées seront préservés.","To make lights work in MSFS, legacy lights values should be converted in new format. Light type and coordinates will be preserved."
+systems_insert_lights,Insérer les phares de roulage,Insert taxi lights
+systems_insert_lights_notice,Vous pouvez attacher automatiquement les phares de roulage aux trains d’atterrissage.\nLa position des phares sera inexacte et peut nécessiter des ajustements manuels.,You can attach taxi lights to landing gears automatically.\nLights position will be inaccurate and may require manual adjustments.
+systems_no_light_issues,Aucun problème d'éclairage,No lights issues
+FLIGHT MODEL TAB,,
+fm_contact_point_data,{0} ft entre les points du train d'atterrissage,{0}ft between landing gear points
+fm_fix_contact_points,Correction des doublons de points de contact,Fix contact points duplicates
+fm_fix_contact_points_notice,"Plusieurs points de contact, attachés à un seul train d'atterrissage rétractable, peuvent le rendre non fonctionnel. Le script déplacera les points voisins dans la même position. Si vous n'avez aucun problème avec les trains d'atterrissage dans le jeu, ne cochez pas ces cases.","Several contact points, attached to single retractable landing gear, can make it non functional. Script will move neighbor points in same position. If you have no problems with landing gears in the game - leave these checkboxes untouched."
+fm_contact_points_issues,Aucun problème de points de contact,No contact points issues
+fm_contact_points_issues_notice,"Les points de contact éventuellement mal formatés, appuyez sur le bouton Modifier et corrigez les valeurs manuellement.","Contact points that possibly formatted incorrectly, press Edit button and fix values manually."
+fm_fix_flight_model,Résoudre les problèmes de modèle de vol,Fix flight model issues
+fm_fix_flight_model_notice,"Des valeurs sensibles manquantes peuvent entraîner des résultats imprévisibles dans le fichier AIR. Cependant, le calcul automatique de ces valeurs est inexact et peut nécessiter des ajustements manuels.","Missing sensitive values may cause unpredictable result in the air. However, these values automatic calculation is inaccurate and may require manual adjustments."
+fm_no_flight_model_issues,Aucun problème de modèle de vol,No flight model issues
+fm_value_generated_notice,"La valeur de {0} a été calculée comme {1} à partir de wing_span, vous devrez l'ajuster manuellement.\nSi après {2} le centre de gravité d'insertion sera cassé, ajustez la première valeur (longitudinale) de empty_weight_cg_position (augmentez pour faire avancer le CG , diminuer - en arrière)","{0} value was calculated as {1} from wing_span, you'll need to adjust it manually.\nIf after {2} insertion center of gravity will be broken, adjust first (longitudinal) value of empty_weight_cg_position (increase to move CG forward, decrease - backward)"
+fm_value_generated_notice2,"La valeur de {0} a été calculée comme étant {1} à partir de wing_span et max_gross_weight, vous devrez l'ajuster manuellement","{0} value was calculated as {1} from wing_span and max_gross_weight, you'll need to adjust it manually"
+fm_bad_contact_point,"Coordonnées du point de contact incorrectes: ""{0}""",Bad contact point coordinate: '{0}'
+CFG SECTIONS,,
+cfg_insert_sections,Insérer les sections CFG sélectionnées,Insert selected CFG sections
+cfg_insert_cockpit_sections_notice,"Sections, surlignées en rouge, responsables des instruments de vue externe. Choisissez «OUI» dans la fenêtre contextuelle pour insérer des instruments externes, vous devrez peut-être ajuster les nouvelles valeurs manuellement.","Sections, highlighted in red, responsible for external view instruments. Choose ""YES"" on the pop up to insert external instruments, you may need to adjust new values manually."
+cfg_insert_flt_sections_notice,"Cette section responsable de l'état de l'avionique sur la piste. Si vous avez des problèmes avec les trains d'atterrissage, les moteurs, le frein de stationnement juste après avoir démarré le jeu au sol, choisissez uniquement les options critiques ou toutes les options disponibles. Cependant, ces corrections n'affectent pas l'état de l'avionique lorsque vous commencez le vol dans les airs.","This section responsible for avionics state on the runway. If you have problem with landing gears, engines, parking brake right after you start the game on the ground - choose only critical or all available options. However, these fixes does not affect avionics state when you starting flight in the air."
+cfg_insert_sections_notice,"Toutes les variables auront des valeurs par défaut\nAppuyez sur OUI pour insérer et activer les valeurs par défaut, cela peut affecter le comportement de l'avion dans le jeu\nAppuyez sur NON pour insérer et désactiver les valeurs par défaut\nAppuyez sur CANCEL pour abandonner l'insertion","All variables will have default values\nPress YES to insert and activate default values, it may affect aircraft behaviour in the game\nPress NO to insert and deactivate default values\nPress CANCEL to abort insertion"
+cfg_insert_sections_header,{0} sections seront insérées dans {1},{0} sections will be inserted into {1}
+cfg_insert_section_header,La section {0} sera insérée dans {1},{0} section will be inserted into {1}
+TEXTURES TAB,,
+textures_convert_notice,"Dans la plupart des cas, les textures BMP doivent être converties au format DDS, mais pas toujours. Si certaines des textures ne peuvent pas être converties par l'un des outils disponibles, vous devez le faire manuellement.","In most cases BMP textures should be converted into DDS format, but not always. If some of the textures can't be converted by any of available tools, you need to make it manually."
+textures_no_issues,Aucun problème de textures,No textures issues
+textures_imagetools,BMP à DDS par ImageTools,BMP to DDS by ImageTools
+textures_nvdxt,BMP à DDS par nvdxt,BMP to DDS by nvdxt
+textures_conversion_process,{0} textures sur {1} converties,{0} of {1} textures converted
+MODEL TAB,,
+model_format_is_not_compatible,"Le format {0} n'est pas compatible avec MSFS, le modèle 3D peut ne pas être chargé par le jeu","{0} format is not compatible with MSFS, 3D model may not be loaded by the game"
+model_remove_clickable,Retirer les interrupteurs cliquables dans le cockpit,Remove interior clickable switches
+model_remove_clickable_notice,"Il s'agit d'un correctif pour le problème de plantage qui n'apparaît plus dans la dernière version du jeu. Cependant, vous pouvez l'utiliser pour supprimer complètement les rectangles cliquables du cockpit.","This is fix for the crash issue that no longer appear in latest version of the game. However, you can use it to remove clickable rectangles from the cockpit completely."
+model_no_clickable_switches,Aucun modèle avec interrupteurs cliquables,No models with clickable switches
+model_no_interior_model,Aucun modèle d'intérieur trouvé,No interior models found
+model_remove_clickable_warning,Vous ne pourrez plus utiliser d'éléments cliquables à l'intérieur du cockpit. Vous pouvez restaurer le modèle intérieur d'origine en cliquant sur le bouton Restaurer la sauvegarde.,You will be no longer able to use clickable elements inside of the cockpit. You can restore original interior model by clicking Restore Backup button.
+model_remove_clickable_warning_header,Vous allez supprimer les Boutons cliquables,You are going to remove clickable switches
+model_clickable_removal_failed,Échec de la suppression des boutons cliquables de {0},Clickable switches removal from {0} failed
+SOUNDS TAB,,
+sounds_toggle_notice,"Vous pouvez basculer entre les échantillons sonores disponibles, puis appuyer sur le bouton Mettre à jour sous la liste.Physiquement, les fichiers restent sur le disque dur et peuvent être activés à tout moment ultérieurement.","You can toggle available sound samples and then press Update button below the list. Physically, files stay on the hard drive and can be enabled anytime later."
+sounds_update,Mettre à jour la liste des sons,Update sounds list
+sounds_not_found,Aucune liste de sons trouvée,No sounds lists found
+sounds_tone_volume,Volume de la tonalité ({0} - silencieux; {1} - normal; {2} - fort),Tone volume ({0} - silent; {1} - normal; {2} - loud)
+sounds_insert_tone,Insérer la tonalité du variomètre du planeur,Insert glider variometer tone
+sounds_remove_tone,Supprimer la tonalité du variomètre du planeur,Remove glider variometer tone
+sounds_warning,Attention,Warning
+sounds_remove_notice,"Le fichier ""\ sound \ sound.xml"" sera supprimé. S'il s'agit uniquement de la tonalité du variomètre - vous pouvez l'insérer à nouveau une fois que ce fichier sera supprimé.","File ""\sound\sound.xml"" will be deleted. If it variometer tone only - you can insert it again after this file will be removed."
+PANEL TAB,,
+panel_dll_detected,Le dossier avion contient des fichiers DLL / GAU - l'avionique et / ou l'animation peuvent ne pas fonctionner dans le jeu,Aircraft folder contains DLL/GAU files - avionics and/or animation may not work in the game
+panel_extract_gauges,Extraire les ressources pour les jauges ( panneau),Extract panel gauges resources
+panel_no_panel,Aucune ressource de panneau trouvée,No panel resources found
+panel_extract_fsx_resources,Extraire les ressources de jauges FSX par défaut,Extract default FSX gauges resources
+panel_fsx_extracted,Ressources de jauges FSX par défaut extraites,Default FSX gauges resources extracted
+panel_import_gauges,Importer les jauges de panneau,Import panel gauges
+panel_force_gauge_background,Forcer l'Image d'arrière-plan de la jauge  (vérifiez-la si vous obtenez des trous noirs sur les emplacements des jauges),Force gauge background image (check it if you get black holes on gauges places)
+panel_ignore_errors,Masquer les erreurs de conversion,"Hide conversion errors popups (they still will be logged in "".Panel.log.txt"" file)"
+panel_disable_logging,"Désactiver la journalisation (fichier "".Panel.log.txt"")","Disable logging ("".Panel.log.txt"" file will be not created/updated)"
+panel_gamma_correction,Correction gamma ({0} - clair; {1} - normal; {2} - foncé),Gamma correction ({0} - bright; {1} - normal; {2} - dark)
+panel_preserve_size,,Leave panel size as it set in XML files (uncheck if gauges appear smaller than should)
+panel_scale_up_gauge,,Scale gauge up to fit image size (uncheck if gauges too large)
+panel_taxi_lights_switch,,"Insert taxi lights automatic switch (turninig off when gears lever in upper position, on - lower)"
+panel_not_found,Aucune panneau jauge trouvée,No panels gauges found
+panel_transparent_mask,,Force mask background transparency (uncheck if gauges elements missing black backgrounds)
+panel_extract_ac_cabs_notice,,"Before gauges conversion can be applied, panel data extraction should be performed. Content of CAB files inside of aircraft panel folder(s) will be extracted and then used by the program as data source (usually XML and BMP files). Sometimes, panel folder does not contain any CAB files as gauges sources already extracted so you don't need to do anything.\nIf you want to edit some of the images or gauges parameters, you need apply changes to the content of extracted folders, not conversion results."
+panel_extract_fsx_cabs_notice,,"If you have Flight SImulator X installed, you can apply default panel sources extraction, so if any of add-on aircraft using default gauges, program will be able to load its data and use for conversion. All extracted files will be stored in the ""\Community\legacy-vcockpits-instruments\.FSX"" directory.\nIf you have no FSX installed just leave this option untouched, but some gauges may be not converted successfully. You may ask your friends to share this folder with you, you don't need whole game for this purpose."
+panel_convert_gauges_notice,,"Panels conversion script will parse "".panel.cfg"" file(s), then load all required XMLs and convert their data into modern format - HTML/JS/CSS. You can see some options under panels list that will affect conversion results.\nIt is recommended to check them all, however you can disable some of them to solve minor issues. If conversion failed and you can't see any/some gauges at all in the cockpit - these option will not help, it may happen because these gauges contained in DLL/GAU files and can't be extracted, or converted script(s) has an error inside that probably will be fixed in next program update."
+panel_extracting_cab,Extraction {0},Extracting {0}
+panel_current_fsx_path,Le chemin FSX actuel est {0},Current FSX path is {0}
+panel_fsx_extract_notice1,Appuyez sur OUI pour extraire les fichiers CAB dans ce dossier (les fichiers DLL / GAU ne sont pas pris en charge et seront ignorés),Press YES to extract CAB files from this folder (DLL/GAU files not supported and will be ignored)
+panel_fsx_extract_notice2,Appuyez sur NON pour sélectionner le dossier d'installation FSX,Press NO to select FSX installation folder
+panel_fsx_extract_notice3,Appuyez sur CANCEL pour annuler,Press CANCEL to abort
+panel_fsx_header,Extractions de fichiers FSX CAB,FSX CAB files extractions
+panel_gauges_not_found,Dossier Jauges ou SimObjects \ Airplanes introuvable dans {0},Gauges or SimObjects\Airplanes folder not found in {0}
+TextExpressionButton,Tester le convertisseur d'expressions FSX,Test FSX Expressions converter
+ABOUT TAB,,
+about_colored_header,Guide Visuel,Colored labels
+about_links_header,Liens et crédits,Links and credits
+about_colored_green,valeur / section activée ou aucun problème détecté,enabled value/section or no issues detected
+about_colored_orange,"valeur / section désactivée mais probablement pas requise,problèmes possibles mais doivent être vérifiés dans le jeu","disabled value/section but probably not required, possible issues but need to be checked ingame"
+about_colored_red,"valeurs erronées ou sections manquantes, certains problèmes critiques détectés et devraient être corrigés pour un flux de jeu normal","wrong values or missing sections, some critical issues detected and should be fixed for normal gameflow"
+about_translation_header,,UI Translation
+UPDATE FUNCTIONS,,
+update_auto,Mettre à jour automatiquement,Update automatically
+update_manually,Mettre à jour manuellement,Update manually
+update_current_version,Vous utilisez la dernière version du programme ({0}),You are using latest program version ({0})
+update_applying_version,Application de la mise à jour ver {0},Applying update ver{0}
+update_cant_delete_backup,Impossible de supprimer le fichier de sauvegarde,Can't delete backup file
+update_cant_delete_exe,Impossible de supprimer l'ancien fichier EXE,Can't delete old EXE file
+update_failed,Mise à jour a échoué,Update failed
+update_available,Mise à jour ver {0} disponible,Update ver{0} available

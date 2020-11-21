@@ -75,7 +75,7 @@ namespace msfsLegacyImporter
 
             if (TargetFolder != "")
             {
-                Content[] array = new Content[10000];
+                Content[] array = new Content[10000000];
 
                 // ADD MANIFEST AT THE TOP
 
@@ -91,7 +91,8 @@ namespace msfsLegacyImporter
                         var txtFiles = Directory.EnumerateFiles(subdir, "*.*", SearchOption.TopDirectoryOnly);
                         foreach (string currentFile in txtFiles)
                         {
-                            if (Path.GetFileName(currentFile)[0] != '.' && Path.GetFileName(currentFile).ToLower() != "layout.json")
+                            if (Path.GetFileName(currentFile)[0] != '.' && Path.GetExtension(currentFile).ToLower() != "json" && Path.GetExtension(currentFile).ToLower() != "exe"
+                                && Path.GetExtension(currentFile).ToLower() != "zip" && Path.GetExtension(currentFile).ToLower() != "rar" && Path.GetExtension(currentFile).ToLower() != "7z")
                             {
                                 FileInfo info = new System.IO.FileInfo(currentFile);
                                 array[i] = new Content(currentFile.Replace(TargetFolder, "").Replace("\\", "/").Trim('/'), info.Length, info.LastWriteTimeUtc.ToFileTimeUtc());
@@ -142,7 +143,7 @@ namespace msfsLegacyImporter
     }
 
     public class Dependencies
-{
+    {
         public string name { get; set; }
         public string package_version { get; set; }
         public Dependencies(string Name, string Package_version)

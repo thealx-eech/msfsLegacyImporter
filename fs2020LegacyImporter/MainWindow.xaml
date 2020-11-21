@@ -352,74 +352,99 @@
                             <TextBlock Name="about_colored_orange" Width="600" Foreground="DarkOrange">about_colored_orange</TextBlock>
                             <TextBlock Name="about_colored_red" Width="600" Foreground="DarkRed">about_colored_red</TextBlock>
                         </StackPanel>
-                        <StackPanel Name="UsefulLinks" VerticalAlignment="Top" Margin="5" Width="auto" HorizontalAlignment="Center">
-                            <TextBlock Name="about_links_header" TextWrapping="Wrap" Text="about_links_header" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,0,0,10" Background="Transparent"/>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="readme.txt" RequestNavigate="Hyperlink_RequestNavigate">
-                                    Readme
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="https://docs.google.com/document/d/1TRCWeobJksmINLaV6u7aRGjeSFQSA2fUx-Mlua6z4IM/edit?usp=sharing" RequestNavigate="Hyperlink_RequestNavigate">
-                                    UI translation
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="http://www.andreadrian.de/FS_2020_sailplanes/msfsLegacyImporter_how-to.pdf" RequestNavigate="Hyperlink_RequestNavigate">
-                                    Step by step tutorial by Paul Falke
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="https://www.nexusmods.com/microsoftflightsimulator/mods/117" RequestNavigate="Hyperlink_RequestNavigate">
-                                    Thumb me up on Nexusmods!
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="http://eech.online/msfslegacyimporter/" RequestNavigate="Hyperlink_RequestNavigate">
-                                    Importer releases archive
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="https://forums.flightsimulator.com/" RequestNavigate="Hyperlink_RequestNavigate">
-                                    Flight Simulator official website
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="https://discord.gg/bdbcZnP" RequestNavigate="Hyperlink_RequestNavigate">
-                                    MFS SDK Discord channel
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="https://www.facebook.com/groups/1803376689823050" RequestNavigate="Hyperlink_RequestNavigate">
-                                    MS Flight Simulator Gliders FB group
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="http://www.mudpond.org/" RequestNavigate="Hyperlink_RequestNavigate">
-                                    AirUpdate air file editor by GWBeckwith
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="https://docs.google.com/spreadsheets/d/1ZcP3mFtIKMlOi479fb-lu-jN_ZAQhiI32yOJO-aL3SA/edit#gid=0" RequestNavigate="Hyperlink_RequestNavigate">
-                                    AIR to CFG Master Sheet by OzWookiee
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="https://www.scenerydesign.org/development-releases/" RequestNavigate="Hyperlink_RequestNavigate">
-                                    ModelConverterX
-                                </Hyperlink>
-                            </TextBlock>
-                            <TextBlock>
-                                <Hyperlink NavigateUri="https://developer.nvidia.com/legacy-texture-tools" RequestNavigate="Hyperlink_RequestNavigate">
-                                    nVidia Legacy Texture Tools
-                                </Hyperlink>
-                            </TextBlock>
+                        <Grid Name="aboutScreen" HorizontalAlignment="Stretch" Width="640">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
 
-                            <TextBlock TextWrapping="Wrap" Margin="0,20,0,0" TextAlignment="Center">To send direct message, visit Discord channel</TextBlock>
-                            <TextBlock TextWrapping="Wrap" Margin="0,0,0,20" TextAlignment="Center">or email to info@eech.online</TextBlock>
-                        </StackPanel>
+                            <StackPanel Name="UsefulLinks" Grid.Column="0" Grid.Row="0" VerticalAlignment="Top" Margin="5" Width="auto" HorizontalAlignment="Center">
+                                <TextBlock Name="about_links_header" TextWrapping="Wrap" Text="about_links_header" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,0,0,10" Background="Transparent"/>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="readme.txt" RequestNavigate="Hyperlink_RequestNavigate">
+                                        Readme
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="http://www.andreadrian.de/FS_2020_sailplanes/msfsLegacyImporter_how-to.pdf" RequestNavigate="Hyperlink_RequestNavigate">
+                                        Step by step tutorial by Paul Falke
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="https://www.nexusmods.com/microsoftflightsimulator/mods/117" RequestNavigate="Hyperlink_RequestNavigate">
+                                        Thumb me up on Nexusmods!
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="http://eech.online/msfslegacyimporter/" RequestNavigate="Hyperlink_RequestNavigate">
+                                        Importer releases archive
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="https://forums.flightsimulator.com/" RequestNavigate="Hyperlink_RequestNavigate">
+                                        Flight Simulator official website
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="https://discord.gg/bdbcZnP" RequestNavigate="Hyperlink_RequestNavigate">
+                                        MFS SDK Discord channel
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="https://www.facebook.com/groups/1803376689823050" RequestNavigate="Hyperlink_RequestNavigate">
+                                        MS Flight Simulator Gliders FB group
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="http://www.mudpond.org/" RequestNavigate="Hyperlink_RequestNavigate">
+                                        AirUpdate air file editor by GWBeckwith
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="https://docs.google.com/spreadsheets/d/1ZcP3mFtIKMlOi479fb-lu-jN_ZAQhiI32yOJO-aL3SA/edit#gid=0" RequestNavigate="Hyperlink_RequestNavigate">
+                                        AIR to CFG Master Sheet by OzWookiee
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="https://www.scenerydesign.org/development-releases/" RequestNavigate="Hyperlink_RequestNavigate">
+                                        ModelConverterX
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Hyperlink NavigateUri="https://developer.nvidia.com/legacy-texture-tools" RequestNavigate="Hyperlink_RequestNavigate">
+                                        nVidia Legacy Texture Tools
+                                    </Hyperlink>
+                                </TextBlock>
+
+                                <TextBlock TextWrapping="Wrap" Margin="0,20,0,0" TextAlignment="Center">To send direct message, visit Discord channel</TextBlock>
+                                <TextBlock TextWrapping="Wrap" Margin="0,0,0,20" TextAlignment="Center">or email to info@eech.online</TextBlock>
+                            </StackPanel>
+                            <StackPanel Name="Translation" Grid.Column="1" Grid.Row="0" VerticalAlignment="Top" Margin="5" Width="auto" HorizontalAlignment="Center">
+                                <TextBlock Name="about_translation_header" TextWrapping="Wrap" Text="about_translation_header" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,0,0,10" Background="Transparent"/>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <Hyperlink NavigateUri="https://docs.google.com/document/d/1TRCWeobJksmINLaV6u7aRGjeSFQSA2fUx-Mlua6z4IM/edit?usp=sharing" RequestNavigate="Hyperlink_RequestNavigate">
+                                        How to
+                                    </Hyperlink>
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" Text="French" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,10,0,0" Background="Transparent"/>
+                                <TextBlock HorizontalAlignment="Center">
+                                    jackburton
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" Text="Russian" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,10,0,0" Background="Transparent"/>
+                                <TextBlock HorizontalAlignment="Center">
+                                    <Hyperlink NavigateUri="https://www.youtube.com/channel/UC8c1HuCGLL8xsx00830mOvA" RequestNavigate="Hyperlink_RequestNavigate">
+                                        thealx
+                                    </Hyperlink>
+                                </TextBlock>
+
+                            </StackPanel>
+                        </Grid>
+
                         <Separator Height="1" Margin="0 0 0 10" Width="auto"/>
                         <StackPanel DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom" >
                             <TextBlock TextWrapping="Wrap" Text="Alex Marko @ 2020" DockPanel.Dock="Bottom"  HorizontalAlignment="Center" VerticalAlignment="Bottom"  Background="#03FFFFFF"/>
