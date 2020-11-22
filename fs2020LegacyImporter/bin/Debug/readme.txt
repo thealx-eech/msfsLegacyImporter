@@ -74,10 +74,6 @@ https://www.youtube.com/watch?v=L77aG5UABS4
 
 https://www.youtube.com/watch?v=g00a3mDRZIA
 
-[NOTICE]
-
-Since MSFS release, bug with legacy aircrafts exists - if you met some other player with same aircraft and exactly the same AC folder name (inside of SimObjects), game will crash for any of you. So it is not recommended to play imported airplanes online.
-
 [CFG_PARSER]
 
 Application loading all required CFG and FLT filed into the memory once aircraft loaded or imported, and updating local files values after each user action. 

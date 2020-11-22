@@ -241,7 +241,8 @@ namespace msfsLegacyImporter
                 {
                     Console.WriteLine("Language changed to " + language);
                     userLanguage = langugeFile;
-                    try { File.WriteAllText(userLanguagefile, language); } catch { }
+                    try { File.WriteAllText(userLanguagefile, language); }
+                    catch (Exception ex) { MessageBox.Show("Can't save userLanguage file" + Environment.NewLine + "Error: " + ex.Message); }
                     break;
                 }
             }

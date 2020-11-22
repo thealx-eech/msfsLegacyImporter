@@ -186,7 +186,8 @@ namespace msfsLegacyImporter
                             {
                                 Bitmap bmp = new Bitmap(Path.GetDirectoryName(mainFile) + "\\" + file);
                                 bmp = setBitmapGamma(bmp, atts[0], false);
-                                bmp.Save(InstrumentFolder + Path.GetFileNameWithoutExtension(file) + ".png", ImageFormat.Png);
+                                try { bmp.Save(InstrumentFolder + Path.GetFileNameWithoutExtension(file) + ".png", ImageFormat.Png); }
+                                catch (Exception e) { MessageBox.Show("Can't save image " + Path.GetFileNameWithoutExtension(file) + ".png" + Environment.NewLine + "Error: " + e.Message); }
                             }
                             else
                             {
@@ -297,7 +298,8 @@ namespace msfsLegacyImporter
                                                 if (imgSize[0] == "0" && imgSize[1] == "0")
                                                     imgSize = new string[] { bmp.Width.ToString(), bmp.Height.ToString() };
 
-                                                bmp.Save(InstrumentFolder + MainImageFilename + ".png", ImageFormat.Png);
+                                                try { bmp.Save(InstrumentFolder + MainImageFilename + ".png", ImageFormat.Png); }
+                                                catch (Exception e) { MessageBox.Show("Can't save image " + MainImageFilename + ".png" + Environment.NewLine + "Error: " + e.Message); }
 
                                                 css += "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + acSlug + "/" + MainImageFilename + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" + Environment.NewLine; ;
                                             }
@@ -404,9 +406,13 @@ namespace msfsLegacyImporter
                             */
 
                             // SAVE FILES
-                            File.WriteAllText(InstrumentFolder + materialName + ".html", html);
-                            File.WriteAllText(InstrumentFolder + materialName + ".css", css);
-                            File.WriteAllText(InstrumentFolder + materialName + ".js", js);
+                            try
+                            {
+                                File.WriteAllText(InstrumentFolder + materialName + ".html", html);
+                                File.WriteAllText(InstrumentFolder + materialName + ".css", css);
+                                File.WriteAllText(InstrumentFolder + materialName + ".js", js);
+                            }
+                            catch (Exception e) { MessageBox.Show("Can't save HTML files" + Environment.NewLine + "Error: " + e.Message); }
 
                             JSONHelper.scanTargetFolder(baseFolder);
 
@@ -494,7 +500,8 @@ namespace msfsLegacyImporter
                     if (MaskImage.Attribute("ImageSizes") != null)
                         maskSize = getXYvalue(MaskImage, false);
 
-                    bmp.Save(targetFile1, ImageFormat.Png);
+                    try { bmp.Save(targetFile1, ImageFormat.Png); }
+                    catch (Exception e) { MessageBox.Show("Can't save image " + maskSlug + ".png" + Environment.NewLine + "Error: " + e.Message); }
 
                     html += "			<div id=\"" + sanitizedSlug + "_mask\">" + Environment.NewLine;
                     css += materialName + "-element #Mainframe #" + sanitizedSlug + "_mask {" + Environment.NewLine + "		background: transparent;" + Environment.NewLine + "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + acSlug + "/" + maskSlug + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine;
@@ -567,7 +574,8 @@ namespace msfsLegacyImporter
                             if (imgSize == null)
                                 imgSize = new string[] { bmp.Width.ToString(), bmp.Height.ToString() };
 
-                            bmp.Save(targetFile, ImageFormat.Png);
+                            try { bmp.Save(targetFile, ImageFormat.Png); }
+                            catch (Exception e) { MessageBox.Show("Can't save image " + slug + ".png" + Environment.NewLine + "Error: " + e.Message); }
                         }
                         else
                         {
@@ -1101,11 +1109,8 @@ namespace msfsLegacyImporter
 
             if (!String.IsNullOrEmpty(logfile) && !String.IsNullOrEmpty(logcontent))
             {
-                try
-                {
-                    File.WriteAllText(logfile, logcontent);
-                }
-                catch { }
+                try { File.WriteAllText(logfile, logcontent); }
+                catch (Exception e) { MessageBox.Show("Can't save logfile" + Environment.NewLine + "Error: " + e.Message); }
             }
             else
             {

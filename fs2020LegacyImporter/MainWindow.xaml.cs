@@ -2199,7 +2199,8 @@ namespace msfsLegacyImporter
                             deleteCVCfolder();
 
                             Console.WriteLine("MDLD pos" + MDLDpos + " lng" + MDLDsizeInt + "; MREC pos" + MRECpos + " lng" + MRECsizeInt);
-                            File.WriteAllBytes(mainFile, buf);
+                            try { File.WriteAllBytes(mainFile, buf); }
+                            catch (Exception ex) { MessageBox.Show("Can't save MDL file" + Environment.NewLine + "Error: " + ex.Message); }
                         }
                         else
                         {
@@ -2362,8 +2363,10 @@ namespace msfsLegacyImporter
                     if (varioVolimeSlider != null)
                         varioVolime = (float)((Slider)varioVolimeSlider).Value;
 
-                    File.WriteAllText(aircraftDirectory + "\\sound\\sound.xml", File.ReadAllText(aircraftDirectory + "\\sound\\sound.xml").Replace("[VOLUME]", varioVolime.ToString()));
-                } catch { }
+                    try { File.WriteAllText(aircraftDirectory + "\\sound\\sound.xml", File.ReadAllText(aircraftDirectory + "\\sound\\sound.xml").Replace("[VOLUME]", varioVolime.ToString())); }
+                    catch (Exception ex) { MessageBox.Show("Can't save sound.xml file" + Environment.NewLine + "Error: " + ex.Message); }
+                }
+                catch { }
 
                 JSONHelper.scanTargetFolder(projectDirectory);
                 SummaryUpdate();
