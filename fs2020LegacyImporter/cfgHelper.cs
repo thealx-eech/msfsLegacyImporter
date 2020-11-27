@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace msfsLegacyImporter
 {
-    class cfgHelper
+    public class cfgHelper
     {
         // cfg file
         // ---- filename
@@ -298,7 +298,7 @@ namespace msfsLegacyImporter
                 try { File.Delete(path); }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.ToString());
+                    Console.WriteLine(ex.Message);
                     MessageBox.Show("Can't update file " + path);
                     return;
                 }

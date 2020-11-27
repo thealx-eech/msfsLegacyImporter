@@ -29,13 +29,26 @@ namespace msfsLegacyImporter
         {
             "pfd_attitude_inner_att_mask",
             "pfd_attitude_sky_ground_strip_mask",
-            "compass_strip_mask"
+            "compass_strip_mask",
+            "HUD_pfd_attitude_sky_ground_strip_pfd_attitude_sky_ground_strip_mask"
         };
 
         string[][] positionExceptions = new string[][]
         {
             new string[] { "HUD_pfd_attitude_ladder", "-25", "-198" },
-            new string[] { "HUD_Heading_pointer", "95", "12" }
+            new string[] { "HUD_Heading_pointer", "95", "12" },
+            new string[] { "Attitude_Attitude_Map", "0", "-229" },
+            new string[] { "Stby_Attitude_Stby_Attitude_Map", "10", "-122" }
+        };
+
+        string[][] scaleExceptions = new string[][]
+        {
+            //new string[] { "RMI_RMI_BG", "0.464", "0.464" },
+        };
+
+        string[][] zIndexExceptions = new string[][]
+        {
+            new string[] { "Attitude_Attitude_Overlay", "2", "" },
         };
 
         private string gaugeGroup;
@@ -185,7 +198,7 @@ namespace msfsLegacyImporter
                             if (File.Exists(Path.GetDirectoryName(mainFile) + "\\" + file))
                             {
                                 Bitmap bmp = new Bitmap(Path.GetDirectoryName(mainFile) + "\\" + file);
-                                bmp = setBitmapGamma(bmp, atts[0], false);
+                                bmp = setBitmapGamma(bmp, atts[0], false, file);
                                 try { bmp.Save(InstrumentFolder + Path.GetFileNameWithoutExtension(file) + ".png", ImageFormat.Png); }
                                 catch (Exception e) { MessageBox.Show("Can't save image " + Path.GetFileNameWithoutExtension(file) + ".png" + Environment.NewLine + "Error: " + e.Message); }
                             }
@@ -293,7 +306,7 @@ namespace msfsLegacyImporter
                                                 bmp = setBitmapGamma(bmp, atts[0],
                                                     mainImage.Element("Transparent") != null && mainImage.Element("Transparent").Value == "True" ||
                                                         mainImage.Attribute("Alpha") != null && mainImage.Attribute("Alpha").Value == "Yes" ||
-                                                        imagesForceTransparancy.Contains(Path.GetFileNameWithoutExtension(sourceFile)));
+                                                        imagesForceTransparancy.Contains(Path.GetFileNameWithoutExtension(sourceFile)), sourceFile);
 
                                                 if (imgSize[0] == "0" && imgSize[1] == "0")
                                                     imgSize = new string[] { bmp.Width.ToString(), bmp.Height.ToString() };
@@ -337,7 +350,7 @@ namespace msfsLegacyImporter
                                 if (atts[3] < 1 && (size2[0] != 0 && size2[0].ToString() != gaugeWidth || size2[1] != 0 && size2[1].ToString() != gaugeHeight))
                                 {
                                     writeLog("Scaling up panel from " + gaugeWidth + " " + gaugeHeight + " to " + size2[0] + " " + size2[1]);
-                                    css += "		transform: scale(calc(" + scaleUp + " * " + size2[0].ToString() + " / " + gaugeWidth + "), calc(" + scaleUp + " * " + size2[1].ToString() + " / " + gaugeHeight + ")); transform-origin: 0 0; " + Environment.NewLine;
+                                    css += "		transform: scale(calc(" + scaleUp + " * " + size2[0].ToString() + " / " + gaugeWidth + "), calc(" + scaleUp + " * " + size2[1].ToString() + " / " + gaugeHeight + ")); transform-origin: 0 0;" + Environment.NewLine;
                                 }
 
                                 css += "}" + Environment.NewLine;
@@ -365,7 +378,7 @@ namespace msfsLegacyImporter
                             catch (Exception ex)
                             {
                                 errors += "Failed to process " + gaugeGroup + "\\" + gaugeName + ".xml" + Environment.NewLine + Environment.NewLine;
-                                writeLog(ex.ToString());
+                                writeLog(ex.Message);
                             }
 
                             try { if (panelDir == Path.GetDirectoryName(mainFile) + "\\" + gaugeGroup)
@@ -495,7 +508,7 @@ namespace msfsLegacyImporter
                     bmp = setBitmapGamma(bmp, atts[0], atts[5] == 1 ||
                         MaskImage.Element("Transparent") != null && MaskImage.Element("Transparent").Value == "True" ||
                             MaskImage.Attribute("Alpha") != null && MaskImage.Attribute("Alpha").Value == "Yes" ||
-                            imagesForceTransparancy.Contains(Path.GetFileNameWithoutExtension(sourceFile1)));
+                            imagesForceTransparancy.Contains(Path.GetFileNameWithoutExtension(sourceFile1)), sourceFile1);
                     string[] maskSize = new string[] { bmp.Width.ToString(), bmp.Height.ToString() };
                     if (MaskImage.Attribute("ImageSizes") != null)
                         maskSize = getXYvalue(MaskImage, false);
@@ -503,13 +516,20 @@ namespace msfsLegacyImporter
                     try { bmp.Save(targetFile1, ImageFormat.Png); }
                     catch (Exception e) { MessageBox.Show("Can't save image " + maskSlug + ".png" + Environment.NewLine + "Error: " + e.Message); }
 
+                    for (int i = 0; i < depth; i++) { html += "	"; }
                     html += "			<div id=\"" + sanitizedSlug + "_mask\">" + Environment.NewLine;
-                    css += materialName + "-element #Mainframe #" + sanitizedSlug + "_mask {" + Environment.NewLine + "		background: transparent;" + Environment.NewLine + "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + acSlug + "/" + maskSlug + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" + Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine;
-                    css += Environment.NewLine + "		width: " + maskSize[0] + "px;" + Environment.NewLine + "		height: " + maskSize[1] + "px;" + Environment.NewLine;
+                    css += materialName + "-element #Mainframe #" + sanitizedSlug + "_mask {" + Environment.NewLine + "		background: transparent;" +
+                        Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine +
+                        Environment.NewLine + "		width: " + maskSize[0] + "px;" + Environment.NewLine + "		height: " + maskSize[1] + "px;" + Environment.NewLine;
                     //if (FloatPosition != null)
-                        css += "		left: " + FloatPositionValues[0] + "px;" + Environment.NewLine + "		top: " + FloatPositionValues[1] + "px;" + Environment.NewLine + "}" + Environment.NewLine;
+                    css += "		left: " + FloatPositionValues[0] + "px;" + Environment.NewLine + "		top: " + FloatPositionValues[1] + "px;" + Environment.NewLine + "}" + Environment.NewLine;
                     //else
                         //css += "		left: 50%;" + Environment.NewLine + "		top: 50%" + Environment.NewLine + "}" + Environment.NewLine;
+
+                    css += materialName + "-element #Mainframe #" + sanitizedSlug + "_mask_image {" + Environment.NewLine + "		background: transparent;" +
+                        Environment.NewLine + "		background-image: url(\"/Pages/VLivery/Liveries/legacy/" + acSlug + "/" + maskSlug + ".png\");" + Environment.NewLine + "		background-position: 0px 0px;" + Environment.NewLine + "		background-repeat: no-repeat;" +
+                        Environment.NewLine + "		position: absolute;" + Environment.NewLine + "		overflow: hidden;" + Environment.NewLine +
+                        Environment.NewLine + "		width: 100%;" + Environment.NewLine + "		height: 100%; " + Environment.NewLine + "}" + Environment.NewLine;
 
                     depth++;
                 }
@@ -569,7 +589,7 @@ namespace msfsLegacyImporter
                                 (Transparent == null && MaskImage == null) ||
                                 Transparent != null && Transparent.Value != "False" ||
                                 MaskImage != null && (MaskImage.Attribute("Alpha") == null || MaskImage.Attribute("Alpha").Value != "No") ||
-                                imagesForceTransparancy.Contains(Path.GetFileNameWithoutExtension(sourceFile)));
+                                imagesForceTransparancy.Contains(Path.GetFileNameWithoutExtension(sourceFile)), sourceFile);
 
                             if (imgSize == null)
                                 imgSize = new string[] { bmp.Width.ToString(), bmp.Height.ToString() };
@@ -600,15 +620,23 @@ namespace msfsLegacyImporter
             else
                 css += Environment.NewLine + "		width: 100%;" + Environment.NewLine + "		height: 100%;" + Environment.NewLine;
 
-            if (getPosException(slug) != null)
-                css += "		left: " + getPosException(slug)[0] + "px;" + Environment.NewLine + "		top: " + getPosException(slug)[1] + "px;" + Environment.NewLine;
+            if (getSizeException(slug, positionExceptions) != null)
+                css += "		left: " + getSizeException(slug, positionExceptions)[0] + "px;" + Environment.NewLine + "		top: " + getSizeException(slug, positionExceptions)[1] + "px; /* EXCEPTION */" + Environment.NewLine;
             else if (MaskImage != null)
-                css += "		left: - " + AxisPositionValues[0] + "px;" + Environment.NewLine + "		top: - " + AxisPositionValues[1] + "px;" + Environment.NewLine;
+                css += "		left: -" + AxisPositionValues[0] + "px;" + Environment.NewLine + "		top: -" + AxisPositionValues[1] + "px;" + Environment.NewLine;
             else if (FloatPosition == null && AxisPositionValues[0] != "0" && AxisPositionValues[1] != "0")
                 css += "		left: calc(50% - " + AxisPositionValues[0] + "px);" + Environment.NewLine + "		top: calc(50% - " + AxisPositionValues[1] + "px);" + Environment.NewLine;
             else
                 css += "		left: calc(" + FloatPositionValues[0] + "px - " + AxisPositionValues[0] + "px);" + Environment.NewLine + "		top: calc(" + FloatPositionValues[1] + "px - " + AxisPositionValues[1] + "px);" + Environment.NewLine;
             css += "		transform-origin: " + AxisPositionValues[0] + "px " + AxisPositionValues[1] + "px;" + Environment.NewLine;
+
+            if (getSizeException(slug, scaleExceptions) != null)
+                css += "		transform: scale(" + getSizeException(slug, scaleExceptions)[0] + ", " + getSizeException(slug, scaleExceptions)[1] + "); /* EXCEPTION */" + Environment.NewLine;
+
+            if (getSizeException(slug, zIndexExceptions) != null)
+                css += "		z-index: " + getSizeException(slug, zIndexExceptions)[0] + "; /* EXCEPTION */" + Environment.NewLine;
+
+
             js += "		var " + sanitizedSlug + " = this.querySelector(\"#" + sanitizedSlug + "\");" + Environment.NewLine;
             js += "		if (typeof " + sanitizedSlug + " !== \"undefined\") {" + Environment.NewLine;
             js += "		  var transform = '';" + Environment.NewLine + Environment.NewLine;
@@ -632,9 +660,12 @@ namespace msfsLegacyImporter
                     expressionRoutin(Expression, FsxVarHelper);
 
                     XElement PointsTo = Rotation.Elements("PointsTo").FirstOrDefault();
+                    XAttribute ImagePointsTo = Image != null ? Image.Attribute("PointsTo") : null;
                     XElement DegreesPointsTo = Rotation.Elements("DegreesPointsTo").FirstOrDefault();
-                    if (PointsTo != null)
-                        switch (PointsTo.Value)
+                    if (PointsTo != null || ImagePointsTo != null)
+                    {
+                        string pointValue = PointsTo != null ? PointsTo.Value : ImagePointsTo.Value;
+                        switch (pointValue.ToUpper())
                         {
                             case "SOUTH":
                                 js += "			var PointsTo = 180;" + Environment.NewLine;
@@ -652,6 +683,7 @@ namespace msfsLegacyImporter
                                 js += "			var PointsTo = 0;" + Environment.NewLine;
                                 break;
                         }
+                    }
                     else if (DegreesPointsTo != null && Double.TryParse(DegreesPointsTo.Value, out double num))
                         js += "			var PointsTo = " + (num - 90.0) + "; " + Environment.NewLine;
                     else
@@ -877,8 +909,12 @@ namespace msfsLegacyImporter
             for (int i = 0; i < depth; i++) { html += "	"; }
             html += "			</div>" + Environment.NewLine;
 
+            // RENDER MASK LAST
             if (MaskImage != null)
             {
+                for (int i = 0; i < depth; i++) { html += "	"; }
+                html += "			<div id=\"" + sanitizedSlug + "_mask_image\"></div>" + Environment.NewLine;
+
                 depth--;
                 for (int i = 0; i < depth; i++) { html += "	"; }
                 html += "			</div>" + Environment.NewLine;
@@ -1055,7 +1091,7 @@ namespace msfsLegacyImporter
                 //return new string[] { "500", "500" };
         }
 
-        private Bitmap setBitmapGamma(Bitmap oldBmp, float gamma, bool transparent)
+        private Bitmap setBitmapGamma(Bitmap oldBmp, float gamma, bool transparent, string sourceFile)
         {
             // ARGB CONVERSION
             Bitmap newBmp;
@@ -1065,29 +1101,34 @@ namespace msfsLegacyImporter
 
             // TRANSPARENCY CHECK
             if (transparent)
-                bmp = MakeTransparent(bmp);
+                bmp = MakeBitmapTransparent(bmp, sourceFile);
 
             // SET GAMMA
-            if (gamma != 1.0f)
-            {
-                ImageAttributes attributes = new ImageAttributes();
-                attributes.SetGamma(gamma);
-
-                System.Drawing.Point[] points =
-                {
-                    new System.Drawing.Point(0, 0),
-                    new System.Drawing.Point(bmp.Width, 0),
-                    new System.Drawing.Point(0, bmp.Height),
-                };
-                Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-                newBmp = new Bitmap(bmp.Width, bmp.Height);
-                using (Graphics graphics = Graphics.FromImage(newBmp))
-                {
-                    graphics.DrawImage(bmp, points, rect, GraphicsUnit.Pixel, attributes);
-                }
-            }
+            if (gamma < 0.99f || gamma > 1.01f)
+                bmp = setBitmapGammaFunct(bmp, gamma);
 
             return bmp;
+        }
+
+        private Bitmap setBitmapGammaFunct(Bitmap bmp, float gamma)
+        {
+            ImageAttributes attributes = new ImageAttributes();
+            attributes.SetGamma(gamma);
+
+            System.Drawing.Point[] points =
+            {
+                new System.Drawing.Point(0, 0),
+                new System.Drawing.Point(bmp.Width, 0),
+                new System.Drawing.Point(0, bmp.Height),
+            };
+            Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+            Bitmap newBmp = new Bitmap(bmp.Width, bmp.Height);
+            using (Graphics graphics = Graphics.FromImage(newBmp))
+            {
+                graphics.DrawImage(bmp, points, rect, GraphicsUnit.Pixel, attributes);
+            }
+
+            return newBmp;
         }
 
         private string probablyFixBmpName(string name)
@@ -1124,27 +1165,42 @@ namespace msfsLegacyImporter
             return Regex.Replace(val, @"[^0-9A-Za-z ,_\-]", "").Replace(" ", "_").Replace("-", "_").Replace(",", "_");
         }
 
-        private Bitmap MakeTransparent(Bitmap bmp/*, string sourceFile*/)
+        private Bitmap MakeBitmapTransparent(Bitmap bmp, string sourceFile)
         {
+            bool transpApplied = false;
             //            writeLog("Processing image: " + Path.GetFileNameWithoutExtension(sourceFile) + " (" + bmp.GetPixel(0, 0).ToString() + ")");
 
-            if (bmp.GetPixel(0, 0) == Color.FromArgb(255, 255, 255, 255))
-                bmp.MakeTransparent(Color.FromArgb(255, 255, 255, 255));
-            else {
+
+            if (bmp.GetPixel(0, 0) == Color.FromArgb(255, 1, 1, 1) || bmp.GetPixel(bmp.Width / 2, bmp.Height / 2) == Color.FromArgb(255, 1, 1, 1))
+            {
                 bmp.MakeTransparent(Color.FromArgb(255, 1, 1, 1));
-                bmp.MakeTransparent(Color.FromArgb(255, 0, 0, 0));
+                transpApplied = true;
             }
+
+            if (!transpApplied || imagesForceTransparancy.Contains(Path.GetFileNameWithoutExtension(sourceFile)))
+                if (bmp.GetPixel(0, 0) == Color.FromArgb(255, 0, 0, 0) || bmp.GetPixel(bmp.Width / 2, bmp.Height / 2) == Color.FromArgb(255, 0, 0, 0))
+                {
+                    bmp.MakeTransparent(Color.FromArgb(255, 0, 0, 0));
+                    transpApplied = true;
+                }
+
+            if (!transpApplied || imagesForceTransparancy.Contains(Path.GetFileNameWithoutExtension(sourceFile)))
+                if (bmp.GetPixel(0, 0) == Color.FromArgb(255, 255, 255, 255) || bmp.GetPixel(bmp.Width / 2, bmp.Height / 2) == Color.FromArgb(255, 255, 255, 255))
+                {
+                    bmp.MakeTransparent(Color.FromArgb(255, 255, 255, 255));
+                    transpApplied = true;
+                }
 
             return bmp;
         }
 
-        private string[] getPosException (string slug)
+        private string[] getSizeException (string slug, string[][] exceptionsArray)
         {
-            for (int x = 0; x < positionExceptions.GetLength(0); x++)
+            for (int x = 0; x < exceptionsArray.GetLength(0); x++)
             {
-                if (Equals(positionExceptions[x][0], slug))
+                if (Equals(exceptionsArray[x][0], slug))
                 {
-                    return new string[] { positionExceptions[x][1], positionExceptions[x][2] };
+                    return new string[] { exceptionsArray[x][1], exceptionsArray[x][2] };
                 }
             }
 

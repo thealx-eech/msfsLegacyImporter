@@ -8,7 +8,7 @@ namespace msfsLegacyImporter
     {
         public string fsx2msfsSimVar(string fsxSimVar, xmlHelper XmlHelper, bool returnVariable = true)
         {
-            fsxSimVar = Regex.Replace(fsxSimVar, "\r\n|\r|\n", "");
+            fsxSimVar = Regex.Replace(fsxSimVar, "\r\n|\r|\n", " ");
             fsxSimVar = Regex.Replace(fsxSimVar, @"\s\s+", " ");
             fsxSimVar = fsxSimVar.Replace(")!", ") !").Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
 
@@ -73,7 +73,7 @@ namespace msfsLegacyImporter
 
         public string fsx2msfsGaugeString(string gaugeTextString, xmlHelper XmlHelper)
         {
-            string gaugeString = Regex.Replace(gaugeTextString, "\r\n|\r|\n", "");
+            string gaugeString = Regex.Replace(gaugeTextString, "\r\n|\r|\n", " ");
             gaugeString = gaugeString./*Replace(") %", ")%").Replace("% (", "%(").*/Replace(")%(", ")%%(").Trim();
 
             XmlHelper.writeLog("### Gauge String: " + gaugeString);
@@ -159,7 +159,10 @@ namespace msfsLegacyImporter
 
                 if (!string.IsNullOrEmpty(msfsVariable))
                 {
-                    msfsVariable = "( " + fsx2msfsSimVar(Regex.Replace(msfsVariable, @"\%\s?\(?(.*)\)\s?\%", "$1").Trim(), XmlHelper, false) + " )";
+                    string textvar = Regex.Replace(msfsVariable, @"\%\s?\(?(.*)\)\s?\%", "$1").Trim();
+                    msfsVariable = "( " + fsx2msfsSimVar(textvar, XmlHelper, false) + " )";
+                    XmlHelper.writeLog("Processing SimVar: " + textvar);
+                    XmlHelper.writeLog("SimVar result: " + msfsVariable);
 
                     if (!String.IsNullOrEmpty(formattingValue))
                     {
@@ -194,6 +197,66 @@ namespace msfsLegacyImporter
             }
 
             newGaugeString = newGaugeString.Trim().Trim('+');
+
+
+            /*// REPLACE STRING LOGIC ON CODE
+            newGaugeString = Regex.Replace(newGaugeString, @"({\s*if\s*})", "{if}");
+            newGaugeString = Regex.Replace(newGaugeString, @"({\s*else\s*})", "{else}");
+            newGaugeString = Regex.Replace(newGaugeString, @"({\s*end\s*})", "{end}");
+            // {if} {else} {end}
+            // if{ }els{ }
+
+
+            string[] delim = {@"\{if\}", @"\{else\}", @"\{end\}"};
+
+            string final = "";
+            var results = Regex.Split(newGaugeString, "({if}|{else}|{end})");
+            foreach (var result in results)
+            {
+                XmlHelper.writeLog("Final split part: " + result + Environment.NewLine);
+
+                int ifs = 0;
+                int elses = 0;
+
+                if (result == "{if}")
+                {
+                    ifs++;
+                    final = Regex.Replace(final, "(\" \\+ )|(\\+ \")", "");
+                    final = "( " + final + " ) ? ( ";
+                }
+                else if (result == "{else}")
+                {
+                    elses++;
+                    final = Regex.Replace(final, "(\" \\+ )|(\\+ \")", "");
+                    final = final + ") : (";
+                }
+                else if (result == "{end}") {
+                    final = Regex.Replace(final, "(\" \\+ )|(\\+ \")", "");
+
+                    if (ifs == elses)
+                    {
+                        final = final + " )";
+                        ifs--;
+                        elses--;
+                    } else
+                    {
+                        final = final + ") : \"\" ";
+                        ifs--;
+                    }
+                }
+                else
+                    final += result;
+            }
+            XmlHelper.writeLog("Final split result: " + final + Environment.NewLine);
+
+            */
+            // {if}GPS%{else}DME%{end}
+            // (P:Units of measure, enum) 2 == if{ (A:Indicated Altitude:1, meters) } els{ (A:Indicated Altitude:1, feet) } 10000 % 1000 / int
+            // DME % ((A: NAV1 DME, nmiles) 999 min 0 max s1 0 >=)% if{ % (l1 100 >=)% if{ % (l1) % !d! % } els{ % (l1) % !0.1f! % } % } els{ ----% }
+
+
+
+
             XmlHelper.writeLog("### Result: " + newGaugeString + Environment.NewLine);
 
             // %((A:Kohlsman setting hg,millibars))%!6.2f! mb
@@ -1215,29 +1278,34 @@ namespace msfsLegacyImporter
                     }
                     else if (token.ToLower() == "}els{")
                     {
-                        elseCounter.Pop();
-                        elseCounter.Push(1);
+                        elseCounter.Push(elseCounter.Pop() + 1);
 
-                        if (stack.Count > 0 && ifCond.Count > 0)
+                        if (elseCounter.Peek() <= 1) // TO AVOID DUPLICATE ELSES
                         {
-                            var rightIntermediate = stack.Pop();
-                            newExpr = ifCond.Pop().expr + " " + rightIntermediate.expr + " : ";
-                            ifCond.Push(new Intermediate(newExpr, token));
-                        }
-                        else if (ifCond.Count > 0)
+                            if (stack.Count > 0 && ifCond.Count > 0)
+                            {
+                                var rightIntermediate = stack.Pop();
+                                newExpr = ifCond.Pop().expr + " " + rightIntermediate.expr + " : ";
+                                ifCond.Push(new Intermediate(newExpr, token));
+                            }
+                            else if (ifCond.Count > 0)
+                            {
+                                newExpr = ifCond.Pop().expr;
+                                ifCond.Push(new Intermediate(newExpr, token));
+                            }
+                            else
+                            {
+                                XmlHelper.writeLog("Failed to apply " + token);
+                                return "";
+                            }
+                        } else
                         {
-                            newExpr = ifCond.Pop().expr;
-                            ifCond.Push(new Intermediate(newExpr, token));
-                        }
-                        else
-                        {
-                            XmlHelper.writeLog("Failed to apply " + token);
-                            return "";
+                            XmlHelper.writeLog("SKIPPED: " + token);
                         }
                     }
                     else if (token == "}")
                     {
-                        if (elseCounter.Peek() == 1 && ifCond.Count > 0)
+                        if (elseCounter.Peek() >= 1 && ifCond.Count > 0)
                         {
                             if (stack.Count > 0)
                             {
@@ -1731,7 +1799,7 @@ namespace msfsLegacyImporter
             }
             catch (Exception ex)
             {
-                XmlHelper.writeLog(ex.ToString());
+                XmlHelper.writeLog(ex.Message);
                 return "";
             }
         }

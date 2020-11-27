@@ -31,14 +31,16 @@ namespace msfsLegacyImporter
         public string projectDirectory = "";
         public string aircraftDirectory = "";
         public string airFilename = "";
-        private cfgHelper CfgHelper;
+        public cfgHelper CfgHelper;
         private jsonHelper JSONHelper;
         private csvHelper CsvHelper;
         private xmlHelper XmlHelper;
         private fsxVarHelper FsxVarHelper;
         private fileDialogHelper FileDialogHelper;
+        private float gammaSliderPos = 1;
 
         private string communityPath = "";
+        private bool extractingCabs = false;
 
         string SourceFolder = "";
         string TargetFolder = "";
@@ -238,10 +240,6 @@ namespace msfsLegacyImporter
             {
                 MessageBox.Show(exc.Message);
             }
-
-            /*string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath"));
-            if (!String.IsNullOrEmpty(selectedPath))
-                setAircraftDirectory(selectedPath);*/
         }
 
         public void setAircraftDirectory(string directory)
@@ -253,16 +251,16 @@ namespace msfsLegacyImporter
                 if (String.IsNullOrEmpty(communityPath))
                 {
                     try { Registry.SetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\11.0\\", "CommunityPath", Path.GetDirectoryName(directory)); }
-                    catch (Exception ex) {  Console.WriteLine(ex.ToString()); }
+                    catch (Exception ex) {  Console.WriteLine(ex.Message); }
                 }
 
                 // CLEAN FIELDS
-                SourceFolder = "";
                 btnSourceFolderPath.Text = "";
                 PackageTitle.Text = "";
                 PackageDir.Text = "";
                 PackageManufacturer.Text = "";
                 PackageAuthor.Text = "";
+                extractingCabs = false;
 
                 projectDirectory = directory;
                 aircraftDirectory = Get_aircraft_directory();
@@ -292,7 +290,19 @@ namespace msfsLegacyImporter
                     LoadLabel.Foreground = new SolidColorBrush(Colors.Black);
 
                     SummaryUpdate();
+
+                    // START BACKGROUND CABS EXTRACTION
+                    if (!string.IsNullOrEmpty(SourceFolder) && (Directory.Exists(SourceFolder + "..\\..\\..\\Gauges") || Directory.Exists(SourceFolder + "..\\..\\..\\SimObjects")))
+                    {
+                        Console.WriteLine("Trying to extract FSX cabs from " + SourceFolder + "..\\..\\..\\");
+                        fsTabControl.IsEnabled = false;
+                        extractingCabs = true;
+                        extractDefaultCabsAsync(btnScan, SourceFolder + "..\\..\\..\\");
+                    }
                 }
+
+                // CLEAN FIELDS
+                SourceFolder = "";
             }
             else
             {
@@ -662,7 +672,7 @@ namespace msfsLegacyImporter
                         File.Delete(aircraftDirectory + "\\.aircraft.cfg");
                     }
                     catch (Exception ex) {
-                        Console.WriteLine(ex.ToString());
+                        Console.WriteLine(ex.Message);
                         MessageBox.Show(CsvHelper.trans("aircraft_cfg_split_failed"));
                         return;
                     }
@@ -760,9 +770,9 @@ namespace msfsLegacyImporter
                 if (engine_type == "2" || engine_type == "3" || engine_type == "4" || engine_type == "")
                     EnginesData = AddGroupCheckBox(EnginesData, "engine_type = " + (engine_type != "" ? engine_type : "missing"), Colors.DarkRed, criticalIssues++);
 
-                string engine0 = CfgHelper.getCfgValue("engine.0", "engines.cfg", "[GENERALENGINEDATA]");
+                /*string engine0 = CfgHelper.getCfgValue("engine.0", "engines.cfg", "[GENERALENGINEDATA]");
                 if (engine0 == "")
-                    EnginesData = AddGroupCheckBox(EnginesData, "engine.0 = missing", Colors.DarkRed, criticalIssues++);
+                    EnginesData = AddGroupCheckBox(EnginesData, "engine.0 = missing", Colors.DarkRed, criticalIssues++);*/
 
                 string afterburner_available = CfgHelper.getCfgValue("afterburner_available", "engines.cfg", "[TURBINEENGINEDATA]");
                 if (afterburner_available != "" && afterburner_available != "0")
@@ -810,9 +820,9 @@ namespace msfsLegacyImporter
                 {
                     string[] val = checkboxLabel.Split('=');
 
-                    if (val[0].Trim() == "engine.0")
+                    /*if (val[0].Trim() == "engine.0")
                         CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0,0,0", "engines.cfg", "[GENERALENGINEDATA]");
-                    else
+                    else*/
                         CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg");
                     i++;
                 }
@@ -1983,7 +1993,7 @@ namespace msfsLegacyImporter
                     try { File.Delete(dds[i]); }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.ToString());
+                        Console.WriteLine(ex.Message);
                     }
                 }
 
@@ -2112,6 +2122,10 @@ namespace msfsLegacyImporter
             }
             else
             {
+                if (modelsFound <= 0)
+                    MessageBox.Show(CsvHelper.trans("model_no_interior_model_warning"), CsvHelper.trans("model_no_interior_model"));
+
+
                 btn.Content = modelsFound > 0 ? CsvHelper.trans("model_no_clickable_switches") : CsvHelper.trans("model_no_interior_model");
                 btn.IsEnabled = false;
             }
@@ -2282,9 +2296,9 @@ namespace msfsLegacyImporter
             {
                 StackPanel myPanel3 = new StackPanel();
 
-                TextBlock gammaCorr = addTextBlock(string.Format(CsvHelper.trans("sounds_tone_volume"), "0", "30", "100"), HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black,
+                TextBlock volumeCorr = addTextBlock(string.Format(CsvHelper.trans("sounds_tone_volume"), "0", "30", "100"), HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black,
                     new Thickness(0, 10, 0, 0));
-                myPanel3.Children.Add(gammaCorr);
+                myPanel3.Children.Add(volumeCorr);
 
                 if (this.FindName("VarioVolimeSlider") != null)
                     UnregisterName("VarioVolimeSlider");
@@ -2455,7 +2469,7 @@ namespace msfsLegacyImporter
                 btn1.IsEnabled = false;
             }
             myPanel1.Children.Add(btn1);
-            myPanel1.Children.Add(sectiondivider());
+            /*----*/myPanel1.Children.Add(sectiondivider());
 
             Button btn3 = new Button();
             btn3 = SetButtonAtts(btn3);
@@ -2469,16 +2483,40 @@ namespace msfsLegacyImporter
                 btn3.Click += extractDefaultCabsClick;
             } else
             {
+                TextBlock extractGaugesNotice = addTextBlock(Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\",
+                    HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 0), TextWrapping.Wrap, 600);
+                myPanel1.Children.Add(extractGaugesNotice);
+
                 btn3.Content = CsvHelper.trans("panel_fsx_extracted");
                 btn3.IsEnabled = false;
             }
+
             myPanel1.Children.Add(btn3);
-            myPanel1.Children.Add(sectiondivider());
+            /*----*/myPanel1.Children.Add(sectiondivider());
 
             if (cabsToConvert > 0 || cabsWithoutBackup > 0)
                 tabPanel.Foreground = new SolidColorBrush(Colors.DarkRed);
 
             CabsList.Children.Add(myPanel1);
+
+
+            StackPanel myPanel4 = new StackPanel();
+            myPanel4.Margin = new Thickness(0, 10, 0, 5);
+
+            Button btn4 = new Button();
+            btn4 = SetButtonAtts(btn4);
+            TextBlock brokenSwitches = addTextBlock(CsvHelper.trans("panel_broken_switches_notice"),
+                HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 0), TextWrapping.Wrap, 600);
+            myPanel4.Children.Add(brokenSwitches);
+
+            btn4.Content = CsvHelper.trans("panel_broken_switches");
+            btn4.Tag = "https://forums.flightsimulator.com/t/make-legacy-cockpit-buttons-work-again/325942";
+            btn4.Click += Button_RequestNavigate;
+
+            myPanel4.Children.Add(btn4);
+            /*----*/myPanel4.Children.Add(sectiondivider());
+            CabsList.Children.Add(myPanel4);
+
 
             StackPanel myPanel2 = new StackPanel();
             myPanel2.Margin = new Thickness(0, 10, 0, 5);
@@ -2506,7 +2544,7 @@ namespace msfsLegacyImporter
                     UnregisterName("GammaSlider");
                 Slider gammaSlider = new Slider();
                 RegisterName("GammaSlider", gammaSlider);
-                gammaSlider.Value = 1.0;
+                gammaSlider.Value = gammaSliderPos;
                 gammaSlider.Minimum = 0.1;
                 gammaSlider.Maximum = 2.0;
                 gammaSlider.AutoToolTipPlacement = AutoToolTipPlacement.TopLeft;
@@ -2529,7 +2567,7 @@ namespace msfsLegacyImporter
             myPanel2.Children.Add(btn2);
             PanelsList.Children.Add(myPanel2);
 
-            PanelsList.Children.Add(sectiondivider());
+            /*----*/PanelsList.Children.Add(sectiondivider());
         }
 
         // AC CAB EXTRACT
@@ -2620,6 +2658,7 @@ namespace msfsLegacyImporter
         }
         private async void extractDefaultCabsAsync(object sender, string selectedPath)
         {
+            Console.WriteLine("Extracting FSX cabs");
             await Task.Run(() => extractDefaultCabsTask(sender, selectedPath));
         }
 
@@ -2634,43 +2673,54 @@ namespace msfsLegacyImporter
             {
                 if (File.Exists(cabFile))
                 {
-                    Application.Current.Dispatcher.Invoke(() => {
-                        if (sender.GetType() == typeof(Button))
-                            ((Button)sender).Content = string.Format(CsvHelper.trans("panel_extracting_cab {0}"), Path.GetFileName(cabFile));
-                    });
-
                     Console.WriteLine("Extracting " + cabFile);
 
                     string extractDirectory = Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\.FSX\\" + Path.GetFileNameWithoutExtension(cabFile);
 
                     if (!Directory.Exists(extractDirectory))
+                    {
+                        Application.Current.Dispatcher.Invoke(() => {
+                            if (sender.GetType() == typeof(Button))
+                                ((Button)sender).Content = string.Format(CsvHelper.trans("panel_extracting_cab"), Path.GetFileName(cabFile));
+                        });
+
                         Directory.CreateDirectory(extractDirectory);
 
-                    try
+                        try
+                        {
+                            CabInfo cab = new CabInfo(cabFile);
+                            cab.Unpack(extractDirectory);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Exception " + e.Message);
+                        }
+
+                        await Task.Delay(100);
+                    }
+                    else
                     {
-                        CabInfo cab = new CabInfo(cabFile);
-                        cab.Unpack(extractDirectory);
-                    } catch (Exception e)
-                    {
-                        Console.WriteLine("Exception " + e.Message);
+                        Console.WriteLine("Already extracted, skipping " + cabFile);
                     }
                 }
-
-                await Task.Delay(100);
             }
 
             Application.Current.Dispatcher.Invoke(() => SummaryUpdate());
             Application.Current.Dispatcher.Invoke(() => fsTabControl.IsEnabled = true);
+            Application.Current.Dispatcher.Invoke(() => extractingCabs = false);
+            Application.Current.Dispatcher.Invoke(() => btnScan.Content = CsvHelper.trans("btnScan"));
         }
 
 
         // PANEL IMPORT
         private void importPanelGaugeClick(object sender, EventArgs e)
         {
+            gammaSliderPos = FindName("GammaSlider") != null ? (float)((Slider)FindName("GammaSlider")).Value : 1;
+
             fsTabControl.IsEnabled = false;
             importPanelGaugeAsync(sender, getCheckedOptions(PanelsList),
                 new float[] {
-                    FindName("GammaSlider") != null ? (float)((Slider)FindName("GammaSlider")).Value : 1,
+                    gammaSliderPos,
                     FindName("ForceBackground") != null && ((CheckBox)FindName("ForceBackground")).IsChecked == true ? 1 : 0,
                     FindName("IgnorePanelErrors") != null && ((CheckBox)FindName("IgnorePanelErrors")).IsChecked == true ? 1 : 0,
                     FindName("PreservePanelSize") != null && ((CheckBox)FindName("PreservePanelSize")).IsChecked == true ? 1 : 0,
@@ -2790,7 +2840,7 @@ namespace msfsLegacyImporter
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine(ex.ToString());
+                                Console.WriteLine(ex.Message);
                             }
                         }
                     }
@@ -2874,8 +2924,6 @@ namespace msfsLegacyImporter
                 dialog.IsFolderPicker = true;
                 dialog.RestoreDirectory = (String.IsNullOrEmpty(defaultPath) || defaultPath == Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)) ? true : false;
                 if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
-                //string selectedPath = FileDialogHelper.getFolderPath(HKLMRegistryHelper.GetRegistryValue("SOFTWARE\\Microsoft\\microsoft games\\Flight Simulator\\10.0\\", "SetupPath", RegistryView.Registry32));
-                //if (!String.IsNullOrEmpty(selectedPath))
                 {
                     string selectedPath = dialog.FileName;
 
@@ -2961,6 +3009,11 @@ namespace msfsLegacyImporter
                                                System.Windows.Navigation.RequestNavigateEventArgs e)
         {
             System.Diagnostics.Process.Start(e.Uri.ToString().Contains("//") ? e.Uri.AbsoluteUri : e.Uri.ToString());
+        }
+        private void Button_RequestNavigate(object sender, RoutedEventArgs e)
+        {
+            Button btn = (Button)sender;
+            System.Diagnostics.Process.Start(btn.Tag.ToString());
         }
 
         public StackPanel AddGroupCheckBox(StackPanel mainPanel, string content, Color color, int index = 1, string tag = "", bool isChecked = false)
@@ -3072,7 +3125,7 @@ namespace msfsLegacyImporter
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.ToString());
+                        Console.WriteLine(ex.Message);
                         MessageBox.Show(CsvHelper.trans("cvt_remove_failed"));
                     }
                 }
@@ -3092,7 +3145,7 @@ namespace msfsLegacyImporter
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.ToString());
+                    Console.WriteLine(ex.Message);
                     MessageBox.Show(CsvHelper.trans("backup_creation_failed"));
                 }
             }
@@ -3227,7 +3280,7 @@ namespace msfsLegacyImporter
                         File.Delete(EXE_PATH + ".BAK");
                     } catch (Exception ex)
                     {
-                        Console.WriteLine(ex.ToString());
+                        Console.WriteLine(ex.Message);
                         MessageBox.Show(CsvHelper.trans("update_cant_delete_backup"));
                     }
                 }

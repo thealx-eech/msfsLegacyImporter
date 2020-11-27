@@ -145,6 +145,7 @@ model_remove_clickable,Retirer les interrupteurs cliquables dans le cockpit,Remo
 model_remove_clickable_notice,"Il s'agit d'un correctif pour le problème de plantage qui n'apparaît plus dans la dernière version du jeu. Cependant, vous pouvez l'utiliser pour supprimer complètement les rectangles cliquables du cockpit.","This is fix for the crash issue that no longer appear in latest version of the game. However, you can use it to remove clickable rectangles from the cockpit completely."
 model_no_clickable_switches,Aucun modèle avec interrupteurs cliquables,No models with clickable switches
 model_no_interior_model,Aucun modèle d'intérieur trouvé,No interior models found
+model_no_interior_model_warning,,"Interior (cockpit) is not configured for this aricraft. It will cause game crash. You should fix it before launche the game, otherwise delete this aircraft to avoid issues."
 model_remove_clickable_warning,Vous ne pourrez plus utiliser d'éléments cliquables à l'intérieur du cockpit. Vous pouvez restaurer le modèle intérieur d'origine en cliquant sur le bouton Restaurer la sauvegarde.,You will be no longer able to use clickable elements inside of the cockpit. You can restore original interior model by clicking Restore Backup button.
 model_remove_clickable_warning_header,Vous allez supprimer les Boutons cliquables,You are going to remove clickable switches
 model_clickable_removal_failed,Échec de la suppression des boutons cliquables de {0},Clickable switches removal from {0} failed
@@ -184,6 +185,8 @@ panel_fsx_extract_notice3,Appuyez sur CANCEL pour annuler,Press CANCEL to abort
 panel_fsx_header,Extractions de fichiers FSX CAB,FSX CAB files extractions
 panel_gauges_not_found,Dossier Jauges ou SimObjects \ Airplanes introuvable dans {0},Gauges or SimObjects\Airplanes folder not found in {0}
 TextExpressionButton,Tester le convertisseur d'expressions FSX,Test FSX Expressions converter
+panel_broken_switches,,Vote for clickable switches fix whishlist item 
+panel_broken_switches_notice,,"Since one of the past MSFS updates clickable switches and other interactive elements no longer work in the legacy cockpits. This issue can't be solved by any kind of model or config files manipulations. If you want this issue to be fixed by developers, press the button below and vote for the wishlist item."
 ABOUT TAB,,
 about_colored_header,Guide Visuel,Colored labels
 about_links_header,Liens et crédits,Links and credits

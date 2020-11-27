@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -16,12 +17,12 @@ namespace msfsLegacyImporter
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Unable to create target folder." + Environment.NewLine + "Error message: " + Environment.NewLine + ex.ToString());
+                MessageBox.Show("Unable to create target folder." + Environment.NewLine + "Error message: " + Environment.NewLine + ex.Message);
                 return;
             }
 
             // COPY FSX FILES TO MSFS
-            string json = "";
+            string json;
 
             try
             {
@@ -31,18 +32,54 @@ namespace msfsLegacyImporter
 
                 Manifest manifest = new Manifest(new Dependencies[] { }, data[1], data[2], data[3], data[4], data[5], data[6], new ReleaseNotes(new Neutral("", "")));
 
+                // READ ALIASES
+                var cfgFiles = Directory.EnumerateFiles(TargetFolder + "SimObjects\\AIRPLANES\\" + sourceChild + "\\", "*.cfg", SearchOption.AllDirectories);
+                foreach (var file in cfgFiles)
+                {
+                    cfgHelper.CfgFile cfgFile;
+                    List<cfgHelper.CfgLine> cfgLines;
+
+                    if (File.Exists(file))
+                    {
+                        string content = File.ReadAllText(file);
+                        cfgLines = parent.CfgHelper.readCSV(content + "\r\n[]");
+                        cfgFile = parent.CfgHelper.parseCfg(file, cfgLines);
+
+                        foreach (var cfgSection in cfgFile.Sections)
+                        {
+                            if (cfgSection.Name == "[FLTSIM]")
+                            {
+                                foreach (var alias in cfgSection.Lines)
+                                {
+                                    if (alias.Name == "alias") // copy alias files
+                                    {
+                                        Console.WriteLine("Processing alias from " + SourceFolder + "\\.." + alias.Value + " to " + Path.GetDirectoryName(file));
+                                        try {
+                                            CloneDirectory(SourceFolder + "\\..\\" + alias.Value, Path.GetDirectoryName(file));
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            MessageBox.Show("Unable to process alias files from " + SourceFolder + "\\..\\" + alias.Value +Environment.NewLine + "Error message: " + Environment.NewLine + ex.Message);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 json = JsonConvert.SerializeObject(manifest, Newtonsoft.Json.Formatting.Indented);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Unable to copy FSX files." + Environment.NewLine + "Error message: " + Environment.NewLine + ex.ToString());
+                MessageBox.Show("Unable to copy FSX files." + Environment.NewLine + "Error message: " + Environment.NewLine + ex.Message);
                 return;
             }
 
             try { File.WriteAllText(TargetFolder + "manifest.json", json); }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine(ex.Message);
                 MessageBox.Show("Can't write into file " + TargetFolder + "\\manifest.json");
                 return;
             }
@@ -63,7 +100,7 @@ namespace msfsLegacyImporter
             try { File.WriteAllText(TargetFolder + "manifest.json", json); }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine(ex.Message);
                 MessageBox.Show("Can't write into file " + TargetFolder + "\\manifest.json");
                 return;
             }
@@ -92,7 +129,8 @@ namespace msfsLegacyImporter
                         foreach (string currentFile in txtFiles)
                         {
                             if (Path.GetFileName(currentFile)[0] != '.' && Path.GetExtension(currentFile).ToLower() != "json" && Path.GetExtension(currentFile).ToLower() != "exe"
-                                && Path.GetExtension(currentFile).ToLower() != "zip" && Path.GetExtension(currentFile).ToLower() != "rar" && Path.GetExtension(currentFile).ToLower() != "7z")
+                                && Path.GetExtension(currentFile).ToLower() != "zip" && Path.GetExtension(currentFile).ToLower() != "rar" && Path.GetExtension(currentFile).ToLower() != "7z"
+                                 && Path.GetExtension(currentFile).ToLower() != "dll" && Path.GetExtension(currentFile).ToLower() != "gau")
                             {
                                 FileInfo info = new System.IO.FileInfo(currentFile);
                                 array[i] = new Content(currentFile.Replace(TargetFolder, "").Replace("\\", "/").Trim('/'), info.Length, info.LastWriteTimeUtc.ToFileTimeUtc());
@@ -114,7 +152,7 @@ namespace msfsLegacyImporter
                 try { File.WriteAllText(TargetFolder + "\\layout.json", json); }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.ToString());
+                    Console.WriteLine(ex.Message);
                     MessageBox.Show("Can't write into file " + TargetFolder + "\\layout.json");
                     return 0;
                 }
@@ -137,7 +175,7 @@ namespace msfsLegacyImporter
 
             foreach (var file in Directory.GetFiles(root))
             {
-                File.Copy(file, Path.Combine(dest, Path.GetFileName(file)));
+                File.Copy(file, Path.Combine(dest, Path.GetFileName(file)), true);
             }
         }
     }
