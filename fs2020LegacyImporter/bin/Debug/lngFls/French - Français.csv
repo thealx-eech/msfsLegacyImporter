@@ -84,6 +84,18 @@ engines_fix_issues,Résoudre les problèmes de moteurs,Fix engines issues
 engines_issues_notice,"La valeur du moteur invalide doit être corrigée, sinon les avions seront ignorés par le code du modèle de vol et resteront gelés même dans les airs.","Invalid engine value should be fixed, otherwise aircraft will be ignored by flight model code and stay frozen even in the air."
 engines_no_issues,Aucun problème moteur,No engines issues
 engines_power,Ajuster la puissance des moteurs,Adjust engines power
+engines_fix_afterburner,,Fix afterburners thrust
+engines_fix_afterburner_not_available,,Afterburners thrust can't be applied
+engines_afterburner_notice,,"You can use this tool to apply afterburner boost to engines parameters. Thrust will be increased for throttle positions greater than threshold value, same value will be set as a start point for flame animation (script should be inserted from Panels tab, and also variables replaced from Models tab).\nTable below represents thrust modifier (Y axis, from 0 to 300%) and throttle position (from 0 to 100%). Two lines are subsonic (black) and supersonic (red) speed. Be sure Black line stays between 100% and 200%, otherwise you will get too much power."
+engines_afterburners_stages,,Current afterburner stages number: {0}
+engines_afterburners_disabled,,Afterburners disabled!
+engines_afterburners_table_missing,,"""N1 and Mach to Thrust"" table does not exists, default was used. You can activate Full import mode and import AIR data to get it, but that is not required."
+engines_afterburners_consumption,,Current afterburner fuel consumption: {0} (thrust modifier: {1}%)
+engines_afterburners_consumption_missing,,"Afterburner fuel consumption not found, default: {0} (thrust modifier: {1}%)"
+engines_afterburners_threshold,,Current afterburner throttle threshold: {0}
+engines_afterburners_threshold_missing,,"Afterburner throttle threshold not found, default: {0}"
+engines_afterburner_warning_header,,You are going to apply afterburner thrust
+engines_afterburner_warning_notice,,"It will affect engines output power on the highest throttle positions. You can't undone this operation, only way to restore original values - recover backup."
 AIR FUNCTIONS,,
 air_tbl_not_found,Aucune table de conversion AIR trouvée,No AIR conversion tables found
 air_tbl_not_found_notice,"Le fichier {0} n'existe pas.\nExtraire le dossier ""airTbls"" de l'archive du programme dans le même répertoire, où EXE est stocké.","File {0} does not exists.\nExtract folder ""airTbls"" from program archive into same directory, where EXE is stored."
@@ -144,11 +156,16 @@ model_format_is_not_compatible,"Le format {0} n'est pas compatible avec MSFS, le
 model_remove_clickable,Retirer les interrupteurs cliquables dans le cockpit,Remove interior clickable switches
 model_remove_clickable_notice,"Il s'agit d'un correctif pour le problème de plantage qui n'apparaît plus dans la dernière version du jeu. Cependant, vous pouvez l'utiliser pour supprimer complètement les rectangles cliquables du cockpit.","This is fix for the crash issue that no longer appear in latest version of the game. However, you can use it to remove clickable rectangles from the cockpit completely."
 model_no_clickable_switches,Aucun modèle avec interrupteurs cliquables,No models with clickable switches
-model_no_interior_model,Aucun modèle d'intérieur trouvé,No interior models found
-model_no_interior_model_warning,,"Interior (cockpit) is not configured for this aricraft. It will cause game crash. You should fix it before launche the game, otherwise delete this aircraft to avoid issues."
+model_no_interior_model,Aucun modèle d'intérieur trouvé,No interior models found!
+model_no_interior_model_warning,,"Interior (cockpit) is not configured for this aircraft. It will cause game crash. You should fix it before launch the game, otherwise delete this aircraft to avoid issues."
 model_remove_clickable_warning,Vous ne pourrez plus utiliser d'éléments cliquables à l'intérieur du cockpit. Vous pouvez restaurer le modèle intérieur d'origine en cliquant sur le bouton Restaurer la sauvegarde.,You will be no longer able to use clickable elements inside of the cockpit. You can restore original interior model by clicking Restore Backup button.
 model_remove_clickable_warning_header,Vous allez supprimer les Boutons cliquables,You are going to remove clickable switches
 model_clickable_removal_failed,Échec de la suppression des boutons cliquables de {0},Clickable switches removal from {0} failed
+model_replace_afterburner,,Replace broken afterburner variables
+model_replace_afterburner_notice,,"To make possible for custom script (can be injected on Panels tab) to control afterburner animation, broken variables should be replaced. This process can take up to several minutes, so be patient. If models disappear from the list after processing, replacement was successful."
+model_no_afterburner,,No broken afterburner variables found
+model_no_exterior_model,,No exterior models found!
+models_processing_file,,Processing {0}
 SOUNDS TAB,,
 sounds_toggle_notice,"Vous pouvez basculer entre les échantillons sonores disponibles, puis appuyer sur le bouton Mettre à jour sous la liste.Physiquement, les fichiers restent sur le disque dur et peuvent être activés à tout moment ultérieurement.","You can toggle available sound samples and then press Update button below the list. Physically, files stay on the hard drive and can be enabled anytime later."
 sounds_update,Mettre à jour la liste des sons,Update sounds list
@@ -162,20 +179,20 @@ PANEL TAB,,
 panel_dll_detected,Le dossier avion contient des fichiers DLL / GAU - l'avionique et / ou l'animation peuvent ne pas fonctionner dans le jeu,Aircraft folder contains DLL/GAU files - avionics and/or animation may not work in the game
 panel_extract_gauges,Extraire les ressources pour les jauges ( panneau),Extract panel gauges resources
 panel_no_panel,Aucune ressource de panneau trouvée,No panel resources found
-panel_extract_fsx_resources,Extraire les ressources de jauges FSX par défaut,Extract default FSX gauges resources
+panel_extract_fsx_resources,Extraire les ressources de jauges FSX par défaut,Bulk extract gauges resources
 panel_fsx_extracted,Ressources de jauges FSX par défaut extraites,Default FSX gauges resources extracted
 panel_import_gauges,Importer les jauges de panneau,Import panel gauges
 panel_force_gauge_background,Forcer l'Image d'arrière-plan de la jauge  (vérifiez-la si vous obtenez des trous noirs sur les emplacements des jauges),Force gauge background image (check it if you get black holes on gauges places)
-panel_ignore_errors,Masquer les erreurs de conversion,"Hide conversion errors popups (they still will be logged in "".Panel.log.txt"" file)"
+panel_ignore_errors,Masquer les erreurs de conversion,"Hide conversion errors pop ups (they still will be logged in "".Panel.log.txt"" file)"
 panel_disable_logging,"Désactiver la journalisation (fichier "".Panel.log.txt"")","Disable logging ("".Panel.log.txt"" file will be not created/updated)"
 panel_gamma_correction,Correction gamma ({0} - clair; {1} - normal; {2} - foncé),Gamma correction ({0} - bright; {1} - normal; {2} - dark)
 panel_preserve_size,,Leave panel size as it set in XML files (uncheck if gauges appear smaller than should)
 panel_scale_up_gauge,,Scale gauge up to fit image size (uncheck if gauges too large)
-panel_taxi_lights_switch,,"Insert taxi lights automatic switch (turninig off when gears lever in upper position, on - lower)"
+panel_taxi_lights_switch,,"Insert taxi lights automatic switch (turning off when gears lever in upper position, on - lower)"
 panel_not_found,Aucune panneau jauge trouvée,No panels gauges found
 panel_transparent_mask,,Force mask background transparency (uncheck if gauges elements missing black backgrounds)
 panel_extract_ac_cabs_notice,,"Before gauges conversion can be applied, panel data extraction should be performed. Content of CAB files inside of aircraft panel folder(s) will be extracted and then used by the program as data source (usually XML and BMP files). Sometimes, panel folder does not contain any CAB files as gauges sources already extracted so you don't need to do anything.\nIf you want to edit some of the images or gauges parameters, you need apply changes to the content of extracted folders, not conversion results."
-panel_extract_fsx_cabs_notice,,"If you have Flight SImulator X installed, you can apply default panel sources extraction, so if any of add-on aircraft using default gauges, program will be able to load its data and use for conversion. All extracted files will be stored in the ""\Community\legacy-vcockpits-instruments\.FSX"" directory.\nIf you have no FSX installed just leave this option untouched, but some gauges may be not converted successfully. You may ask your friends to share this folder with you, you don't need whole game for this purpose."
+panel_extract_fsx_cabs_notice,,"If you have Flight SImulator X installed, you need to apply default panel resources extraction at least once, so if any of add-on aircraft will require default gauges, program will be able to load this data and use for conversion.\nAlso, some FSX aircraft installers copy gauges data into Gauges folder outside of aircraft directory, so if you will get error messages in conversion process about missing resources, try to apply this function again. Keep all aircraft in single folder with proper structure (should contain Gauges and SimObjects) so program will be able to find newerly added resources.\nExtracted files will be stored in the ""{0}"" directory."
 panel_convert_gauges_notice,,"Panels conversion script will parse "".panel.cfg"" file(s), then load all required XMLs and convert their data into modern format - HTML/JS/CSS. You can see some options under panels list that will affect conversion results.\nIt is recommended to check them all, however you can disable some of them to solve minor issues. If conversion failed and you can't see any/some gauges at all in the cockpit - these option will not help, it may happen because these gauges contained in DLL/GAU files and can't be extracted, or converted script(s) has an error inside that probably will be fixed in next program update."
 panel_extracting_cab,Extraction {0},Extracting {0}
 panel_current_fsx_path,Le chemin FSX actuel est {0},Current FSX path is {0}
@@ -185,8 +202,9 @@ panel_fsx_extract_notice3,Appuyez sur CANCEL pour annuler,Press CANCEL to abort
 panel_fsx_header,Extractions de fichiers FSX CAB,FSX CAB files extractions
 panel_gauges_not_found,Dossier Jauges ou SimObjects \ Airplanes introuvable dans {0},Gauges or SimObjects\Airplanes folder not found in {0}
 TextExpressionButton,Tester le convertisseur d'expressions FSX,Test FSX Expressions converter
-panel_broken_switches,,Vote for clickable switches fix whishlist item 
+panel_broken_switches,,Vote for clickable switches fix wishlist item 
 panel_broken_switches_notice,,"Since one of the past MSFS updates clickable switches and other interactive elements no longer work in the legacy cockpits. This issue can't be solved by any kind of model or config files manipulations. If you want this issue to be fixed by developers, press the button below and vote for the wishlist item."
+,,Insert custom afterburners script (uncheck if model does not have afterburners animation)
 ABOUT TAB,,
 about_colored_header,Guide Visuel,Colored labels
 about_links_header,Liens et crédits,Links and credits

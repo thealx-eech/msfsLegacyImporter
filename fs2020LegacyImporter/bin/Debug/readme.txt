@@ -25,6 +25,8 @@ Program still in development stage, but you can participate in testing and repor
 - set speed indicator limits from cruise_speed value
 - detect buggy engine values (engine_type and afterburner_available)
 - adjust engines output power
+- apply afterburner thrust
+- display afterburner flame animation
 - fix runway issues (gears raised, fuel pump disabled, parking brakes disabled)
 - fix contact points duplicates (stuck landing gear issue)
 - notify about contact point formatting issues
@@ -106,13 +108,14 @@ To avoid parsing issues, keep files formatting properly (comment symbol is ";", 
 
 3.1 Script checking values of critical parameters
 3.2 If checkbox checked near some of the wrong parameter, they will be set to "0" after button pressed
-3.3 Engines power rough adjustments buttons change value of "static_thrust" for turbine engine and "power_scalar" for piston engine
-3.4 AIR data import available if TXT dump of AIR file exists in aircraft folder
-3.5 To create AIR dump, get AirUpdate program ( http://www.mudpond.org/ ) and unpack it into Importer directory, launch it, select AIR file inside of aircraft folder, check "Full dump" and press "Dump" button. TXT file should be saved in aircraft directory with same name as AIR file (with .txt extension)
-3.6 All available values will appear in comparison table "AIR value" - "current or default" (if current is missing) value, it is recommended to validate all lines visually 
-3.7 You can import all available values, or ignore zero/flat tables
-3.8 After import, you'll need to fix all untouched modern values manually
-3.9 List of sections at the bottom (same as 2.7-2.8)
+3.3 For jets afterburner adjustment available. You can use this tool to apply afterburner boost to engines parameters. Thrust will be increased for throttle positions greater than threshold value, same value will be set as a start point for flame animation (script should be inserted from Panels tab, and also variables replaced from Models tab). Table below represents thrust modifier (Y axis, from 0 to 300%) and throttle position (from 0 to 100%). Two lines are subsonic (black) and supersonic (red) speed. Be sure Black line stays between 100% and 200%, otherwise you will get too much power.
+3.4 Engines power rough adjustments buttons change value of "static_thrust" for turbine engine and "power_scalar" for piston engine
+3.5 AIR data import available if TXT dump of AIR file exists in aircraft folder
+3.6 To create AIR dump, get AirUpdate program ( http://www.mudpond.org/ ) and unpack it into Importer directory, launch it, select AIR file inside of aircraft folder, check "Full dump" and press "Dump" button. TXT file should be saved in aircraft directory with same name as AIR file (with .txt extension)
+3.7 All available values will appear in comparison table "AIR value" - "current or default" (if current is missing) value, it is recommended to validate all lines visually 
+3.8 You can import all available values, or ignore zero/flat tables
+3.9 After import, you'll need to fix all untouched modern values manually
+3.10 List of sections at the bottom (same as 2.7-2.8)
 
 4. FlightModel
 
@@ -152,11 +155,13 @@ To avoid parsing issues, keep files formatting properly (comment symbol is ";", 
 
 9. Models
 
-9.1 Program read model.cfg file and get name of "interior" model, if it exists. Clickable elements in that model can be disabled to avoid game crash since MSFS ver1.8.3.0, or for any other reason
-9.2 After Remove button pressed, backup of MDL file will be created (only if it does not exists) and _CVC_ folder (cache) of this aircraft cleared
-9.3 Original MDL can be restored by clicking button in right top corner of Models tab
-9.4 If not interior file found - you will see notification about that, usually such arcraft cause CTD
-9.5 If MDL file has wrong format key (should be MDLX) - you will see notification about that, usually such arcraft cause CTD
+9.1 Program read model.cfg file(s) and get name of "exterior" model. To make possible for custom script (that can be injected on Panels tab) to control afterburner animation, broken variables should be replaced in exterior models content.
+9.2 This process can take up to several minutes, so be patient. If models disappear from the list after processing, replacement was successful.
+9.3 Program read model.cfg file(s) and get name of "interior" model, if it exists. Clickable elements in that model can be disabled to avoid game crash since MSFS ver1.8.3.0, or for any other reason
+9.4 After Remove button pressed, backup of MDL file will be created (only if it does not exists) and _CVC_ folder (cache) of this aircraft cleared
+9.5 Original MDL can be restored by clicking button in right top corner of Models tab
+9.6 If no interior file found - you will see notification about that, such arcraft will cause CTD
+9.7 If MDL file has wrong format key (should be MDLX) - you will see notification about that, usually such arcraft cause CTD
 
 10 Sounds
 
@@ -176,14 +181,15 @@ To avoid parsing issues, keep files formatting properly (comment symbol is ";", 
 11.8 If gauge size is smaller that spot that exists for it in the mode, check "Leave panel sizeas it in XML" option
 11.9 If gauge size does not look right (smaller or larger), check "Scale gauge to fit image" option
 11.10 If you want taxi lights to be disabled and enabled automatically (depending on landing gears lever position), check "Insert taxi lights switch" option
-11.11 If you are not willing to debug conversion process, check "Hide conversion errors popup" checkbox (detailed log still will be stored in the ".Panel.log.txt" file
-11.12 If you experience any problems with imported gauges, you can try again with next update - each fixed issue may affect any FSX aircraft.
-11.13 Possible results:
-11.13.1 Gauges may get same view as originally in FSX and work as expected, i.e. conversion succeed
-11.13.2 Gauges may get texture background and wireframe removed from it, even if it will not functioning properly; wait for updates or check generated JS files
-11.13.3 Game crashes or no gauges appear (try to check "Force gauge background") or you see total mess in the cockpit (you can try to copy required files that mentioned in warning messages)
-11.13.4 App crashes when you press one of the import buttons, usually because of XML file format issues (feel free to report)
-11.14 To remove generated panels: Press "Restore Backup" button on Panel tab, delete /Community/legacy-vcockpits-instruments folder
+11.11 If aircraft model contain fixed afterburner variables, you can insert script that will set this variable depending on engine RPM value, so afterburner animation will be triggered.
+11.12 If you are not willing to debug conversion process, check "Hide conversion errors popup" checkbox (detailed log still will be stored in the ".Panel.log.txt" file
+11.13 If you experience any problems with imported gauges, you can try again with next update - each fixed issue may affect any FSX aircraft.
+11.14 Possible results:
+11.14.1 Gauges may get same view as originally in FSX and work as expected, i.e. conversion succeed
+11.14.2 Gauges may get texture background and wireframe removed from it, even if it will not functioning properly; wait for updates or check generated JS files
+11.14.3 Game crashes or no gauges appear (try to check "Force gauge background") or you see total mess in the cockpit (you can try to copy required files that mentioned in warning messages)
+11.14.4 App crashes when you press one of the import buttons, usually because of XML file format issues (feel free to report)
+11.15 To remove generated panels: Press "Restore Backup" button on Panel tab, delete /Community/legacy-vcockpits-instruments folder
 
 12. About
 

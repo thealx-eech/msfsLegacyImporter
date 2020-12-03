@@ -701,6 +701,25 @@ namespace msfsLegacyImporter
             return models;
         }
 
+        public List<string> getExteriorModels(string aircraftDirectory)
+        {
+            List<string> models = new List<string>();
+            var cfgFiles = Directory.EnumerateFiles(aircraftDirectory, "model.cfg", SearchOption.AllDirectories);
+            foreach (string currentFile in cfgFiles)
+            {
+                if (Path.GetFileName(currentFile)[0] != '.')
+                {
+                    foreach (var modelString in readCSV(File.ReadAllText(currentFile)))
+                    {
+                        if (modelString.Name == "normal")
+                            models.Add(Path.GetDirectoryName(currentFile) + "\\" + modelString.Value + ".mdl");
+                    }
+                }
+            }
+
+            return models;
+        }
+
         public List<string> getSounds(string aircraftDirectory)
         {
             List<string> sounds = new List<string>();
@@ -823,6 +842,33 @@ namespace msfsLegacyImporter
                 Value = value;
                 Comment = comment;
             }
+        }
+
+        public List<double[]>[] parseCfgDoubleTable(string table)
+        {
+            List<double[]>[] data = new List<double[]>[] { new List<double[]>(), new List<double[]>() };
+
+            List<double[]> table1 = new List<double[]>();
+            List<double[]> table2 = new List<double[]>();
+
+            foreach (string value in table.Split(','))
+            {
+
+                string[] values = value.Trim().Split(':');
+                if (values.Length == 3)
+                {
+                    Double.TryParse(values[0], out double res0);
+                    Double.TryParse(values[1], out double res1);
+                    Double.TryParse(values[2], out double res2);
+                    table1.Add(new double[] { res0, res1 });
+                    table2.Add(new double[] { res0, res2 });
+                }
+            }
+
+            data[0] = table1;
+            data[1] = table2;
+
+            return data;
         }
     }
 }

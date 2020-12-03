@@ -206,6 +206,8 @@
                         </WrapPanel>
                         <StackPanel Name="EnginesData" VerticalAlignment="Top">
                         </StackPanel>
+                        <StackPanel Name="AfterburnerData" VerticalAlignment="Top">
+                        </StackPanel>
                         <TextBlock Name="engines_power" TextWrapping="Wrap" Text="engines_power" Foreground="Black" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,-1" Background="Transparent"/>
                         <WrapPanel HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0,20,0,40" VerticalAlignment="Top">
                             <Button Width="auto" Click="BtnEnginePowerClick" Tag="0.5">-50%</Button>
@@ -303,7 +305,7 @@
                         <WrapPanel HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0" VerticalAlignment="Top">
                             <Button Content="ModelBackupButton" Margin="1" Name="ModelBackupButton" Tag="" Click="CfgBackupClick" VerticalAlignment="Top" HorizontalAlignment="right"  />
                         </WrapPanel>
-                        <StackPanel Name="MissingLiveryModels" VerticalAlignment="Top" >
+                        <StackPanel Name="ModelAfterburnerList" VerticalAlignment="Top" >
                         </StackPanel>
                         <StackPanel Name="ModelsList" VerticalAlignment="Top" >
                         </StackPanel>
@@ -379,7 +381,7 @@
                                     </Hyperlink>
                                 </TextBlock>
                                 <TextBlock>
-                                    <Hyperlink NavigateUri="http://eech.online/msfslegacyimporter/" RequestNavigate="Hyperlink_RequestNavigate">
+                                    <Hyperlink NavigateUri="http://msfs.touching.cloud/legacyimporter/" RequestNavigate="Hyperlink_RequestNavigate">
                                         Importer releases archive
                                     </Hyperlink>
                                 </TextBlock>
@@ -422,7 +424,7 @@
                                 </TextBlock>
 
                                 <TextBlock TextWrapping="Wrap" Margin="0,20,0,0" TextAlignment="Center">To send direct message, visit Discord channel</TextBlock>
-                                <TextBlock TextWrapping="Wrap" Margin="0,0,0,20" TextAlignment="Center">or email to info@eech.online</TextBlock>
+                                <TextBlock TextWrapping="Wrap" Margin="0,0,0,20" TextAlignment="Center">or email on msfs@touching.cloud</TextBlock>
                             </StackPanel>
                             <StackPanel Name="Translation" Grid.Column="1" Grid.Row="0" VerticalAlignment="Top" Margin="5" Width="auto" HorizontalAlignment="Center">
                                 <TextBlock Name="about_translation_header" TextWrapping="Wrap" Text="about_translation_header" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,0,0,10" Background="Transparent"/>

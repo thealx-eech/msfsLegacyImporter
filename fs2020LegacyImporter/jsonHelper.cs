@@ -53,9 +53,9 @@ namespace msfsLegacyImporter
                                 {
                                     if (alias.Name == "alias") // copy alias files
                                     {
-                                        Console.WriteLine("Processing alias from " + SourceFolder + "\\.." + alias.Value + " to " + Path.GetDirectoryName(file));
+                                        Console.WriteLine("Processing alias from " + SourceFolder + "\\.." + alias.Value + " to " + System.IO.Path.GetDirectoryName(file));
                                         try {
-                                            CloneDirectory(SourceFolder + "\\..\\" + alias.Value, Path.GetDirectoryName(file));
+                                            CloneDirectory(SourceFolder + "\\..\\" + alias.Value, System.IO.Path.GetDirectoryName(file));
                                         }
                                         catch (Exception ex)
                                         {
@@ -128,9 +128,9 @@ namespace msfsLegacyImporter
                         var txtFiles = Directory.EnumerateFiles(subdir, "*.*", SearchOption.TopDirectoryOnly);
                         foreach (string currentFile in txtFiles)
                         {
-                            if (Path.GetFileName(currentFile)[0] != '.' && Path.GetExtension(currentFile).ToLower() != "json" && Path.GetExtension(currentFile).ToLower() != "exe"
-                                && Path.GetExtension(currentFile).ToLower() != "zip" && Path.GetExtension(currentFile).ToLower() != "rar" && Path.GetExtension(currentFile).ToLower() != "7z"
-                                 && Path.GetExtension(currentFile).ToLower() != "dll" && Path.GetExtension(currentFile).ToLower() != "gau")
+                            if (System.IO.Path.GetFileName(currentFile)[0] != '.' && System.IO.Path.GetExtension(currentFile).ToLower() != "json" && System.IO.Path.GetExtension(currentFile).ToLower() != "exe"
+                                && System.IO.Path.GetExtension(currentFile).ToLower() != "zip" && System.IO.Path.GetExtension(currentFile).ToLower() != "rar" && System.IO.Path.GetExtension(currentFile).ToLower() != "7z"
+                                 && System.IO.Path.GetExtension(currentFile).ToLower() != "dll" && System.IO.Path.GetExtension(currentFile).ToLower() != "gau")
                             {
                                 FileInfo info = new System.IO.FileInfo(currentFile);
                                 array[i] = new Content(currentFile.Replace(TargetFolder, "").Replace("\\", "/").Trim('/'), info.Length, info.LastWriteTimeUtc.ToFileTimeUtc());
@@ -165,17 +165,17 @@ namespace msfsLegacyImporter
         {
             foreach (var directory in Directory.GetDirectories(root))
             {
-                string dirName = Path.GetFileName(directory);
-                if (!Directory.Exists(Path.Combine(dest, dirName)))
+                string dirName = System.IO.Path.GetFileName(directory);
+                if (!Directory.Exists(System.IO.Path.Combine(dest, dirName)))
                 {
-                    Directory.CreateDirectory(Path.Combine(dest, dirName));
+                    Directory.CreateDirectory(System.IO.Path.Combine(dest, dirName));
                 }
-                CloneDirectory(directory, Path.Combine(dest, dirName));
+                CloneDirectory(directory, System.IO.Path.Combine(dest, dirName));
             }
 
             foreach (var file in Directory.GetFiles(root))
             {
-                File.Copy(file, Path.Combine(dest, Path.GetFileName(file)), true);
+                File.Copy(file, System.IO.Path.Combine(dest, System.IO.Path.GetFileName(file)), true);
             }
         }
     }

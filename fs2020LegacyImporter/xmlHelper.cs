@@ -71,7 +71,7 @@ namespace msfsLegacyImporter
         private string errors;
 
 
-        public void insertFsxGauge(object sender, string aircraftDirectory, string projectDirectory, string chkContent, float[] atts, cfgHelper CfgHelper, fsxVarHelper FsxVarHelper, jsonHelper JSONHelper)
+        public void insertFsxGauge(MainWindow parent, object sender, string aircraftDirectory, string projectDirectory, string chkContent, float[] atts, cfgHelper CfgHelper, fsxVarHelper FsxVarHelper, jsonHelper JSONHelper)
         {
             string mainFile = aircraftDirectory + "\\" + (string)chkContent;
             string backupFile = Path.GetDirectoryName(mainFile) + "\\." + Path.GetFileName(mainFile);
@@ -184,7 +184,49 @@ namespace msfsLegacyImporter
                             js += "            SimVar.SetSimVarValue(\"K:TOGGLE_TAXI_LIGHTS\", \"bool\", false)" + Environment.NewLine;
                             js += "         else if (!SimVar.GetSimVarValue(\"LIGHT TAXI\", \"bool\") && gears_extracted)" + Environment.NewLine;
                             js += "            SimVar.SetSimVarValue(\"K:TOGGLE_TAXI_LIGHTS\", \"bool\", true)" + Environment.NewLine;
-                            js += "       }" + Environment.NewLine;
+                            js += "       }" + Environment.NewLine + Environment.NewLine;
+                        }
+
+                        if (atts[7] == 1)
+                        {
+                            double[] ABdata = parent.getABdata();
+
+                            js += "       // AFTERBURNER CONTROL START" + Environment.NewLine;
+                            js += "       if (SimVar.GetSimVarValue(\"ENGINE TYPE\",\"Enum\") == 1) {" + Environment.NewLine;
+                            js += "       		var stages = " + (ABdata[4] > 0 ? ABdata[4] : 1) + ";" + Environment.NewLine;
+                            js += "       		var threshold = " + (100 * (ABdata[1] > 0 ? ABdata[1] : ABdata[1])) + ";" + Environment.NewLine;
+                            js += "       		var eng;" + Environment.NewLine;
+                            js += "       		var currABpct = Math.ceil(parseFloat(SimVar.GetSimVarValue(\"L:TURB ENG AFTERBURNER PCT ACTIVE\",\"percent\")) / (100 / stages));" + Environment.NewLine + Environment.NewLine; ;
+                            js += "       		for (eng = 1; eng <= 4; eng++) {" + Environment.NewLine;
+                            js += "       			var rpm = parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:\"+eng,\"percent\"));" + Environment.NewLine;
+                            js += "       			var i;" + Environment.NewLine + Environment.NewLine; ;
+                            js += "       			var currABstage = SimVar.GetSimVarValue(\"L:TURB ENG AFTERBURNER STAGE ACTIVE:\"+eng,\"number\");" + Environment.NewLine;
+                            js += "       			var currABbool = SimVar.GetSimVarValue(\"L:TURB ENG AFTERBURNER:\"+eng,\"boolean\");" + Environment.NewLine;
+                            js += "       			var currABbool2 = SimVar.GetSimVarValue(\"L:TURB ENG\"+eng+\" AFTERBURNER\",\"boolean\");" + Environment.NewLine + Environment.NewLine; ;
+                            js += "       			var afterburnedEnabled = false;" + Environment.NewLine + Environment.NewLine; ;
+                            js += "       			var step = (100 - threshold) / stages;" + Environment.NewLine;
+                            js += "       			for(i=1; i <= stages; i++) {" + Environment.NewLine;
+                            js += "       				if (rpm >= threshold + step * (i - 1) && (i == stages || rpm < threshold + step * i)) {" + Environment.NewLine;
+                            js += "       					afterburnedEnabled = true;" + Environment.NewLine;
+                            js += "       					if (currABstage != i || eng == 1 && currABpct != i) {" + Environment.NewLine;
+                            js += "       						SimVar.SetSimVarValue(\"L:TURB ENG AFTERBURNER STAGE ACTIVE:\"+eng,\"number\",i);" + Environment.NewLine + Environment.NewLine; ;
+                            js += "       						if (eng == 1)" + Environment.NewLine;
+                            js += "       							SimVar.SetSimVarValue(\"L:TURB ENG AFTERBURNER PCT ACTIVE\",\"percent\",100 / stages * i);" + Environment.NewLine;
+                            js += "       					}" + Environment.NewLine;
+                            js += "       				}" + Environment.NewLine;
+                            js += "       			}" + Environment.NewLine + Environment.NewLine; ;
+                            js += "       			if (!afterburnedEnabled && (currABstage != 0 || currABpct!= 0 || currABbool != false || currABbool2 != false)) {" + Environment.NewLine;
+                            js += "       				SimVar.SetSimVarValue(\"L:TURB ENG AFTERBURNER STAGE ACTIVE:\"+eng,\"number\",0);" + Environment.NewLine;
+                            js += "       				SimVar.SetSimVarValue(\"L:TURB ENG AFTERBURNER PCT ACTIVE\",\"percent\",0);" + Environment.NewLine;
+                            js += "       				SimVar.SetSimVarValue(\"L:TURB ENG AFTERBURNER:\"+eng,\"boolean\",false);" + Environment.NewLine;
+                            js += "       				SimVar.SetSimVarValue(\"L:TURB ENG\"+eng+\" AFTERBURNER\",\"boolean\",false);" + Environment.NewLine;
+                            js += "       			} else if (afterburnedEnabled && (currABbool == false || currABbool2 == false)) {" + Environment.NewLine;
+                            js += "       				SimVar.SetSimVarValue(\"L:TURB ENG AFTERBURNER:\"+eng,\"boolean\",true);" + Environment.NewLine;
+                            js += "       				SimVar.SetSimVarValue(\"L:TURB ENG\"+eng+\" AFTERBURNER\",\"boolean\",true);" + Environment.NewLine;
+                            js += "       			}" + Environment.NewLine;
+                            js += "       		}" + Environment.NewLine;
+                            js += "       	}" + Environment.NewLine;
+                            js += "       // AFTERBURNER CONTROL END" + Environment.NewLine;
                         }
 
                         string baseFolder = /*projectDirectory.TrimEnd('\\')*/ Path.GetDirectoryName(projectDirectory.TrimEnd('\\')) + "\\legacy-vcockpits-instruments\\";
@@ -210,6 +252,7 @@ namespace msfsLegacyImporter
                             }
                         }
 
+                        string[] last = gaugesList.Last();
                         foreach (var gaugeData in gaugesList)
                         {
                             gaugeGroup = Path.GetFileName(gaugeData[0].Split('!')[0].Trim().ToLower());
@@ -253,7 +296,11 @@ namespace msfsLegacyImporter
                                         Directory.Move(panelDir, Path.GetDirectoryName(mainFile) + "\\." + gaugeGroup); }
                                 catch { }
 
-                                continue;
+                                // LAST CHANCE TO RENDER SPECIAL SCRIPT
+                                if (!gaugeData.Equals(last) || atts[4] != 1 && atts[7] != 1)
+                                    continue;
+                                else
+                                    html = " ";
                             }
 
                             // SET UP GAUGE
@@ -845,7 +892,7 @@ namespace msfsLegacyImporter
                 XElement VerticalAlign = GaugeText.Element("VerticalAlign");
                 XElement WidthFit = GaugeText.Element("WidthFit");
 
-                string value = FsxVarHelper.fsx2msfsGaugeString(GaugeString.Value.Trim(), this);
+                string value = GaugeString != null ? FsxVarHelper.fsx2msfsGaugeString(GaugeString.Value.Trim(), this) : "";
 
                 string[] GaugeSize = getXYvalue(Size, false);
 

@@ -467,6 +467,7 @@ namespace msfsLegacyImporter
                 case string hn when hn.Equals("(A:Ambient Wind VELOCITY,knots)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"AMBIENT WIND VELOCITY\", \"knots\"))";
                 case string hn when hn.Equals("(A:Ambient Wind VELOCITY,kilometers per hour)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Ambient Wind VELOCITY,kilometer/hour)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"AMBIENT WIND VELOCITY\", \"kilometers per hour\"))";
                 case string hn when hn.Equals("(A:Ambient Wind VELOCITY,mph)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"AMBIENT WIND VELOCITY\", \"mph\"))";
@@ -679,26 +680,6 @@ namespace msfsLegacyImporter
                 case string hn when hn.Equals("(A:Turb eng4 N2,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng4 N2 RPM,percent)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM:4\", \"percent\"))";
-                case string hn when hn.Equals("(A:Turb Eng1 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                case string ho when ho.Equals("(A:Eng1 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:1\", \"Pounds per hour\"))";
-                case string hn when hn.Equals("(A:Turb Eng2 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                case string ho when ho.Equals("(A:Eng2 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:2\", \"Pounds per hour\"))";
-                case string hn when hn.Equals("(A:Turb Eng3 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                case string ho when ho.Equals("(A:Eng3 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:3\", \"Pounds per hour\"))";
-                case string hn when hn.Equals("(A:Turb Eng4 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                case string ho when ho.Equals("(A:Eng4 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:4\", \"Pounds per hour\"))";
-                case string hn when hn.Equals("(A:TURB ENG1 N1,Percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:1\", \"percent\"))";
-                case string hn when hn.Equals("(A:TURB ENG2 N1,Percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:2\", \"percent\"))";
-                case string hn when hn.Equals("(A:TURB ENG3 N1,Percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:3\", \"percent\"))";
-                case string hn when hn.Equals("(A:TURB ENG4 N1,Percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:4\", \"percent\"))";
                 case string hn when hn.Equals("(A:TURB ENG1 N1,part)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:1\", \"part\"))";
                 case string hn when hn.Equals("(A:TURB ENG2 N1,part)", StringComparison.InvariantCultureIgnoreCase):
@@ -723,6 +704,18 @@ namespace msfsLegacyImporter
                     return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM: 3\", \"percent\"))";
                 case string hn when hn.Equals("(A:TURB ENG4 corrected N2,Percent)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM: 4\", \"percent\"))";
+                case string hn when hn.Equals("(A:Turb Eng1 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Eng1 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:1\", \"Pounds per hour\"))";
+                case string hn when hn.Equals("(A:Turb Eng2 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Eng2 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:2\", \"Pounds per hour\"))";
+                case string hn when hn.Equals("(A:Turb Eng3 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Eng3 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:3\", \"Pounds per hour\"))";
+                case string hn when hn.Equals("(A:Turb Eng4 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Eng4 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:4\", \"Pounds per hour\"))";
                 case string hn when hn.Equals("(A:Hydraulic1 Pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng1 hydraulic pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:Eng hydraulic pressure:1,psi)", StringComparison.InvariantCultureIgnoreCase):
@@ -769,12 +762,65 @@ namespace msfsLegacyImporter
                     return "parseFloat(SimVar.GetSimVarValue(\"ENG PRESSURE RATIO:3\", \"ratio\"))";
                 case string ho when ho.Equals("(A:Turb eng4 pressure ratio,ratio)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"ENG PRESSURE RATIO:4\", \"ratio\"))";
+                case string ho when ho.Equals("(A: Turb Eng1 Afterburner,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "(parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:1\", \"percent\")) >= 90)";
+                case string ho when ho.Equals("(A: Turb Eng2 Afterburner,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "(parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:2\", \"percent\")) >= 90)";
+                case string ho when ho.Equals("(A: Turb Eng3 Afterburner,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "(parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:3\", \"percent\")) >= 90)";
+                case string ho when ho.Equals("(A: Turb Eng4 Afterburner,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "(parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:4\", \"percent\")) >= 90)";
+
 
                 // NAV
                 case string hn when hn.Equals("(A:NAV GSI:1,percent)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:NAV1 GSI,percent)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"NAV GSI:1\", \"percent\"))";
                 case string hn when hn.Equals("(A:NAV GSI:2,percent)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:NAV2 GSI,percent)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"NAV GSI:2\", \"percent\"))";
+                case string hn when hn.Equals("(A:NAV GSI:1,number)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:NAV1 GSI,number)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV GSI:1\", \"number\"))";
+                case string hn when hn.Equals("(A:NAV GSI:2,number)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:NAV2 GSI,number)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV GSI:2\", \"number\"))";
+                case string hn when hn.Equals("(A:NAV CDI:1,number)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:NAV1 CDI,number)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV CDI:1\", \"number\"))";
+                case string hn when hn.Equals("(A:NAV CDI:2,number)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:NAV2 CDI,number)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV CDI:2\", \"number\"))";
+                case string hn when hn.Equals("(A:NAV ident:1,string)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Nav1 ident,string)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV IDENT:1\", \"string\"))";
+                case string hn when hn.Equals("(A:NAV ident:2,string)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Nav2 ident,string)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV IDENT:2\", \"string\"))";
+                case string hn when hn.Equals("(A:NAV HAS NAV:1,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Nav1 HAS NAV,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV HAS NAV:1\", \"boolean\"))";
+                case string hn when hn.Equals("(A:NAV HAS NAV:2,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Nav2 HAS NAV,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV HAS NAV:2\", \"boolean\"))";
+                case string hn when hn.Equals("(A:NAV HAS DME:1,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Nav1 HAS DME,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV HAS DME:1\", \"boolean\"))";
+                case string hn when hn.Equals("(A:NAV HAS DME:2,bool)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Nav2 HAS DME,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV HAS DME:2\", \"boolean\"))";
+                case string hn when hn.Equals("(A:NAV DME:1,kilometers)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Nav1 DME,kilometers)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV DME:1\", \"kilometers\"))";
+                case string hn when hn.Equals("(A:NAV DME:2,kilometers)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Nav2 DME,kilometers)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV DME:2\", \"kilometers\"))";
+                case string hn when hn.Equals("(A:NAV DME:1,nmiles)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Nav1 DME,nmiles)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV DME:1\", \"nautical mile\"))";
+                case string hn when hn.Equals("(A:NAV DME:2,nmiles)", StringComparison.InvariantCultureIgnoreCase):
+                case string ho when ho.Equals("(A:Nav2 DME,nmiles)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"NAV DME:2\", \"nautical mile\"))";
                 case string hn when hn.Equals("(A:NAV1 OBS,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:NAV1 radial,degrees)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"NAV OBS:1\", \"degrees\"))";
@@ -811,7 +857,7 @@ namespace msfsLegacyImporter
                 case string ho when ho.Equals("(A:GPS WP BEARING,degrees)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"GPS WP BEARING\", \"degree\"))";
                 case string ho when ho.Equals("(A:GPS drives nav1,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GPS DRIVES NAV1\", \"Boolean\"))";
+                    return "parseFloat(SimVar.GetSimVarValue(\"GPS DRIVES NAV1\", \"boolean\"))";
                 case string ho when ho.Equals("(A:Nav1 Active Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"NAV ACTIVE FREQUENCY:1\", \"MHz\"))";
                 case string ho when ho.Equals("(A:Nav1 Active Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
@@ -895,7 +941,7 @@ namespace msfsLegacyImporter
                 case string hn when hn.Equals("(A:Autopilot heading lock dir,degree)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"degree\"))";
                 case string hn when hn.Equals("(A:AUTOPILOT FLIGHT DIRECTOR ACTIVE,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR ACTIVE\", \"bool\"))";
+                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR ACTIVE\", \"boolean\"))";
                 case string hn when hn.Equals("(A:Autopilot flight director bank,degrees)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"degree\"))";
                 case string hn when hn.Equals("(A:Autopilot flight director bank,radians)", StringComparison.InvariantCultureIgnoreCase):
@@ -954,107 +1000,116 @@ namespace msfsLegacyImporter
                     return "parseFloat(SimVar.GetSimVarValue(\"ELECTRICAL BATTERY BUS AMPS\", \"amperes\"))";
                 case string hn when hn.Equals("(A:ELECTRICAL BATTERY BUS VOLTAGE,volts)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"ELECTRICAL BATTERY BUS VOLTAGE\", \"volts\"))";
+                case string hn when hn.Equals("(A:General Eng Generator Active:1,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:1\", \"boolean\"))";
+                case string hn when hn.Equals("(A:General Eng Generator Active:2,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:2\", \"boolean\"))";
+                case string hn when hn.Equals("(A:General Eng Generator Active:3,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:3\", \"boolean\"))";
+                case string hn when hn.Equals("(A:General Eng Generator Active:4,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:4\", \"boolean\"))";
+                case string hn when hn.Equals("(A:General eng1 anti ice position,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG ANTI ICE:1\", \"boolean\"))";
+                case string hn when hn.Equals("(A:General eng2 anti ice position,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG ANTI ICE:2\", \"boolean\"))";
+                case string hn when hn.Equals("(A:General eng3 anti ice position,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG ANTI ICE:3\", \"boolean\"))";
+                case string hn when hn.Equals("(A:General eng4 anti ice position,bool)", StringComparison.InvariantCultureIgnoreCase):
+                    return "parseFloat(SimVar.GetSimVarValue(\"ENG ANTI ICE:4\", \"boolean\"))";
+
 
                 case string hn when hn.Equals("(A:Sim On Ground,bool)", StringComparison.InvariantCultureIgnoreCase):
                     return "parseFloat(SimVar.GetSimVarValue(\"SIM ON GROUND\", \"boolean\"))";
 
                 /*
-                (A:Aileron Position,degrees)
-                (A:Airspeed Barber Pole,knots)
-                (A:Apu On Fire Detected,bool)
-                (A:Attitude bars position,position)
-                (A:Auto brake switch cb,enum)
-                (A:BARBER POLE MACH,mach)
-                (A:Brake Dependent Hydraulic Pressure,PSF)
-                (A:BRAKE INDICATOR,enum)
-                (A:Elevator position,degrees)
-                (A:Eng1 On Fire,bool)
-                (A:Eng2 On Fire,bool)
-                (A:Eng3 On Fire,bool)
-                (A:Eng4 On Fire,bool)
-                (A:Gear Warning,bool)
-                (A:General Eng Generator Active:1,bool)
-                (A:General Eng Generator Active:2,bool)
-                (A:General Eng Generator Active:3,bool)
-                (A:General Eng Generator Active:4,bool)
-                (A:General eng1 anti ice position,bool)
-                (A:HSI CDI needle valid,bool)
-                (A:HSI CDI needle,number)
-                (A:HSI GSI needle valid,bool)
-                (A:HSI GSI needle,number)
-                (A:INCIDENCE ALPHA,number)
-                (A:Light Panel,bool)
-                (A:Rudder Position,degrees)
-                (A:STALL ALPHA,number)
-                (A:Turb Eng1 Afterburner,bool)
+-(A:Aileron Position,degrees)
+-(A:Airspeed Barber Pole,knots)
++(A:AMBIENT AMBIENT VELOCITY,kilometer/hour)
+-(A:Apu On Fire Detected,bool)
+-(A:APU PCT RPM,part)
+-(A:APU PCT RPM,percent over 100)
+-(A:APU Volts,volts)
+-(A:Attitude bars position,position)
+-(A:Auto brake switch cb,enum)
+(A:Autopilot airspeed hold var,knots)
+(A:Autopilot airspeed hold,bool)
+(A:AUTOPILOT ALTITUDE LOCK VAR,FEET)
+(A:Autopilot altitude lock var,feet)
+(A:AUTOPILOT ALTITUDE LOCK VAR,METERS)
+(A:Autopilot altitude lock var,meters)
+(A:AUTOPILOT ALTITUDE LOCK,bool)
+(A:Autopilot altitude lock,bool)
+(A:AUTOPILOT APPROACH HOLD,bool)
+(A:AUTOPILOT BACKCOURSE HOLD,bool)
+(A:Autopilot Glideslope Hold,bool)
+(A:AUTOPILOT HEADING LOCK,bool)
+(A:Autopilot heading lock,bool)
+(A:Autopilot mach hold var,mach)
+(A:Autopilot mach hold,bool)
+(A:AUTOPILOT MASTER,bool)
+(A:Autopilot master,bool)
+(A:Autopilot nav1 lock,bool)
+(A:Autopilot takeoff power active,bool)
+(A:AUTOPILOT THROTTLE ARM,bool)
+(A:AUTOPILOT VERTICAL HOLD VAR,feet per minute)
+(A:Autopilot vertical hold var,feet per minute)
+(A:Autopilot vertical hold var,ft/min)
+(A:AUTOPILOT VERTICAL HOLD VAR,meters per minute)
+-(A:AUTOTHROTTLE ACTIVE,bool)
+-(A:BARBER POLE MACH,mach)
+-(A:Brake Dependent Hydraulic Pressure,PSF)
+-(A:BRAKE INDICATOR,enum)
+(A:BRAKE LEFT POSITION,percent)
+(A:BRAKE RIGHT POSITION,percent)
+-(A:Electrical avionics bus voltage,volts)
+(A:Electrical genalt1 bus amps,amps)
+(A:ELECTRICAL GENALT1 BUS AMPS,amps)
+(A:Electrical genalt2 bus amps,amps)
+(A:ELECTRICAL GENALT2 BUS AMPS,amps)
+(A:Electrical main bus voltage,volts)
+(A:Electrical total load amps,amps)
+(A:Elevator position,degrees)
+(A:ELEVATOR POSITION,degrees)
+(A:Eng1 fuel flow PPH:@ENGINE_NUMBER,pounds per hour)
+(A:Eng1 hydraulic pressure:1,psi)
+(A:Eng1 On Fire,bool)
+(A:Eng2 fuel flow PPH:@ENGINE_NUMBER,pounds per hour)
+(A:Eng2 hydraulic pressure:1,psi)
+(A:Eng2 On Fire,bool)
+(A:Eng3 On Fire,bool)
+(A:Eng4 On Fire,bool)
+(A:FLAPS HANDLE PERCENT,percent)
+(A:fly by wire alpha protection,bool)
+(A:Gear left position,percent)
+(A:Gear Warning,bool)
 
-                (A:Electrical avionics bus voltage,volts)
-                (A:ELECTRICAL GENALT1 BUS AMPS,amps)
-                (A:ELECTRICAL GENALT2 BUS AMPS,amps)
-                (A:Electrical main bus voltage,volts)
-                (A:Electrical total load amps,amps)
+(A:HSI CDI needle valid,bool)
+(A:HSI CDI NEEDLE VALID:1,bool)
+(A:HSI CDI needle,number)
+(A:HSI distance,nmiles)
+(A:HSI GSI needle valid,bool)
+(A:HSI GSI needle,number)
+(A:HSI has localizer,bool)
+(A:HSI TF FLAGS,enum)
+(A:INCIDENCE ALPHA,number)
+(A:Inner Marker,bool)
+(A:Launchbar Position,percent)
+(A:Light Panel,bool)
+(A:Middle Marker,bool)
+(A:NAV GS FLAG:2,bool)
+(A:NAV HAS GLIDE SLOPE,bool)
+(A:NAV TOFROM:2,enum)
 
-                (A:HSI CDI needle valid,bool)
-                (A:HSI CDI NEEDLE VALID:1,bool)
-                (A:HSI CDI needle,number)
-                (A:HSI distance,nmiles)
-                (A:HSI GSI needle valid,bool)
-                (A:HSI GSI needle,number)
-                (A:HSI has localizer,bool)
-                (A:HSI TF FLAGS,enum)
 
-                (A:NAV GS FLAG: 2,bool)
-                (A:NAV HAS GLIDE SLOPE,bool)
-                (A:NAV HAS NAV: 2,bool)
-                (A:NAV TOFROM: 2,enum)
-                (A:Nav1 ident,string)
-                (A:NAV2 CDI,number)
-                (A:NAV2 DME,kilometers)
-                (A:NAV2 DME,nmiles)
-                (A:NAV2 GSI,number)
-                (A:NAV2 HAS NAV,bool)
-                (A:Nav2 ident,string)
-
-                (A:Autopilot airspeed hold var,knots)
-                (A:Autopilot altitude lock var,feet)
-                (A:Autopilot mach hold var,mach)
-                (A:Autopilot vertical hold var,feet per minute)
-                (A:Autopilot airspeed hold,bool)
-                (A:Autopilot altitude lock var,feet)
-                (A:Autopilot altitude lock var,meters)
-                (A:Autopilot altitude lock,bool)
-                (A:AUTOPILOT APPROACH HOLD,bool)
-                (A:AUTOPILOT BACKCOURSE HOLD,bool)
-                (A:Autopilot Glideslope Hold,bool)
-                (A:Autopilot heading lock,bool)
-                (A:Autopilot master,bool)
-                (A:Autopilot nav1 lock,bool)
-                (A:Autopilot takeoff power active,bool)
-                (A:AUTOPILOT THROTTLE ARM,bool)
-                (A:AUTOPILOT VERTICAL HOLD VAR,meters per minute)
-                (A:AUTOTHROTTLE ACTIVE,bool)
-
-                (A:APU PCT RPM,part)
-                (A:APU PCT RPM,percent over 100)
-                (A:APU Volts,volts)
-                (A:Auto brake switch cb,enum)
-                (A:BRAKE LEFT POSITION,percent)
-                (A:BRAKE RIGHT POSITION,percent)
-                (A:ELEVATOR POSITION,degrees)
-                (A:Eng1 fuel flow PPH: @ENGINE_NUMBER,pounds per hour)
-                (A:Eng2 fuel flow PPH: @ENGINE_NUMBER,pounds per hour)
-                (A:FLAPS HANDLE PERCENT,percent)
-                (A:fly by wire alpha protection,bool)
-                (A:Gear left position,percent)
-                (A:Inner Marker,bool)
-                (A:Launchbar Position,percent)
-                (A:Middle Marker,bool)
-                (A:Outer Marker,bool)
-                (A:SIM ON GROUND,bool)
-                (A:TOTAL AIR TEMPERATURE,Celsius)
-                (A:Turb Eng Max Torque Percent:1,part)
-                (A:Turb Eng Max Torque Percent:2,part)
-                (A:Turn coordinator ball,position)
+(A:Outer Marker,bool)
+(A:Rudder Position,degrees)
+(A:STALL ALPHA,number)
+(A:Trailing Edge Flaps0 Left percent,percent)
+(A:Trailing edge flaps0 left percent,percent)
+(A:Turb Eng Max Torque Percent:1,part)
+(A:Turb Eng Max Torque Percent:2,part)
+(A:Turn coordinator ball,position)
+(P:Zulu time,seconds)
 
                 */
 
