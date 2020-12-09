@@ -211,5 +211,8 @@
   <ItemGroup>
     <Resource Include="mainRight.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="icon-tc.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -693,7 +693,7 @@ namespace msfsLegacyImporter
                     foreach (var modelString in readCSV(File.ReadAllText(currentFile)))
                     {
                         if (modelString.Name == "interior")
-                            models.Add(Path.GetDirectoryName(currentFile) + "\\" + modelString.Value + ".mdl");
+                            models.Add(Path.GetDirectoryName(currentFile) + "\\" + modelString.Value + (modelString.Value.ToLower().EndsWith(".mdl") ? "" : ".mdl"));
                     }
                 }
             }

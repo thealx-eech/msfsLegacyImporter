@@ -313,713 +313,713 @@ namespace msfsLegacyImporter
                 case string hp when hp.Equals("(A:Airspeed select indicated or true:2,knots)", StringComparison.InvariantCultureIgnoreCase):
                 case string hq when hq.Equals("(A:Airspeed true,knots)", StringComparison.InvariantCultureIgnoreCase):
                 case string hr when hr.Equals("(A:AIRSPEED BARBER POLE,knots)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"knots\"))";
+                    return "SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"knots\")";
                 case string hp when hp.Equals("(A:Airspeed select indicated or true,k/h)", StringComparison.InvariantCultureIgnoreCase):
                 case string hq when hq.Equals("(A:Airspeed select indicated or true,kilometers per hour)", StringComparison.InvariantCultureIgnoreCase):
                 case string hr when hr.Equals("(A:Airspeed true,k/h)", StringComparison.InvariantCultureIgnoreCase):
                 case string hs when hs.Equals("(A:Airspeed true,kilometers per hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"mph\"))";
+                    return "SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"mph\")";
                 case string hp when hp.Equals("(A:Airspeed select indicated or true,mph)", StringComparison.InvariantCultureIgnoreCase):
                 case string hq when hq.Equals("(A:Airspeed select indicated or true,miles per hour)", StringComparison.InvariantCultureIgnoreCase):
                 case string hr when hr.Equals("(A:Airspeed true,mph)", StringComparison.InvariantCultureIgnoreCase):
                 case string hs when hs.Equals("(A:Airspeed true,miles per hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"mph\"))";
+                    return "SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"mph\")";
                 case string hp when hp.Equals("(A:Airspeed indicated,knots)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED INDICATED\", \"knots\"))";
+                    return "SimVar.GetSimVarValue(\"AIRSPEED INDICATED\", \"knots\")";
                 case string hn when hn.Equals("(A:AIRSPEED INDICATED,mph)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED INDICATED\", \"mph\"))";
+                    return "SimVar.GetSimVarValue(\"AIRSPEED INDICATED\", \"mph\")";
                 case string hn when hn.Equals("(A:AIRSPEED INDICATED,k/h)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:AIRSPEED INDICATED,kilometers per hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED INDICATED\", \"kilometers per hour\"))";
+                    return "SimVar.GetSimVarValue(\"AIRSPEED INDICATED\", \"kilometers per hour\")";
                 case string hn when hn.Equals("(A:Airspeed mach,machs)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Airspeed mach,mach)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"mach\"))";
+                    return "SimVar.GetSimVarValue(\"AIRSPEED TRUE\", \"mach\")";
                 case string hn when hn.Equals("(A:ACCELERATION BODY X,feet per second squared)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ACCELERATION WORLD X\", \"feet per second squared\"), 0)";
+                    return "SimVar.GetSimVarValue(\"ACCELERATION WORLD X\", \"feet per second squared\")";
                 case string hn when hn.Equals("(A:ACCELERATION BODY Y,feet per second squared)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ACCELERATION WORLD Y\", \"feet per second squared\"), 0)";
+                    return "SimVar.GetSimVarValue(\"ACCELERATION WORLD Y\", \"feet per second squared\")";
                 case string hn when hn.Equals("(A:ACCELERATION BODY Z,feet per second squared)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ACCELERATION WORLD Z\", \"feet per second squared\"), 0)";
+                    return "SimVar.GetSimVarValue(\"ACCELERATION WORLD Z\", \"feet per second squared\")";
                 case string hn when hn.Equals("(A:ACCELERATION BODY X,feet per minute squared)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ACCELERATION WORLD X\", \"feet per minute squared\"), 0)";
+                    return "SimVar.GetSimVarValue(\"ACCELERATION WORLD X\", \"feet per minute squared\")";
                 case string hn when hn.Equals("(A:ACCELERATION BODY Y,feet per minute squared)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ACCELERATION WORLD Y\", \"feet per minute squared\"), 0)";
+                    return "SimVar.GetSimVarValue(\"ACCELERATION WORLD Y\", \"feet per minute squared\")";
                 case string hn when hn.Equals("(A:ACCELERATION BODY Z,feet per minute squared)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ACCELERATION WORLD Z\", \"feet per minute squared\"), 0)";
+                    return "SimVar.GetSimVarValue(\"ACCELERATION WORLD Z\", \"feet per minute squared\")";
                 case string hn when hn.Equals("(A:VELOCITY WORLD X,m/s)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"VELOCITY WORLD X\", \"meter per second\"))";
+                    return "SimVar.GetSimVarValue(\"VELOCITY WORLD X\", \"meter per second\")";
                 case string hn when hn.Equals("(A:VELOCITY WORLD X,knots)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"VELOCITY WORLD X\", \"knots\"))";
+                    return "SimVar.GetSimVarValue(\"VELOCITY WORLD X\", \"knots\")";
                 case string hn when hn.Equals("(A:VELOCITY WORLD Y,m/s)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"VELOCITY WORLD Y\", \"meter per second\"))";
+                    return "SimVar.GetSimVarValue(\"VELOCITY WORLD Y\", \"meter per second\")";
                 case string hn when hn.Equals("(A:VELOCITY WORLD Y,knots)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"VELOCITY WORLD Y\", \"knots\"))";
+                    return "SimVar.GetSimVarValue(\"VELOCITY WORLD Y\", \"knots\")";
                 case string hn when hn.Equals("(A:VELOCITY WORLD Z,m/s)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:VELOCITY WORLD Z,meters per second)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"VELOCITY WORLD Z\", \"meter per second\"))";
+                    return "SimVar.GetSimVarValue(\"VELOCITY WORLD Z\", \"meter per second\")";
                 case string hn when hn.Equals("(A:VELOCITY WORLD Z,knots)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"VELOCITY WORLD Z\", \"knots\"))";
+                    return "SimVar.GetSimVarValue(\"VELOCITY WORLD Z\", \"knots\")";
                 case string hn when hn.Equals("(A:GROUND VELOCITY,m/s)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:GROUND VELOCITY,meters per second)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:GPS Ground Speed,meters per second)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GPS GROUND SPEED\", \"meter per second\"))";
+                    return "SimVar.GetSimVarValue(\"GPS GROUND SPEED\", \"meter per second\")";
                 case string hn when hn.Equals("(A:GROUND VELOCITY,knots)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:GPS Ground Speed,knots)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GPS GROUND SPEED\", \"knots\"))";
+                    return "SimVar.GetSimVarValue(\"GPS GROUND SPEED\", \"knots\")";
 
                 // VERTICAL
                 case string hn when hn.Equals("(A:Vertical speed,feet per minute)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"feet per minute\"))";
+                    return "SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"feet per minute\")";
                 case string hn when hn.Equals("(A:Vertical speed,meters per minute)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"meters per minute\"))";
+                    return "SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"meters per minute\")";
                 case string hn when hn.Equals("(A:Vertical speed,meters per second)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"meters per second\"))";
+                    return "SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"meters per second\")";
                 case string hn when hn.Equals("(A:Indicated Altitude,meters)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Indicated Altitude:1,meters)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:Indicated Altitude:2,meters)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE\", \"meters\"))";
+                    return "SimVar.GetSimVarValue(\"INDICATED ALTITUDE\", \"meters\")";
                 case string hp when hp.Equals("(A:PLANE ALTITUDE,nmiles)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE\", \"nautical miles\"))";
+                    return "SimVar.GetSimVarValue(\"INDICATED ALTITUDE\", \"nautical miles\")";
                 case string hn when hn.Equals("(A:Indicated Altitude,feet)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Indicated Altitude:1,feet)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:Indicated Altitude:2,feet)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"INDICATED ALTITUDE\", \"feet\"))";
+                    return "SimVar.GetSimVarValue(\"INDICATED ALTITUDE\", \"feet\")";
                 case string hn when hn.Equals("(A:Variometer rate,knots)", StringComparison.InvariantCultureIgnoreCase):
-                    //return "parseFloat(SimVar.GetSimVarValue(\"AIRCRAFT WIND Y\", \"knots\"))"; // TODO: fix rate
-                    //return "parseFloat(SimVar.GetSimVarValue(\"ACCELERATION BODY Y\", \"feet per second squared\"), 0);";
-                    return "parseFloat(SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"feet per minute\"), 0) / 101 + parseFloat(SimVar.GetSimVarValue(\"ACCELERATION WORLD Z\", \"feet per minute squared\"), 0)";
+                    //return "SimVar.GetSimVarValue(\"AIRCRAFT WIND Y\", \"knots\")"; // TODO: fix rate
+                    //return "SimVar.GetSimVarValue(\"ACCELERATION BODY Y\", \"feet per second squared\");";
+                    return "SimVar.GetSimVarValue(\"VERTICAL SPEED\", \"feet per minute\") / 101 + SimVar.GetSimVarValue(\"ACCELERATION WORLD Z\", \"feet per minute squared\")";
                 case string hn when hn.Equals("(A:RADIO HEIGHT,meters)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"RADIO HEIGHT\", \"meters\"))";
+                    return "SimVar.GetSimVarValue(\"RADIO HEIGHT\", \"meters\")";
                 case string hn when hn.Equals("(A:RADIO HEIGHT,feet)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"RADIO HEIGHT\", \"feet\"))";
+                    return "SimVar.GetSimVarValue(\"RADIO HEIGHT\", \"feet\")";
                 case string hn when hn.Equals("(A:DECISION HEIGHT,feet)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"DECISION HEIGHT\", \"feet\"))";
+                    return "SimVar.GetSimVarValue(\"DECISION HEIGHT\", \"feet\")";
                 case string hn when hn.Equals("(A:DECISION HEIGHT,meters)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"DECISION HEIGHT\", \"meters\"))";
+                    return "SimVar.GetSimVarValue(\"DECISION HEIGHT\", \"meters\")";
                 case string hn when hn.Equals("(A:G force,G force)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:G force,Gforce)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"G FORCE\", \"GForce\"))";
+                    return "SimVar.GetSimVarValue(\"G FORCE\", \"GForce\")";
                 case string hn when hn.Equals("(A:Min G force,Gforce)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Min G force,G force)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"MIN G FORCE\", \"GForce\"))";
+                    return "SimVar.GetSimVarValue(\"MIN G FORCE\", \"GForce\")";
                 case string hn when hn.Equals("(A:MaxG force,Gforce)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:MaxG force,G force)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"MAX G FORCE\", \"GForce\"))";
+                    return "SimVar.GetSimVarValue(\"MAX G FORCE\", \"GForce\")";
 
 
                 // ATTITUDE
                 case string hn when hn.Equals("(A:TURN COORDINATOR BALL,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "Math.min(30, Math.max(-30 , -parseFloat(SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"degree\")))) / 30 * 100";
+                    return "Math.min(30, Math.max(-30 , -SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"degree\"))) / 30 * 100";
                 case string hn when hn.Equals("(A:Delta Heading Rate,rpm)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(-SimVar.GetSimVarValue(\"TURN INDICATOR RATE\", \"degree per second\")) * 60 / 360";
+                    return "-SimVar.GetSimVarValue(\"TURN INDICATOR RATE\", \"degree per second\") * 60 / 360";
                 case string hn when hn.Equals("(A:Wiskey compass indication degrees,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:Magnetic compass,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:PLANE HEADING DEGREES MAGNETIC,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"degrees\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"degrees\")";
                 case string hm when hm.Equals("(A:Wiskey compass indication degrees,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string hn when hn.Equals("(A:Magnetic compass,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:PLANE HEADING DEGREES MAGNETIC,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE HEADING DEGREES MAGNETIC\", \"radians\")";
                 case string hn when hn.Equals("(A:Plane heading degrees gyro,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:heading indicator,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hm when hm.Equals("(A:heading indicator:1,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:heading indicator:2,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"degrees\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"degrees\")";
                 case string hn when hn.Equals("(A:PLANE HEADING DEGREES GYRO,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:heading indicator,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string hm when hm.Equals("(A:heading indicator:1,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:heading indicator:2,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"radians\")";
                 case string hn when hn.Equals("(A:Autopilot heading lock dir,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"degrees\"))";
+                    return "SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"degrees\")";
                 case string hn when hn.Equals("(A:RUDDER TRIM PCT,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"RUDDER TRIM PCT\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"RUDDER TRIM PCT\", \"percent\")";
                 case string hn when hn.Equals("(A:ELEVATOR TRIM POSITION,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ELEVATOR TRIM PCT\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ELEVATOR TRIM PCT\", \"percent\")";
                 case string hn when hn.Equals("(A:Attitude indicator bank degrees,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:PLANE BANK DEGREES,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"radians\")";
                 case string ho when ho.Equals("(A:PLANE BANK DEGREES,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"degree\")";
                 case string hn when hn.Equals("(A:Attitude indicator bank degrees,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"degree\")";
                 case string hn when hn.Equals("(A:Attitude indicator bank degrees:1,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"degree\")";
                 case string hn when hn.Equals("(A:Attitude indicator bank degrees,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Attitude indicator bank degrees:1,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:Attitude indicator bank degrees:2,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE BANK DEGREES\", \"radians\")";
                 case string hn when hn.Equals("(A:Attitude indicator pitch degrees,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Attitude indicator pitch degrees:1,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:Attitude indicator pitch degrees:2,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hq when hq.Equals("(A:PLANE PITCH DEGREES,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE PITCH DEGREES\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE PITCH DEGREES\", \"degree\")";
                 case string hn when hn.Equals("(A:PLANE HEADING DEGREES GYRO,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Plane heading degrees true,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE HEADING DEGREES TRUE\", \"radians\")";
 
                 // AMBIENT
                 case string hn when hn.Equals("(A:AMBIENT TEMPERATURE,Celsius)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Total air temperature,Celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AMBIENT TEMPERATURE\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"AMBIENT TEMPERATURE\", \"celsius\")";
                 case string hn when hn.Equals("(A:Ambient Wind Direction,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AMBIENT WIND DIRECTION\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"AMBIENT WIND DIRECTION\", \"degree\")";
                 case string hn when hn.Equals("(A:Ambient Wind VELOCITY,knots)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AMBIENT WIND VELOCITY\", \"knots\"))";
+                    return "SimVar.GetSimVarValue(\"AMBIENT WIND VELOCITY\", \"knots\")";
                 case string hn when hn.Equals("(A:Ambient Wind VELOCITY,kilometers per hour)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Ambient Wind VELOCITY,kilometer/hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AMBIENT WIND VELOCITY\", \"kilometers per hour\"))";
+                    return "SimVar.GetSimVarValue(\"AMBIENT WIND VELOCITY\", \"kilometers per hour\")";
                 case string hn when hn.Equals("(A:Ambient Wind VELOCITY,mph)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AMBIENT WIND VELOCITY\", \"mph\"))";
+                    return "SimVar.GetSimVarValue(\"AMBIENT WIND VELOCITY\", \"mph\")";
                 case string hn when hn.Equals("(A:AMBIENT VISIBILITY,nmiles)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AMBIENT VISIBILITY\", \"nautical mile\"))";
+                    return "SimVar.GetSimVarValue(\"AMBIENT VISIBILITY\", \"nautical mile\")";
                 case string hn when hn.Equals("(A:Kohlsman setting hg,inHg)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG\", \"inches of mercury\"))";
+                    return "SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG\", \"inches of mercury\")";
                 case string ho when ho.Equals("(A:Kohlsman setting hg:1,inHg)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG:1\", \"inches of mercury\"))";
+                    return "SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG:1\", \"inches of mercury\")";
                 case string ho when ho.Equals("(A:Kohlsman setting hg:2,inHg)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG:2\", \"inches of mercury\"))";
+                    return "SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG:2\", \"inches of mercury\")";
                 case string hn when hn.Equals("(A:Kohlsman setting hg,mbar)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG\", \"Millibars\"))";
+                    return "SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG\", \"Millibars\")";
                 case string ho when ho.Equals("(A:Kohlsman setting hg:1,mbar)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG:1\", \"Millibars\"))";
+                    return "SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG:1\", \"Millibars\")";
                 case string ho when ho.Equals("(A:Kohlsman setting hg:2,mbar)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG:2\", \"Millibars\"))";
+                    return "SimVar.GetSimVarValue(\"KOHLSMAN SETTING HG:2\", \"Millibars\")";
 
                 case string hn when hn.Equals("(P:Local time,seconds)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"seconds\"))";
+                    return "SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"seconds\")";
                 case string hn when hn.Equals("(P:Local time,minutes)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"minutes\"))";
+                    return "SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"minutes\")";
                 case string hn when hn.Equals("(P:Local time,hours)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"hours\"))";
+                    return "SimVar.GetGlobalVarValue(\"LOCAL TIME\", \"hours\")";
                 case string hn when hn.Equals("(L:Zulu,bool)", StringComparison.InvariantCultureIgnoreCase):
                     return "0";
                 case string hn when hn.Equals("(P:ZULU TIME,hours)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetGlobalVarValue(\"ZULU TIME\", \"hours\"))";
+                    return "SimVar.GetGlobalVarValue(\"ZULU TIME\", \"hours\")";
                 case string hn when hn.Equals("(P:ZULU TIME,minutes)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetGlobalVarValue(\"ZULU TIME\", \"minutes\"))";
+                    return "SimVar.GetGlobalVarValue(\"ZULU TIME\", \"minutes\")";
                 case string hn when hn.Equals("(P:Absolute time,seconds)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"E: ABSOLUTE TIME\", \"seconds\"))";
+                    return "SimVar.GetSimVarValue(\"E: ABSOLUTE TIME\", \"seconds\")";
 
                     // FUEL
                 case string hl when hl.Equals("(A:Fuel weight per gallon,pounds)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL WEIGHT PER GALLON\", \"lbs\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL WEIGHT PER GALLON\", \"lbs\")";
 
                 case string hk when hk.Equals("(A:fuel tank left quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel left quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK LEFT QUANTITY\", \"liters\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK LEFT QUANTITY\", \"liters\")";
                 case string hk when hk.Equals("(A:fuel tank left quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel left quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK LEFT QUANTITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK LEFT QUANTITY\", \"gallons\")";
                 case string hk when hk.Equals("(A:fuel tank right quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel right quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK RIGHT QUANTITY\", \"liters\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK RIGHT QUANTITY\", \"liters\")";
                 case string hk when hk.Equals("(A:fuel tank right quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel right quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK RIGHT QUANTITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK RIGHT QUANTITY\", \"gallons\")";
 
                 case string hk when hk.Equals("(A:fuel tank left aux quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel left aux quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK LEFT AUX QUANTITY\", \"liters\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK LEFT AUX QUANTITY\", \"liters\")";
                 case string hk when hk.Equals("(A:fuel tank left aux quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel left aux quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK LEFT AUX QUANTITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK LEFT AUX QUANTITY\", \"gallons\")";
                 case string hk when hk.Equals("(A:fuel tank right aux quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel right aux quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK RIGHT AUX QUANTITY\", \"liters\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK RIGHT AUX QUANTITY\", \"liters\")";
                 case string hk when hk.Equals("(A:fuel tank right aux quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel right aux quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK RIGHT AUX QUANTITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK RIGHT AUX QUANTITY\", \"gallons\")";
 
                 case string hk when hk.Equals("(A:fuel tank left MAIN quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel left MAIN quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK LEFT MAIN QUANTITY\", \"liters\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK LEFT MAIN QUANTITY\", \"liters\")";
                 case string hk when hk.Equals("(A:fuel tank left MAIN quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel left MAIN quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK LEFT MAIN QUANTITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK LEFT MAIN QUANTITY\", \"gallons\")";
                 case string hk when hk.Equals("(A:fuel tank right MAIN quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel right MAIN quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK RIGHT MAIN QUANTITY\", \"liters\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK RIGHT MAIN QUANTITY\", \"liters\")";
                 case string hk when hk.Equals("(A:fuel tank right MAIN quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel right MAIN quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK RIGHT MAIN QUANTITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK RIGHT MAIN QUANTITY\", \"gallons\")";
 
                 case string hk when hk.Equals("(A:fuel tank left tip quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel left tip quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK LEFT TIP QUANTITY\", \"liters\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK LEFT TIP QUANTITY\", \"liters\")";
                 case string hk when hk.Equals("(A:fuel tank left tip quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel left tip quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK LEFT TIP QUANTITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK LEFT TIP QUANTITY\", \"gallons\")";
                 case string hk when hk.Equals("(A:fuel tank right tip quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel right tip quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK RIGHT TIP QUANTITY\", \"liters\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK RIGHT TIP QUANTITY\", \"liters\")";
                 case string hk when hk.Equals("(A:fuel tank right tip quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel right tip quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK RIGHT TIP QUANTITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK RIGHT TIP QUANTITY\", \"gallons\")";
 
                 case string hk when hk.Equals("(A:fuel tank center quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel center quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK CENTER QUANTITY\", \"liters\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK CENTER QUANTITY\", \"liters\")";
                 case string hk when hk.Equals("(A:fuel tank center quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:fuel center quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK CENTER QUANTITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK CENTER QUANTITY\", \"gallons\")";
                 case string hk when hk.Equals("(A:Fuel tank center level,position)", StringComparison.InvariantCultureIgnoreCase):
                 case string hl when hl.Equals("(A:Fuel center level,position)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TANK CENTER QUANTITY\", \"gallons\")) / parseFloat(SimVar.GetSimVarValue(\"FUEL TANK CENTER CAPACITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TANK CENTER QUANTITY\", \"gallons\") / SimVar.GetSimVarValue(\"FUEL TANK CENTER CAPACITY\", \"gallons\")";
 
                 case string hk when hk.Equals("(A:Fuel total quantity,gallons)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL QUANTITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TOTAL QUANTITY\", \"gallons\")";
                 case string hk when hk.Equals("(A:Fuel total quantity,liter)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL QUANTITY\", \"liters\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TOTAL QUANTITY\", \"liters\")";
                 case string hk when hk.Equals("(A:FUEL TOTAL CAPACITY,gallons)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL CAPACITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TOTAL CAPACITY\", \"gallons\")";
                 case string hk when hk.Equals("(A:FUEL TOTAL CAPACITY,liters)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL CAPACITY\", \"liters\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TOTAL CAPACITY\", \"liters\")";
 
                 case string hn when hn.Equals("(A:Fuel tank total level,position)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL QUANTITY\", \"gallons\")) / parseFloat(SimVar.GetSimVarValue(\"FUEL TOTAL CAPACITY\", \"gallons\"))";
+                    return "SimVar.GetSimVarValue(\"FUEL TOTAL QUANTITY\", \"gallons\") / SimVar.GetSimVarValue(\"FUEL TOTAL CAPACITY\", \"gallons\")";
 
                 // ENGINES
                 case string hn when hn.Equals("(A:SUCTION PRESSURE,inHg)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"SUCTION PRESSURE\", \"inch of mercury\"))";
+                    return "SimVar.GetSimVarValue(\"SUCTION PRESSURE\", \"inch of mercury\")";
                 case string hn when hn.Equals("(A:GENERAL ENG1 OIL PRESSURE,PSI)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng1 Oil Pressure,PSI)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL PRESSURE:1\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL PRESSURE:1\", \"psi\")";
                 case string hn when hn.Equals("(A:GENERAL ENG2 OIL PRESSURE,PSI)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng2 Oil Pressure,PSI)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL PRESSURE:2\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL PRESSURE:2\", \"psi\")";
                 case string hn when hn.Equals("(A:GENERAL ENG3 OIL PRESSURE,PSI)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng3 Oil Pressure,PSI)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL PRESSURE:3\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL PRESSURE:3\", \"psi\")";
                 case string hn when hn.Equals("(A:GENERAL ENG4 OIL PRESSURE,PSI)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng4 Oil Pressure,PSI)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL PRESSURE:4\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL PRESSURE:4\", \"psi\")";
                 case string hn when hn.Equals("(A:GENERAL ENG1 OIL PRESSURE,PSF)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng1 Oil Pressure,PSF)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL PRESSURE:1\", \"psf\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL PRESSURE:1\", \"psf\")";
                 case string hn when hn.Equals("(A:GENERAL ENG2 OIL PRESSURE,PSF)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng2 Oil Pressure,PSF)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL PRESSURE:2\", \"psf\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL PRESSURE:2\", \"psf\")";
                 case string hn when hn.Equals("(A:GENERAL ENG3 OIL PRESSURE,PSF)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng3 Oil Pressure,PSF)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL PRESSURE:3\", \"psf\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL PRESSURE:3\", \"psf\")";
                 case string hn when hn.Equals("(A:GENERAL ENG4 OIL PRESSURE,PSF)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng4 Oil Pressure,PSF)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL PRESSURE:4\", \"psf\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL PRESSURE:4\", \"psf\")";
                 case string hj when hj.Equals("(A:ENG1 OIL TEMPERATURE,celsius)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:GENERAL ENG1 OIL TEMPERATURE,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL TEMPERATURE:1\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL TEMPERATURE:1\", \"celsius\")";
                 case string hj when hj.Equals("(A:ENG2 OIL TEMPERATURE,celsius)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:GENERAL ENG2 OIL TEMPERATURE,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL TEMPERATURE:2\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL TEMPERATURE:2\", \"celsius\")";
                 case string hj when hj.Equals("(A:ENG3 OIL TEMPERATURE,celsius)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:GENERAL ENG3 OIL TEMPERATURE,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL TEMPERATURE:3\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL TEMPERATURE:3\", \"celsius\")";
                 case string hj when hj.Equals("(A:ENG4 OIL TEMPERATURE,celsius)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:GENERAL ENG4 OIL TEMPERATURE,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL TEMPERATURE:4\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL TEMPERATURE:4\", \"celsius\")";
                 case string hn when hn.Equals("(A:General Eng Fuel Pressure:1,psi)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:1\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:1\", \"psi\")";
                 case string hn when hn.Equals("(A:General Eng Fuel Pressure:2,psi)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:2\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:2\", \"psi\")";
                 case string hn when hn.Equals("(A:General Eng Fuel Pressure:3,psi)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:3\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:3\", \"psi\")";
                 case string hn when hn.Equals("(A:General Eng Fuel Pressure:4,psi)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:4\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:4\", \"psi\")";
                 case string hn when hn.Equals("(A:General Eng Fuel Pressure:1,PSF)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:1\", \"PSF\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:1\", \"PSF\")";
                 case string hn when hn.Equals("(A:General Eng Fuel Pressure:2,PSF)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:2\", \"PSF\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:2\", \"PSF\")";
                 case string hn when hn.Equals("(A:General Eng Fuel Pressure:3,PSF)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:3\", \"PSF\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:3\", \"PSF\")";
                 case string hn when hn.Equals("(A:General Eng Fuel Pressure:4,PSF)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:4\", \"PSF\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG FUEL PRESSURE:4\", \"PSF\")";
                 case string hn when hn.Equals("(A:GENERAL ENG1 RPM,rpm)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG RPM:2\", \"Rpm\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG RPM:2\", \"Rpm\")";
                 case string hn when hn.Equals("(A:GENERAL ENG2 RPM,rpm)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG RPM:1\", \"Rpm\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG RPM:1\", \"Rpm\")";
                 case string hn when hn.Equals("(A:ENG1 MANIFOLD PRESSURE,inHg)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG MANIFOLD PRESSURE:1\", \"inHG\"))";
+                    return "SimVar.GetSimVarValue(\"ENG MANIFOLD PRESSURE:1\", \"inHG\")";
                 case string hn when hn.Equals("(A:ENG2 MANIFOLD PRESSURE,inHg)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG MANIFOLD PRESSURE:2\", \"inHG\"))";
+                    return "SimVar.GetSimVarValue(\"ENG MANIFOLD PRESSURE:2\", \"inHG\")";
                 case string hn when hn.Equals("(A:RECIP CARBURETOR TEMPERATURE:1,celsius)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:GENERAL ENG1 OIL TEMPERATURE,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG OIL TEMPERATURE:1\", \"celsius\")) * 0.5";//??
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG OIL TEMPERATURE:1\", \"celsius\") * 0.5";//??
                 case string hn when hn.Equals("(A:RECIP CARBURETOR TEMPERATURE:2,celsius)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:GENERAL ENG2 OIL TEMPERATURE,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG OIL TEMPERATURE:2\", \"celsius\")) * 0.5";//??
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG OIL TEMPERATURE:2\", \"celsius\") * 0.5";//??
                 case string hn when hn.Equals("(A:RECIP ENG CYLINDER HEAD TEMPERATURE:1,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG CYLINDER HEAD TEMPERATURE:1\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"ENG CYLINDER HEAD TEMPERATURE:1\", \"celsius\")";
                 case string hn when hn.Equals("(A:RECIP ENG CYLINDER HEAD TEMPERATURE:2,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG CYLINDER HEAD TEMPERATURE:2\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"ENG CYLINDER HEAD TEMPERATURE:2\", \"celsius\")";
                 case string hn when hn.Equals("(A:Eng1 oil quantity,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL QUANTITY:1\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL QUANTITY:1\", \"percent\")";
                 case string hn when hn.Equals("(A:Eng2 oil quantity,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG OIL QUANTITY:2\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG OIL QUANTITY:2\", \"percent\")";
                 case string hn when hn.Equals("(A:Turb eng1 N1,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng1 N1 RPM,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:1\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N1 RPM:1\", \"percent\")";
                 case string hn when hn.Equals("(A:Turb eng2 N1,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng2 N1 RPM,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:2\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N1 RPM:2\", \"percent\")";
                 case string hn when hn.Equals("(A:Turb eng3 N1,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng3 N1 RPM,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:3\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N1 RPM:3\", \"percent\")";
                 case string hn when hn.Equals("(A:Turb eng4 N1,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng4 N1 RPM,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:4\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N1 RPM:4\", \"percent\")";
                 case string hn when hn.Equals("(A:Turb eng1 N2,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng1 N2 RPM,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM:1\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N2 RPM:1\", \"percent\")";
                 case string hn when hn.Equals("(A:Turb eng2 N2,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng2 N2 RPM,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM:2\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N2 RPM:2\", \"percent\")";
                 case string hn when hn.Equals("(A:Turb eng3 N2,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng3 N2 RPM,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM:3\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N2 RPM:3\", \"percent\")";
                 case string hn when hn.Equals("(A:Turb eng4 N2,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng4 N2 RPM,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM:4\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N2 RPM:4\", \"percent\")";
                 case string hn when hn.Equals("(A:TURB ENG1 N1,part)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:1\", \"part\"))";
+                    return "SimVar.GetSimVarValue(\"TURB ENG N1:1\", \"part\")";
                 case string hn when hn.Equals("(A:TURB ENG2 N1,part)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:2\", \"part\"))";
+                    return "SimVar.GetSimVarValue(\"TURB ENG N1:2\", \"part\")";
                 case string hn when hn.Equals("(A:TURB ENG3 N1,part)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:3\", \"part\"))";
+                    return "SimVar.GetSimVarValue(\"TURB ENG N1:3\", \"part\")";
                 case string hn when hn.Equals("(A:TURB ENG4 N1,part)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TURB ENG N1:4\", \"part\"))";
+                    return "SimVar.GetSimVarValue(\"TURB ENG N1:4\", \"part\")";
                 case string hn when hn.Equals("(A:general eng1 throttle lever position,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:1\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:1\", \"percent\")";
                 case string hn when hn.Equals("(A:general eng2 throttle lever position,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:2\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:2\", \"percent\")";
                 case string hn when hn.Equals("(A:general eng3 throttle lever position,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:3\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:3\", \"percent\")";
                 case string hn when hn.Equals("(A:general eng4 throttle lever position,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:4\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG THROTTLE LEVER POSITION:4\", \"percent\")";
                 case string hn when hn.Equals("(A:TURB ENG1 corrected N2,Percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM: 1\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N2 RPM: 1\", \"percent\")";
                 case string hn when hn.Equals("(A:TURB ENG2 corrected N2,Percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM: 2\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N2 RPM: 2\", \"percent\")";
                 case string hn when hn.Equals("(A:TURB ENG3 corrected N2,Percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM: 3\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N2 RPM: 3\", \"percent\")";
                 case string hn when hn.Equals("(A:TURB ENG4 corrected N2,Percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG N2 RPM: 4\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"ENG N2 RPM: 4\", \"percent\")";
                 case string hn when hn.Equals("(A:Turb Eng1 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng1 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:1\", \"Pounds per hour\"))";
+                    return "SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:1\", \"Pounds per hour\")";
                 case string hn when hn.Equals("(A:Turb Eng2 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng2 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:2\", \"Pounds per hour\"))";
+                    return "SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:2\", \"Pounds per hour\")";
                 case string hn when hn.Equals("(A:Turb Eng3 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng3 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:3\", \"Pounds per hour\"))";
+                    return "SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:3\", \"Pounds per hour\")";
                 case string hn when hn.Equals("(A:Turb Eng4 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng4 Fuel Flow PPH,pounds per hour)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:4\", \"Pounds per hour\"))";
+                    return "SimVar.GetSimVarValue(\"ENG FUEL FLOW PPH:4\", \"Pounds per hour\")";
                 case string hn when hn.Equals("(A:Hydraulic1 Pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng1 hydraulic pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:Eng hydraulic pressure:1,psi)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 1\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 1\", \"psi\")";
                 case string hn when hn.Equals("(A:Hydraulic2 Pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng2 hydraulic pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:Eng hydraulic pressure:2,psi)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 2\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 2\", \"psi\")";
                 case string hn when hn.Equals("(A:Hydraulic3 Pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng3 hydraulic pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:Eng hydraulic pressure:3,psi)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 3\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 3\", \"psi\")";
                 case string hn when hn.Equals("(A:Hydraulic4 Pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Eng4 hydraulic pressure,psi)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:Eng hydraulic pressure:4,psi)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 4\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"ENG HYDRAULIC PRESSURE: 4\", \"psi\")";
                 case string hn when hn.Equals("(A:General eng1 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 1\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 1\", \"celsius\")";
                 case string hn when hn.Equals("(A:eng1 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG EXHAUST GAS TEMPERATURE:1\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"ENG EXHAUST GAS TEMPERATURE:1\", \"celsius\")";
                 case string hn when hn.Equals("(A:General eng2 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 2\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 2\", \"celsius\")";
                 case string hn when hn.Equals("(A:eng2 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG EXHAUST GAS TEMPERATURE:2\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"ENG EXHAUST GAS TEMPERATURE:2\", \"celsius\")";
                 case string hn when hn.Equals("(A:General eng3 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 3\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 3\", \"celsius\")";
                 case string hn when hn.Equals("(A:eng3 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG EXHAUST GAS TEMPERATURE:3\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"ENG EXHAUST GAS TEMPERATURE:3\", \"celsius\")";
                 case string hn when hn.Equals("(A:General eng4 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 4\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG EXHAUST GAS TEMPERATURE: 4\", \"celsius\")";
                 case string hn when hn.Equals("(A:eng4 exhaust gas temperature,celsius)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG EXHAUST GAS TEMPERATURE:4\", \"celsius\"))";
+                    return "SimVar.GetSimVarValue(\"ENG EXHAUST GAS TEMPERATURE:4\", \"celsius\")";
                 case string hn when hn.Equals("(A:Turb eng1 vibration,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Turb vibration:1,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG VIBRATION:1\", \"Number\")) / 0.05";
+                    return "SimVar.GetSimVarValue(\"ENG VIBRATION:1\", \"Number\") / 0.05";
                 case string hn when hn.Equals("(A:Turb eng2 vibration,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Turb vibration:2,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG VIBRATION:2\", \"Number\")) / 0.05";
+                    return "SimVar.GetSimVarValue(\"ENG VIBRATION:2\", \"Number\") / 0.05";
                 case string ho when ho.Equals("(A:Turb eng1 pressure ratio,ratio)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG PRESSURE RATIO:1\", \"ratio\"))";
+                    return "SimVar.GetSimVarValue(\"ENG PRESSURE RATIO:1\", \"ratio\")";
                 case string ho when ho.Equals("(A:Turb eng2 pressure ratio,ratio)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG PRESSURE RATIO:2\", \"ratio\"))";
+                    return "SimVar.GetSimVarValue(\"ENG PRESSURE RATIO:2\", \"ratio\")";
                 case string ho when ho.Equals("(A:Turb eng3 pressure ratio,ratio)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG PRESSURE RATIO:3\", \"ratio\"))";
+                    return "SimVar.GetSimVarValue(\"ENG PRESSURE RATIO:3\", \"ratio\")";
                 case string ho when ho.Equals("(A:Turb eng4 pressure ratio,ratio)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG PRESSURE RATIO:4\", \"ratio\"))";
+                    return "SimVar.GetSimVarValue(\"ENG PRESSURE RATIO:4\", \"ratio\")";
                 case string ho when ho.Equals("(A: Turb Eng1 Afterburner,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "(parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:1\", \"percent\")) >= 90)";
+                    return "(SimVar.GetSimVarValue(\"ENG N1 RPM:1\", \"percent\") >= 90)";
                 case string ho when ho.Equals("(A: Turb Eng2 Afterburner,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "(parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:2\", \"percent\")) >= 90)";
+                    return "(SimVar.GetSimVarValue(\"ENG N1 RPM:2\", \"percent\") >= 90)";
                 case string ho when ho.Equals("(A: Turb Eng3 Afterburner,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "(parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:3\", \"percent\")) >= 90)";
+                    return "(SimVar.GetSimVarValue(\"ENG N1 RPM:3\", \"percent\") >= 90)";
                 case string ho when ho.Equals("(A: Turb Eng4 Afterburner,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "(parseFloat(SimVar.GetSimVarValue(\"ENG N1 RPM:4\", \"percent\")) >= 90)";
+                    return "(SimVar.GetSimVarValue(\"ENG N1 RPM:4\", \"percent\") >= 90)";
 
 
                 // NAV
                 case string hn when hn.Equals("(A:NAV GSI:1,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:NAV1 GSI,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV GSI:1\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"NAV GSI:1\", \"percent\")";
                 case string hn when hn.Equals("(A:NAV GSI:2,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:NAV2 GSI,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV GSI:2\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"NAV GSI:2\", \"percent\")";
                 case string hn when hn.Equals("(A:NAV GSI:1,number)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:NAV1 GSI,number)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV GSI:1\", \"number\"))";
+                    return "SimVar.GetSimVarValue(\"NAV GSI:1\", \"number\")";
                 case string hn when hn.Equals("(A:NAV GSI:2,number)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:NAV2 GSI,number)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV GSI:2\", \"number\"))";
+                    return "SimVar.GetSimVarValue(\"NAV GSI:2\", \"number\")";
                 case string hn when hn.Equals("(A:NAV CDI:1,number)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:NAV1 CDI,number)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV CDI:1\", \"number\"))";
+                    return "SimVar.GetSimVarValue(\"NAV CDI:1\", \"number\")";
                 case string hn when hn.Equals("(A:NAV CDI:2,number)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:NAV2 CDI,number)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV CDI:2\", \"number\"))";
+                    return "SimVar.GetSimVarValue(\"NAV CDI:2\", \"number\")";
                 case string hn when hn.Equals("(A:NAV ident:1,string)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Nav1 ident,string)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV IDENT:1\", \"string\"))";
+                    return "SimVar.GetSimVarValue(\"NAV IDENT:1\", \"string\")";
                 case string hn when hn.Equals("(A:NAV ident:2,string)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Nav2 ident,string)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV IDENT:2\", \"string\"))";
+                    return "SimVar.GetSimVarValue(\"NAV IDENT:2\", \"string\")";
                 case string hn when hn.Equals("(A:NAV HAS NAV:1,bool)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Nav1 HAS NAV,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV HAS NAV:1\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"NAV HAS NAV:1\", \"boolean\")";
                 case string hn when hn.Equals("(A:NAV HAS NAV:2,bool)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Nav2 HAS NAV,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV HAS NAV:2\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"NAV HAS NAV:2\", \"boolean\")";
                 case string hn when hn.Equals("(A:NAV HAS DME:1,bool)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Nav1 HAS DME,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV HAS DME:1\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"NAV HAS DME:1\", \"boolean\")";
                 case string hn when hn.Equals("(A:NAV HAS DME:2,bool)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Nav2 HAS DME,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV HAS DME:2\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"NAV HAS DME:2\", \"boolean\")";
                 case string hn when hn.Equals("(A:NAV DME:1,kilometers)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Nav1 DME,kilometers)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV DME:1\", \"kilometers\"))";
+                    return "SimVar.GetSimVarValue(\"NAV DME:1\", \"kilometers\")";
                 case string hn when hn.Equals("(A:NAV DME:2,kilometers)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Nav2 DME,kilometers)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV DME:2\", \"kilometers\"))";
+                    return "SimVar.GetSimVarValue(\"NAV DME:2\", \"kilometers\")";
                 case string hn when hn.Equals("(A:NAV DME:1,nmiles)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Nav1 DME,nmiles)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV DME:1\", \"nautical mile\"))";
+                    return "SimVar.GetSimVarValue(\"NAV DME:1\", \"nautical mile\")";
                 case string hn when hn.Equals("(A:NAV DME:2,nmiles)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Nav2 DME,nmiles)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV DME:2\", \"nautical mile\"))";
+                    return "SimVar.GetSimVarValue(\"NAV DME:2\", \"nautical mile\")";
                 case string hn when hn.Equals("(A:NAV1 OBS,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:NAV1 radial,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV OBS:1\", \"degrees\"))";
+                    return "SimVar.GetSimVarValue(\"NAV OBS:1\", \"degrees\")";
                 case string hn when hn.Equals("(A:NAV2 OBS,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:NAV2 radial,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV OBS:2\", \"degrees\"))";
+                    return "SimVar.GetSimVarValue(\"NAV OBS:2\", \"degrees\")";
                 case string hn when hn.Equals("(A:NAV1 OBS,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:NAV1 radial,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV OBS:1\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"NAV OBS:1\", \"radians\")";
                 case string hn when hn.Equals("(A:NAV2 OBS,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:NAV2 radial,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV OBS:2\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"NAV OBS:2\", \"radians\")";
                 case string hn when hn.Equals("(A:GPS WP TRUE BEARING,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GPS WP BEARING\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"GPS WP BEARING\", \"degree\")";
                 case string hn when hn.Equals("(A:GPS MAGVAR,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"MAGVAR\", \"degrees\"))";
+                    return "SimVar.GetSimVarValue(\"MAGVAR\", \"degrees\")";
                 case string hn when hn.Equals("(A:NAV1 DME,nmiles)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV DME\", \"nautical miles\"))";
+                    return "SimVar.GetSimVarValue(\"NAV DME\", \"nautical miles\")";
                 case string hn when hn.Equals("(A:GPS WP DISTANCE,nmiles)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:GPS WP DISTANCE)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GPS WP DISTANCE\", \"nautical mile\"))";
+                    return "SimVar.GetSimVarValue(\"GPS WP DISTANCE\", \"nautical mile\")";
                 case string hn when hn.Equals("(A:PLANE LONGITUDE,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE LONGITUDE\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE LONGITUDE\", \"radians\")";
                 case string hn when hn.Equals("(A:PLANE LATITUDE,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE LATITUDE\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE LATITUDE\", \"radians\")";
                 case string hn when hn.Equals("(A:PLANE LONGITUDE,degree)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:PLANE LONGITUDE,degree longitude)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE LONGITUDE\", \"degree longitude\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE LONGITUDE\", \"degree longitude\")";
                 case string hn when hn.Equals("(A:PLANE LATITUDE,degree)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:PLANE LATITUDE,degree latitude)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PLANE LATITUDE\", \"degree latitude\"))";
+                    return "SimVar.GetSimVarValue(\"PLANE LATITUDE\", \"degree latitude\")";
                 case string hn when hn.Equals("(A:GPS GROUND MAGNETIC TRACK,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GPS GROUND MAGNETIC TRACK\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"GPS GROUND MAGNETIC TRACK\", \"degree\")";
                 case string ho when ho.Equals("(A:GPS WP BEARING,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GPS WP BEARING\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"GPS WP BEARING\", \"degree\")";
                 case string ho when ho.Equals("(A:GPS drives nav1,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GPS DRIVES NAV1\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"GPS DRIVES NAV1\", \"boolean\")";
                 case string ho when ho.Equals("(A:Nav1 Active Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV ACTIVE FREQUENCY:1\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"NAV ACTIVE FREQUENCY:1\", \"MHz\")";
                 case string ho when ho.Equals("(A:Nav1 Active Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV ACTIVE FREQUENCY:1\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"NAV ACTIVE FREQUENCY:1\", \"KHz\")";
                 case string ho when ho.Equals("(A:Nav2 Active Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV ACTIVE FREQUENCY:2\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"NAV ACTIVE FREQUENCY:2\", \"MHz\")";
                 case string ho when ho.Equals("(A:Nav2 Active Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV ACTIVE FREQUENCY:2\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"NAV ACTIVE FREQUENCY:2\", \"KHz\")";
                 case string ho when ho.Equals("(A:Nav1 Standby Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV STANDBY FREQUENCY:1\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"NAV STANDBY FREQUENCY:1\", \"MHz\")";
                 case string ho when ho.Equals("(A:Nav1 Standby Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV STANDBY FREQUENCY:1\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"NAV STANDBY FREQUENCY:1\", \"KHz\")";
                 case string ho when ho.Equals("(A:Nav2 Standby Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV STANDBY FREQUENCY:2\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"NAV STANDBY FREQUENCY:2\", \"MHz\")";
                 case string ho when ho.Equals("(A:Nav2 Standby Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"NAV STANDBY FREQUENCY:2\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"NAV STANDBY FREQUENCY:2\", \"KHz\")";
 
                 // RADIO
                 case string ho when ho.Equals("(A:Com1 Active Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"COM ACTIVE FREQUENCY:1\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"COM ACTIVE FREQUENCY:1\", \"MHz\")";
                 case string ho when ho.Equals("(A:Com1 Active Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"COM ACTIVE FREQUENCY:1\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"COM ACTIVE FREQUENCY:1\", \"KHz\")";
                 case string ho when ho.Equals("(A:Com2 Active Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"COM ACTIVE FREQUENCY:2\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"COM ACTIVE FREQUENCY:2\", \"MHz\")";
                 case string ho when ho.Equals("(A:Com2 Active Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"COM ACTIVE FREQUENCY:2\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"COM ACTIVE FREQUENCY:2\", \"KHz\")";
                 case string ho when ho.Equals("(A:Com1 Standby Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"COM STANDBY FREQUENCY:1\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"COM STANDBY FREQUENCY:1\", \"MHz\")";
                 case string ho when ho.Equals("(A:Com1 Standby Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"COM STANDBY FREQUENCY:1\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"COM STANDBY FREQUENCY:1\", \"KHz\")";
                 case string ho when ho.Equals("(A:Com2 Standby Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"COM STANDBY FREQUENCY:2\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"COM STANDBY FREQUENCY:2\", \"MHz\")";
                 case string ho when ho.Equals("(A:Com2 Standby Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"COM STANDBY FREQUENCY:2\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"COM STANDBY FREQUENCY:2\", \"KHz\")";
                 case string hn when hn.Equals("(A:ADF radial:1,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:ADF1 radial,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF RADIAL:1\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"ADF RADIAL:1\", \"radians\")";
                 case string hn when hn.Equals("(A:ADF radial:2,radians)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:ADF2 radial,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF RADIAL:2\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"ADF RADIAL:2\", \"radians\")";
                 case string hn when hn.Equals("(A:ADF radial:1,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:ADF1 radial,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF RADIAL:1\", \"degrees\"))";
+                    return "SimVar.GetSimVarValue(\"ADF RADIAL:1\", \"degrees\")";
                 case string hn when hn.Equals("(A:ADF radial:2,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string hk when hk.Equals("(A:ADF2 radial,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF RADIAL:2\", \"degrees\"))";
+                    return "SimVar.GetSimVarValue(\"ADF RADIAL:2\", \"degrees\")";
                 case string ho when ho.Equals("(A:Adf1 Active Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:ADF active frequency:1,megahertz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF ACTIVE FREQUENCY:1\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"ADF ACTIVE FREQUENCY:1\", \"MHz\")";
                 case string ho when ho.Equals("(A:Adf1 Active Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:ADF active frequency:1,kilohertz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF ACTIVE FREQUENCY:1\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"ADF ACTIVE FREQUENCY:1\", \"KHz\")";
                 case string ho when ho.Equals("(A:Adf2 Active Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:ADF active frequency:2,megahertz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF ACTIVE FREQUENCY:2\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"ADF ACTIVE FREQUENCY:2\", \"MHz\")";
                 case string ho when ho.Equals("(A:Adf2 Active Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
                 case string hp when hp.Equals("(A:ADF active frequency:2,kilohertz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF ACTIVE FREQUENCY:2\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"ADF ACTIVE FREQUENCY:2\", \"KHz\")";
                 case string ho when ho.Equals("(A:Adf1 Standby Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF STANDBY FREQUENCY:1\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"ADF STANDBY FREQUENCY:1\", \"MHz\")";
                 case string ho when ho.Equals("(A:Adf1 Standby Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF STANDBY FREQUENCY:1\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"ADF STANDBY FREQUENCY:1\", \"KHz\")";
                 case string ho when ho.Equals("(A:Adf2 Standby Frequency,MHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF STANDBY FREQUENCY:2\", \"MHz\"))";
+                    return "SimVar.GetSimVarValue(\"ADF STANDBY FREQUENCY:2\", \"MHz\")";
                 case string ho when ho.Equals("(A:Adf2 Standby Frequency,KHz)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF STANDBY FREQUENCY:2\", \"KHz\"))";
+                    return "SimVar.GetSimVarValue(\"ADF STANDBY FREQUENCY:2\", \"KHz\")";
                 case string ho when ho.Equals("(A:Adf signal:1,number)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF SIGNAL:1\", \"number\"))";
+                    return "SimVar.GetSimVarValue(\"ADF SIGNAL:1\", \"number\")";
                 case string hp when hp.Equals("(A:Adf signal:2,number)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ADF SIGNAL:2\", \"number\"))";
+                    return "SimVar.GetSimVarValue(\"ADF SIGNAL:2\", \"number\")";
                 case string hp when hp.Equals("(A:ATC ID,string)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ATC ID\", \"string\"))";
+                    return "SimVar.GetSimVarValue(\"ATC ID\", \"string\")";
 
                 // CONTROLS
                 case string ho when ho.Equals("(A:GEAR HANDLE POSITION,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GEAR HANDLE POSITION\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"GEAR HANDLE POSITION\", \"percent\")";
                 case string hn when hn.Equals("(A:INCIDENCE ALPHA,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"INCIDENCE ALPHA\", \"degrees\"))";
+                    return "SimVar.GetSimVarValue(\"INCIDENCE ALPHA\", \"degrees\")";
                 case string hn when hn.Equals("(A:Autopilot heading lock dir,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"radians\")";
                 case string hn when hn.Equals("(A:Autopilot heading lock dir,degree)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"AUTOPILOT HEADING LOCK DIR\", \"degree\")";
                 case string hn when hn.Equals("(A:AUTOPILOT FLIGHT DIRECTOR ACTIVE,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR ACTIVE\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR ACTIVE\", \"boolean\")";
                 case string hn when hn.Equals("(A:Autopilot flight director bank,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"degree\")";
                 case string hn when hn.Equals("(A:Autopilot flight director bank,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"radians\")";
                 case string hn when hn.Equals("(A:Autopilot flight director pitch,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"degree\")";
                 case string hn when hn.Equals("(A:Autopilot flight director pitch,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"AUTOPILOT FLIGHT DIRECTOR BANK\", \"radians\")";
                 case string hn when hn.Equals("(A:CG Percent,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"CG PERCENT\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"CG PERCENT\", \"percent\")";
                 case string hn when hn.Equals("(A:Pressurization Pressure Differential,psi)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PRESSURIZATION PRESSURE DIFFERENTIAL\", \"psi\"))";
+                    return "SimVar.GetSimVarValue(\"PRESSURIZATION PRESSURE DIFFERENTIAL\", \"psi\")";
                 case string hn when hn.Equals("(A:Pressurization Cabin Altitude,feet)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PRESSURIZATION CABIN ALTITUDE\", \"feet\"))";
+                    return "SimVar.GetSimVarValue(\"PRESSURIZATION CABIN ALTITUDE\", \"feet\")";
                 case string hn when hn.Equals("(A:Pressurization Cabin Altitude,meters)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PRESSURIZATION CABIN ALTITUDE\", \"meters\"))";
+                    return "SimVar.GetSimVarValue(\"PRESSURIZATION CABIN ALTITUDE\", \"meters\")";
                 case string hn when hn.Equals("(A:Pressurization Cabin Altitude Rate,feet per minute)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PRESSURIZATION CABIN ALTITUDE RATE\", \"feet per minute\"))";
+                    return "SimVar.GetSimVarValue(\"PRESSURIZATION CABIN ALTITUDE RATE\", \"feet per minute\")";
                 case string hn when hn.Equals("(A:Pressurization Cabin Altitude Rate,meters per second)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"PRESSURIZATION CABIN ALTITUDE RATE\", \"meters per second\"))";
+                    return "SimVar.GetSimVarValue(\"PRESSURIZATION CABIN ALTITUDE RATE\", \"meters per second\")";
                 case string hn when hn.Equals("(A:Aileron trim pct,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"AILERON TRIM PCT\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"AILERON TRIM PCT\", \"percent\")";
                 case string hn when hn.Equals("(A:MAGVAR,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"MAGVAR\", \"degree\"))";
+                    return "SimVar.GetSimVarValue(\"MAGVAR\", \"degree\")";
                 case string hn when hn.Equals("(A:Trailing edge flaps0 left angle,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Trailing edge flaps1 left angle,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS LEFT ANGLE\", \"degrees\"))";
+                    return "SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS LEFT ANGLE\", \"degrees\")";
                 case string hn when hn.Equals("(A:Trailing edge flaps0 left angle,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Trailing edge flaps1 left angle,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS LEFT ANGLE\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS LEFT ANGLE\", \"percent\")";
                 case string hn when hn.Equals("(A:TRAILING EDGE FLAPS LEFT ANGLE,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS LEFT ANGLE\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS LEFT ANGLE\", \"radians\")";
                 case string hn when hn.Equals("(A:Trailing edge flaps0 right angle,degrees)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Trailing edge flaps1 right angle,degrees)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS RIGHT ANGLE\", \"degrees\"))";
+                    return "SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS RIGHT ANGLE\", \"degrees\")";
                 case string hn when hn.Equals("(A:Trailing edge flaps0 right angle,percent)", StringComparison.InvariantCultureIgnoreCase):
                 case string ho when ho.Equals("(A:Trailing edge flaps1 right angle,percent)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS RIGHT ANGLE\", \"percent\"))";
+                    return "SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS RIGHT ANGLE\", \"percent\")";
                 case string hn when hn.Equals("(A:TRAILING EDGE FLAPS RIGHT ANGLE,radians)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS RIGHT ANGLE\", \"radians\"))";
+                    return "SimVar.GetSimVarValue(\"TRAILING EDGE FLAPS RIGHT ANGLE\", \"radians\")";
 
                 // ELECTRICS
                 case string hn when hn.Equals("(L:Show Volts 1,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "1";//"parseFloat(SimVar.GetSimVarValue(\"ELECTRICAL MAIN BUS VOLTAGE:1\", \"volts\"))";
+                    return "1";//"SimVar.GetSimVarValue(\"ELECTRICAL MAIN BUS VOLTAGE:1\", \"volts\")";
                 case string hn when hn.Equals("(L:Show Volts 2,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "1";//parseFloat(SimVar.GetSimVarValue(\"ELECTRICAL MAIN BUS VOLTAGE:2\", \"volts\"))";
+                    return "1";//SimVar.GetSimVarValue(\"ELECTRICAL MAIN BUS VOLTAGE:2\", \"volts\")";
                 case string hn when hn.Equals("(A:ELECTRICAL GENALT BUS VOLTAGE:1,volts)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ELECTRICAL GENALT BUS VOLTAGE:1\", \"volts\"))";
+                    return "SimVar.GetSimVarValue(\"ELECTRICAL GENALT BUS VOLTAGE:1\", \"volts\")";
                 case string hn when hn.Equals("(A:ELECTRICAL GENALT BUS VOLTAGE:2,volts)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ELECTRICAL GENALT BUS VOLTAGE:2\", \"volts\"))";
+                    return "SimVar.GetSimVarValue(\"ELECTRICAL GENALT BUS VOLTAGE:2\", \"volts\")";
                 case string hn when hn.Equals("(A:ELECTRICAL GENALT BUS AMPS:1,amps)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ELECTRICAL GENALT BUS AMPS:1\", \"amperes\"))";
+                    return "SimVar.GetSimVarValue(\"ELECTRICAL GENALT BUS AMPS:1\", \"amperes\")";
                 case string hn when hn.Equals("(A:ELECTRICAL GENALT BUS AMPS:2,amps)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ELECTRICAL GENALT BUS AMPS:2\", \"amperes\"))";
+                    return "SimVar.GetSimVarValue(\"ELECTRICAL GENALT BUS AMPS:2\", \"amperes\")";
                 case string hn when hn.Equals("(A:ELECTRICAL BATTERY BUS AMPS,amps)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ELECTRICAL BATTERY BUS AMPS\", \"amperes\"))";
+                    return "SimVar.GetSimVarValue(\"ELECTRICAL BATTERY BUS AMPS\", \"amperes\")";
                 case string hn when hn.Equals("(A:ELECTRICAL BATTERY BUS VOLTAGE,volts)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ELECTRICAL BATTERY BUS VOLTAGE\", \"volts\"))";
+                    return "SimVar.GetSimVarValue(\"ELECTRICAL BATTERY BUS VOLTAGE\", \"volts\")";
                 case string hn when hn.Equals("(A:General Eng Generator Active:1,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:1\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:1\", \"boolean\")";
                 case string hn when hn.Equals("(A:General Eng Generator Active:2,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:2\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:2\", \"boolean\")";
                 case string hn when hn.Equals("(A:General Eng Generator Active:3,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:3\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:3\", \"boolean\")";
                 case string hn when hn.Equals("(A:General Eng Generator Active:4,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:4\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"GENERAL ENG GENERATOR SWITCH:4\", \"boolean\")";
                 case string hn when hn.Equals("(A:General eng1 anti ice position,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG ANTI ICE:1\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"ENG ANTI ICE:1\", \"boolean\")";
                 case string hn when hn.Equals("(A:General eng2 anti ice position,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG ANTI ICE:2\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"ENG ANTI ICE:2\", \"boolean\")";
                 case string hn when hn.Equals("(A:General eng3 anti ice position,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG ANTI ICE:3\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"ENG ANTI ICE:3\", \"boolean\")";
                 case string hn when hn.Equals("(A:General eng4 anti ice position,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"ENG ANTI ICE:4\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"ENG ANTI ICE:4\", \"boolean\")";
 
 
                 case string hn when hn.Equals("(A:Sim On Ground,bool)", StringComparison.InvariantCultureIgnoreCase):
-                    return "parseFloat(SimVar.GetSimVarValue(\"SIM ON GROUND\", \"boolean\"))";
+                    return "SimVar.GetSimVarValue(\"SIM ON GROUND\", \"boolean\")";
 
                 /*
 -(A:Aileron Position,degrees)
@@ -1141,7 +1141,7 @@ namespace msfsLegacyImporter
                         else if (unit == "mbars" || unit == "mbar")
                             unit = "Millibars";
 
-                        string converted = "parseFloat(SimVar.GetSimVarValue(\"" + varname + "\", \"" + unit + "\"))";
+                        string converted = "SimVar.GetSimVarValue(\"" + varname + "\", \"" + unit + "\")";
                         XmlHelper.writeLog("Conversion result: " + converted);
                         return converted;
                     }

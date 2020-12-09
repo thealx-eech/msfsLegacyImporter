@@ -381,7 +381,7 @@
                                     </Hyperlink>
                                 </TextBlock>
                                 <TextBlock>
-                                    <Hyperlink NavigateUri="http://msfs.touching.cloud/legacyimporter/" RequestNavigate="Hyperlink_RequestNavigate">
+                                    <Hyperlink NavigateUri="http://msfs.touching.cloud/mods/msfs-legacy-importer/" RequestNavigate="Hyperlink_RequestNavigate">
                                         Importer releases archive
                                     </Hyperlink>
                                 </TextBlock>

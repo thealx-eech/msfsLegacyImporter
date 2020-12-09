@@ -781,6 +781,20 @@ namespace msfsLegacyImporter
                 if (afterburner_available != "" && afterburner_available != "0")
                     EnginesData = AddGroupCheckBox(EnginesData, "afterburner_available = " + afterburner_available, Colors.DarkRed, criticalIssues++);
 
+                if (CfgHelper.cfgSectionExists("engines.cfg", "[TURBINEENGINEDATA]") && (engine_type == "1" || engine_type == "5"))
+                {
+                    if (CfgHelper.getCfgValue("low_idle_n1", "engines.cfg", "[TURBINEENGINEDATA]") == "")
+                        EnginesData = AddGroupCheckBox(EnginesData, "low_idle_n1 = missing", Colors.DarkRed, criticalIssues++);
+
+                    if (CfgHelper.getCfgValue("low_idle_n2", "engines.cfg", "[TURBINEENGINEDATA]") == "")
+                        EnginesData = AddGroupCheckBox(EnginesData, "low_idle_n2 = missing", Colors.DarkRed, criticalIssues++);
+
+                    if (CfgHelper.getCfgValue("high_n1", "engines.cfg", "[TURBINEENGINEDATA]") == "")
+                        EnginesData = AddGroupCheckBox(EnginesData, "high_n1 = missing", Colors.DarkRed, criticalIssues++);
+
+                    if (CfgHelper.getCfgValue("high_n2", "engines.cfg", "[TURBINEENGINEDATA]") == "")
+                        EnginesData = AddGroupCheckBox(EnginesData, "high_n2 = missing", Colors.DarkRed, criticalIssues++);
+                }
 
                 StackPanel myPanel2 = new StackPanel();
 
@@ -927,10 +941,19 @@ namespace msfsLegacyImporter
 
                     /*if (val[0].Trim() == "engine.0")
                         CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0,0,0", "engines.cfg", "[GENERALENGINEDATA]");*/
-                    if (val[0].Trim() == "afterburner_available")
+                    if (val[0].Trim() == "low_idle_n1")
+                        CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "20", "engines.cfg", "[TURBINEENGINEDATA]");
+                    else if (val[0].Trim() == "low_idle_n2")
+                        CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "60", "engines.cfg", "[TURBINEENGINEDATA]");
+                    else if (val[0].Trim() == "high_n1")
+                        CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "100", "engines.cfg", "[TURBINEENGINEDATA]");
+                    else if (val[0].Trim() == "high_n2")
+                        CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "100", "engines.cfg", "[TURBINEENGINEDATA]");
+                    else if (val[0].Trim() == "afterburner_available")
+                    {
                         CfgHelper.setCfgValue(aircraftDirectory, "afterburner_stages", val[1].Trim(), "engines.cfg", "[TURBINEENGINEDATA]", false);
-
-                    CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg");
+                        CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg");
+                    }
                     i++;
                 }
             }
@@ -1949,9 +1972,11 @@ namespace msfsLegacyImporter
                                 if (engine_type.Contains('.'))
                                     engine_type = engine_type.Split('.')[0];
 
-                                if (secton.Contains("[FUEL_QUANTITY]") || secton.Contains("[AIRSPEED]") || secton.Contains("[RPM]") ||
+                                if (secton.Contains("[FUEL_QUANTITY]") || secton.Contains("[AIRSPEED]") || 
+                                    secton.Contains("[RPM]") && engine_type == "0" ||
+                                    secton.Contains("[TORQUE]") && (engine_type == "1" || engine_type == "5") ||
                                     secton.Contains("[THROTTLE_LEVELS]") || secton.Contains("[FLAPS_LEVELS]") ||
-                                    secton.Contains("[CONTROLS.") /*|| secton.Contains("[FUELSYSTEM.")*/ || secton.Contains("[SIMVARS.") ||
+                                    secton.Contains("[CONTROLS.") || secton.Contains("[FUELSYSTEM.") || secton.Contains("[SIMVARS.") ||
                                     (secton.Contains("[PROPELLER]") || secton.Contains("[PISTON_ENGINE]")) && engine_type == "0" ||
                                     (secton.Contains("[PROPELLER]") || secton.Contains("[TURBOPROP_ENGINE]") || secton.Contains("[TURBINEENGINEDATA]")) && engine_type == "5" ||
                                     (secton.Contains("[TURBINEENGINEDATA]") || secton.Contains("[JET_ENGINE]")) && engine_type == "1" ||
@@ -1963,7 +1988,7 @@ namespace msfsLegacyImporter
                                     requiredMissing++;
                                 }
                                 else
-                                    AddGroupCheckBox(parentPanel, secton.Substring(1), Colors.DarkOrange, sectionsMissing++);
+                                    AddGroupCheckBox(parentPanel, secton.Substring(1), Colors.Black, sectionsMissing++);
                             }
                             else
                             {
@@ -2045,8 +2070,14 @@ namespace msfsLegacyImporter
 
                 if (i > 0)
                 {
-                    MessageBoxResult messageBoxResult = MessageBox.Show(CsvHelper.trans("cfg_insert_sections_notice"), 
-                        string.Format(i > 1 ? CsvHelper.trans("cfg_insert_sections_header") : CsvHelper.trans("cfg_insert_section_header") , i, targetFilename), System.Windows.MessageBoxButton.YesNoCancel);
+                    MessageBoxResult messageBoxResult;
+
+                    if (sourceFilename == "cockpit.cfg")
+                        messageBoxResult = MessageBoxResult.Yes;
+                    else
+                        messageBoxResult = MessageBox.Show(CsvHelper.trans("cfg_insert_sections_notice"),
+                            string.Format(i > 1 ? CsvHelper.trans("cfg_insert_sections_header") : CsvHelper.trans("cfg_insert_section_header"), i, targetFilename), System.Windows.MessageBoxButton.YesNoCancel);
+                    
                     if (messageBoxResult != MessageBoxResult.Cancel)
                     {
                         CfgHelper.insertSections(aircraftDirectory, sourceFilename, targetFilename, sections, messageBoxResult == MessageBoxResult.Yes);
