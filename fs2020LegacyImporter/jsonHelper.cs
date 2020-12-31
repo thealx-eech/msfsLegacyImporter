@@ -9,6 +9,8 @@ namespace msfsLegacyImporter
 {
     class jsonHelper
     {
+        public Dictionary<string, string> importerSettings;
+
         public void createManifest(MainWindow parent, string SourceFolder, string TargetFolder, string[] data)
         {
             try
@@ -178,6 +180,36 @@ namespace msfsLegacyImporter
                 File.Copy(file, System.IO.Path.Combine(dest, System.IO.Path.GetFileName(file)), true);
             }
         }
+
+        public void loadSettings()
+        {
+            importerSettings = new Dictionary<string, string>();
+
+            if (File.Exists("msfsLegacyImporter.json"))
+            {
+                try
+                {
+                    JsonConvert.PopulateObject(File.ReadAllText("msfsLegacyImporter.json"), importerSettings);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
+
+        public void saveSettings()
+        {
+            try
+            {
+                File.WriteAllText("msfsLegacyImporter.json", JsonConvert.SerializeObject(importerSettings));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
     }
 
     public class Dependencies

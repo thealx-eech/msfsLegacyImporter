@@ -103,6 +103,8 @@ namespace msfsLegacyImporter
             FsxVarHelper = new fsxVarHelper();
             FileDialogHelper = new fileDialogHelper();
 
+            JSONHelper.loadSettings();
+
             // INIT LANGUAGES
             CsvHelper.initializeLanguages(LangSelector);
             LangSelector.DropDownClosed += new EventHandler(languageUpdated);
@@ -954,6 +956,9 @@ namespace msfsLegacyImporter
                         CfgHelper.setCfgValue(aircraftDirectory, "afterburner_stages", val[1].Trim(), "engines.cfg", "[TURBINEENGINEDATA]", false);
                         CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg");
                     }
+                    else
+                        CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg");
+                    
                     i++;
                 }
             }
@@ -3499,13 +3504,36 @@ namespace msfsLegacyImporter
         }
 
         // UPDATES START
+        private void setNewsLabel(string counter)
+        {
+            if (counter != "0")
+                Application.Current.Dispatcher.Invoke(() => newsLink.Text = counter + " missed update" + (counter != "1" ? "s" : ""));
+            else
+                Application.Current.Dispatcher.Invoke(() => newsLink.Text = "Updates and announces");
+        }
+        private void resetMissedUpdates(object sender, RoutedEventArgs e)
+        {
+            JSONHelper.importerSettings["last_read"] = DateTime.Now.ToUniversalTime().ToString();
+            setNewsLabel("0");
+            JSONHelper.saveSettings();
+        }
         public async Task CheckUpdateAsync()
         {
             string pubVer = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             {
                 var client = new HttpClient();
-                string data = await client.GetStringAsync(updatedirectory);
+                if (!JSONHelper.importerSettings.TryGetValue("last_read", out string date))
+                    date = "2000-01-01";
+                string data = await client.GetStringAsync(updatedirectory + "?last_read=" + date);
+
+                // GET NES COUNT
+                Regex regexNews = new Regex(@"news=(\d+)");
+                Match matchNews = regexNews.Match(data);
+                if (matchNews.Groups.Count >= 2)
+                {
+                    setNewsLabel(matchNews.Groups[1].ToString());
+                }
 
                 //Console.WriteLine(data);
 

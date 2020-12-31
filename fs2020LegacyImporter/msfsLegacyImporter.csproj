@@ -60,7 +60,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <ApplicationIcon>logo-l.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>23EFF24ADAE150144E494EA1CBC856DFFF243826</ManifestCertificateThumbprint>
@@ -213,6 +213,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="icon-tc.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="logo-s.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="logo-l.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

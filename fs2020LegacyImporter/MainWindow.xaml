@@ -79,6 +79,14 @@
             <TextBlock Name="imageRightTooltip" HorizontalAlignment="Left" Margin="10 5 10 0" Foreground="#FFBEDDFF" Grid.Column="1" FontSize="24" ToolTip="imageRightTooltip">*</TextBlock>
             <ComboBox Name="LangSelector" Grid.ColumnSpan="2" HorizontalAlignment="Right" FontSize="18" Height="30" VerticalAlignment="bottom" Width="auto" Margin="15 15 30 15">
             </ComboBox>
+            <StackPanel  Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="180px" Height="100" VerticalAlignment="bottom" Margin="15 15 30 15">
+                <Image Source="logo-s.png" Height="80"></Image>
+                <TextBlock HorizontalAlignment="Center">
+                    <Hyperlink Click="resetMissedUpdates" Foreground="White"  NavigateUri="https://msfs.touching.cloud/news/" RequestNavigate="Hyperlink_RequestNavigate">
+                        <TextBlock FontSize="16" FontFamily="Impact" HorizontalAlignment="Center" Name="newsLink">Updates and announces</TextBlock>
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
         </Grid>
 
         <TabControl Name="fsTabControl">

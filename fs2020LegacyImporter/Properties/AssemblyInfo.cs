@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("MSFS Legacy Importer")]
 [assembly: AssemblyDescription("FSX to MSFS aircraft importer")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Alex Marko")]
+[assembly: AssemblyCompany("Touching Cloud")]
 [assembly: AssemblyProduct("msfsLegacyImporter")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("none")]
@@ -51,7 +51,7 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.2.4.0")]
-[assembly: AssemblyFileVersion("0.2.4.0")]
+[assembly: AssemblyVersion("0.2.5.0")]
+[assembly: AssemblyFileVersion("0.2.5.0")]
 [assembly: NeutralResourcesLanguage("en")]
 [assembly: Guid("596D4399-521F-40DF-81C8-899F17BCBA4C")]
