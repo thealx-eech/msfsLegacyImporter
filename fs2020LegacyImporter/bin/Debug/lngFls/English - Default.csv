@@ -78,7 +78,7 @@ aircraft_missing_parameter_notice,,"Missing performance values will be searched 
 aircraft_cfg_not_found,,aircraft.cfg not found in aircraft directory
 aircraft_cfg_split_failed,,CFG split failed
 aircraft_split_notice,,"aircraft.cfg file will be split on parts, so MSFS will treat this aircraft as Native. This operation can't be undone, current config file will be saved as "".aircraft.cfg"""
-aircraft_split_header,,AIRCRAFT.CFG conversion warning
+aircraft_split_header,,AIRCRAFT.CFG conversion - do you want to add missing parameters?
 ENGINES TAB,,
 engines_fix_issues,,Fix engines issues
 engines_issues_notice,,"Invalid engine value should be fixed, otherwise aircraft will be ignored by flight model code and stay frozen even in the air."
@@ -184,6 +184,7 @@ panel_fsx_extracted,,Default FSX gauges resources extracted
 panel_import_gauges,,Import panel gauges
 panel_force_gauge_background,,Force gauge background image (check it if you get black holes on gauges places)
 panel_ignore_errors,,"Hide conversion errors pop ups (they still will be logged in "".Panel.log.txt"" file)"
+panel_js_validation,,Generated JavaScript code validation
 panel_disable_logging,,"Disable logging ("".Panel.log.txt"" file will be not created/updated)"
 panel_gamma_correction,,Gamma correction ({0} - bright; {1} - normal; {2} - dark)
 panel_preserve_size,,Leave panel size as it set in XML files (uncheck if gauges appear smaller than should)
