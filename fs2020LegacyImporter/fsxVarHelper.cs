@@ -6,8 +6,9 @@ namespace msfsLegacyImporter
 {
     class fsxVarHelper
     {
-        public string fsx2msfsSimVar(string fsxSimVar, xmlHelper XmlHelper, bool returnVariable = true)
+        public string fsx2msfsSimVar(string fsxSimVar, xmlHelper XmlHelper, bool returnVariable, string globalVars)
         {
+            Console.WriteLine("globalVars: " + globalVars);
             fsxSimVar = Regex.Replace(fsxSimVar, "\r\n|\r|\n", " ");
             fsxSimVar = Regex.Replace(fsxSimVar, @"\s\s+", " ");
             fsxSimVar = fsxSimVar.Replace(")!", ") !").Replace("&gt;", ">").Replace("&lt;", "<").Replace("&amp;", "&");
@@ -41,6 +42,22 @@ namespace msfsLegacyImporter
             {
                 infix = infix.Replace("SETVARPLACEHOLDER", "1");
 
+                // VALIDATE
+                string JSResult = "";
+                if (globalVars != "False") {
+                    JSResult = "0";
+                    try
+                    {
+                        var engine = new Jint.Engine();
+                        JSResult = engine.Execute(globalVars + infix).GetCompletionValue().ToString();
+                        XmlHelper.writeLog("JS validatio result: " + JSResult);
+                    }
+                    catch (Exception ex)
+                    {
+                        XmlHelper.writeLog("JS validation exception: " + ex.Message);
+                    }
+                }
+
                 foreach (string[] variable in variables)
                 {
                     string msfsVariable = getMsfsVariable(variable[0], XmlHelper);
@@ -57,6 +74,8 @@ namespace msfsLegacyImporter
 
                 if (!String.IsNullOrEmpty(infix))
                 {
+                    if (JSResult == "0" || JSResult == "False")
+                        return "var ExpressionResult = 0; /* POSSIBLE JS ERROR \"" + fsxSimVar + "\" */";
                     if (returnVariable)
                         return "var ExpressionResult = " + infix + "; /* PARSED FROM \"" + fsxSimVar + "\" */";
                     else
@@ -71,7 +90,7 @@ namespace msfsLegacyImporter
                 return "0";
         }
 
-        public string fsx2msfsGaugeString(string gaugeTextString, xmlHelper XmlHelper)
+        public string fsx2msfsGaugeString(string gaugeTextString, xmlHelper XmlHelper, string globalVars)
         {
             string gaugeString = Regex.Replace(gaugeTextString, "\r\n|\r|\n", " ");
             gaugeString = gaugeString./*Replace(") %", ")%").Replace("% (", "%(").*/Replace(")%(", ")%%(").Trim();
@@ -160,7 +179,7 @@ namespace msfsLegacyImporter
                 if (!string.IsNullOrEmpty(msfsVariable))
                 {
                     string textvar = Regex.Replace(msfsVariable, @"\%\s?\(?(.*)\)\s?\%", "$1").Trim();
-                    msfsVariable = "( " + fsx2msfsSimVar(textvar, XmlHelper, false) + " )";
+                    msfsVariable = "( " + fsx2msfsSimVar(textvar, XmlHelper, false, globalVars) + " )";
                     XmlHelper.writeLog("Processing SimVar: " + textvar);
                     XmlHelper.writeLog("SimVar result: " + msfsVariable);
 

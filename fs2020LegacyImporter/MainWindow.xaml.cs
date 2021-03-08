@@ -337,8 +337,11 @@ namespace msfsLegacyImporter
         private void SummaryUpdate(bool reset = false)
         {
             // RESET TABS COLOR
-            foreach (var item in fsTabControl.Items)
-                ((TabItem)item).Foreground = new SolidColorBrush(Colors.Black);
+            foreach (TabItem item in fsTabControl.Items)
+            {
+                if (item.Name != "tabAbout")
+                    ((TabItem)item).Background = new SolidColorBrush(Colors.Transparent);
+            }
 
             if (!reset)
             {
@@ -505,7 +508,7 @@ namespace msfsLegacyImporter
 
             // AIRCRAFT.CFG SPLIT
             AircraftProcess.Children.Clear();
-            tabAircraft.Foreground = new SolidColorBrush(Colors.DarkGreen);
+            tabAircraft.Background = new SolidColorBrush(Color.FromArgb(10, 0, 255, 0));
 
             if (aircraftDirectory != "" && File.Exists(aircraftDirectory + @"\aircraft.cfg"))
             {
@@ -609,7 +612,7 @@ namespace msfsLegacyImporter
             else
             {
                 //AircraftContent.Text = "aircraft.cfg file not exists!";
-                tabAircraft.Foreground = new SolidColorBrush(Colors.DarkRed);
+                tabAircraft.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
             }
 
             // DESCRIPTION FIXES
@@ -636,7 +639,7 @@ namespace msfsLegacyImporter
                                 if (requiredValue == "ui_typerole")
                                 {
                                     AircraftPerformance = AddGroupCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " " + CsvHelper.trans("aircraft_parameter_invalid"), Colors.DarkRed, i++);
-                                    tabAircraft.Foreground = new SolidColorBrush(Colors.DarkRed);
+                                    tabAircraft.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
                                 }
                                 else
                                     AircraftPerformance = AddGroupCheckBox(AircraftPerformance, "[FLTSIM." + k + "] " + requiredValue + " " + CsvHelper.trans("aircraft_parameter_missing"), Colors.DarkOrange, i++);
@@ -684,10 +687,10 @@ namespace msfsLegacyImporter
 
                 if (!File.Exists(aircraftDirectory + "\\.aircraft.cfg"))
                 {
-                    MessageBoxResult messageBoxResult = MessageBox.Show(CsvHelper.trans("aircraft_split_notice"), CsvHelper.trans("aircraft_split_header"), System.Windows.MessageBoxButton.YesNo);
-                    if (messageBoxResult == MessageBoxResult.Yes)
+                    MessageBoxResult messageBoxResult = MessageBox.Show(CsvHelper.trans("aircraft_split_notice"), CsvHelper.trans("aircraft_split_header"), System.Windows.MessageBoxButton.YesNoCancel);
+                    if (messageBoxResult == MessageBoxResult.Yes || messageBoxResult == MessageBoxResult.No)
                     {
-                        CfgHelper.splitCfg(aircraftDirectory);
+                        CfgHelper.splitCfg(aircraftDirectory, "", messageBoxResult == MessageBoxResult.Yes);
                     } else
                     {
                         return;
@@ -763,7 +766,7 @@ namespace msfsLegacyImporter
         public void SummaryEngines()
         {
             EnginesData.Children.Clear();
-            tabEngines.Foreground = new SolidColorBrush(Colors.DarkGreen);
+            tabEngines.Background = new SolidColorBrush(Color.FromArgb(10, 0, 255, 0));
             AfterburnerData.Children.Clear();
             EnginesAir.Children.Clear();
 
@@ -771,18 +774,37 @@ namespace msfsLegacyImporter
             {
                 int criticalIssues = 0;
 
+                // ENGINE TYPE
                 string engine_type = CfgHelper.getCfgValue("engine_type", "engines.cfg", "[GENERALENGINEDATA]");
                 if (engine_type == "2" || engine_type == "3" || engine_type == "4" || engine_type == "")
                     EnginesData = AddGroupCheckBox(EnginesData, "engine_type = " + (engine_type != "" ? engine_type : "missing"), Colors.DarkRed, criticalIssues++);
+
+                // IGNITION
+                if (CfgHelper.getCfgValue("master_ignition_switch", "engines.cfg", "[GENERALENGINEDATA]") == "")
+                    EnginesData = AddGroupCheckBox(EnginesData, "master_ignition_switch = missing", Colors.DarkRed, criticalIssues++);
+
+                // STARTER
+                if (CfgHelper.getCfgValue("starter_type", "engines.cfg", "[GENERALENGINEDATA]") == "")
+                    EnginesData = AddGroupCheckBox(EnginesData, "starter_type = missing", Colors.DarkRed, criticalIssues++);
+
+                // THRUST ANGLE
+                for (int engine = 0; engine < 4; engine++)
+                {
+                    if (CfgHelper.getCfgValue("engine."+ engine, "engines.cfg", "[GENERALENGINEDATA]") != "" &&
+                            CfgHelper.getCfgValue("thrustanglespitchheading."+ engine, "engines.cfg", "[GENERALENGINEDATA]") == "")
+                        EnginesData = AddGroupCheckBox(EnginesData, "thrustanglespitchheading."+ engine +" = missing", Colors.DarkRed, criticalIssues++);
+                }
 
                 /*string engine0 = CfgHelper.getCfgValue("engine.0", "engines.cfg", "[GENERALENGINEDATA]");
                 if (engine0 == "")
                     EnginesData = AddGroupCheckBox(EnginesData, "engine.0 = missing", Colors.DarkRed, criticalIssues++);*/
 
+                // AB
                 string afterburner_available = CfgHelper.getCfgValue("afterburner_available", "engines.cfg", "[TURBINEENGINEDATA]");
                 if (afterburner_available != "" && afterburner_available != "0")
                     EnginesData = AddGroupCheckBox(EnginesData, "afterburner_available = " + afterburner_available, Colors.DarkRed, criticalIssues++);
 
+                // IDLE N1
                 if (CfgHelper.cfgSectionExists("engines.cfg", "[TURBINEENGINEDATA]") && (engine_type == "1" || engine_type == "5"))
                 {
                     if (CfgHelper.getCfgValue("low_idle_n1", "engines.cfg", "[TURBINEENGINEDATA]") == "")
@@ -812,7 +834,7 @@ namespace msfsLegacyImporter
                        HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                     EnginesData.Children.Insert(0, notice);
 
-                    tabEngines.Foreground = new SolidColorBrush(Colors.DarkRed);
+                    tabEngines.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
                 }
                 else
                 {
@@ -956,9 +978,16 @@ namespace msfsLegacyImporter
                         CfgHelper.setCfgValue(aircraftDirectory, "afterburner_stages", val[1].Trim(), "engines.cfg", "[TURBINEENGINEDATA]", false);
                         CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg");
                     }
+                    else if (val[0].Trim().Contains("thrustanglespitchheading"))
+                    {
+                        CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0,0", "engines.cfg", "[GENERALENGINEDATA]");
+                    }
+                    else if (checkboxLabel.Contains("missing")) {
+                        CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg", "[GENERALENGINEDATA]");
+                    }
                     else
                         CfgHelper.setCfgValue(aircraftDirectory, val[0].Trim(), "0", "engines.cfg");
-                    
+
                     i++;
                 }
             }
@@ -1397,7 +1426,7 @@ namespace msfsLegacyImporter
                        HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                     SystemsData.Children.Insert(0, notice);
 
-                    tabSystems.Foreground = new SolidColorBrush(Colors.DarkRed);
+                    tabSystems.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
                 }
                 else
                 {
@@ -1415,14 +1444,14 @@ namespace msfsLegacyImporter
                             HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                         SystemsData.Children.Insert(0, notice);
 
-                        tabSystems.Foreground = new SolidColorBrush(Colors.DarkOrange);
+                        tabSystems.Background = new SolidColorBrush(Color.FromArgb(10, 255, 150, 0));
                     }
                     else
                     {
                         btn.Content = CsvHelper.trans("systems_no_light_issues");
                         btn.IsEnabled = false;
 
-                        tabSystems.Foreground = new SolidColorBrush(Colors.DarkGreen);
+                        tabSystems.Background = new SolidColorBrush(Color.FromArgb(10, 0, 255, 0));
                     }
                 }
 
@@ -1539,11 +1568,11 @@ namespace msfsLegacyImporter
                 case "fx_navgre":
                     return "LIGHT_ASOBO_NavigationGreen";
                 case "fx_navgrem":
-                    return "LIGHT_ASOBO_Navigation_Green";
+                    return "LIGHT_ASOBO_NavigationGreen";
                 case "fx_navred":
                     return "LIGHT_ASOBO_NavigationRed";
                 case "fx_navredm":
-                    return "LIGHT_ASOBO_Navigation_Red";
+                    return "LIGHT_ASOBO_NavigationRed";
                 case "fx_navwhi":
                     return "LIGHT_ASOBO_NavigationWhite";
                 case "fx_navwhih":
@@ -1656,14 +1685,14 @@ namespace msfsLegacyImporter
                        HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600 );
                     FlightModelData.Children.Insert(0, notice);
 
-                    //tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkRed);
+                    //tabFlightModel.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
                 }
                 else
                 {
                     btn.Content = CsvHelper.trans("fm_contact_points_issues");
                     btn.IsEnabled = false;
 
-                    tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkGreen);
+                    tabFlightModel.Background = new SolidColorBrush(Color.FromArgb(10, 0, 255, 0));
                 }
 
                 myPanel2.Children.Add(btn);
@@ -1686,7 +1715,7 @@ namespace msfsLegacyImporter
                         }
                     }
 
-                    tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkRed);
+                    tabFlightModel.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
                 }
 
                 FlightModelData.Children.Add(myPanel2);
@@ -1728,7 +1757,7 @@ namespace msfsLegacyImporter
                        HorizontalAlignment.Stretch, VerticalAlignment.Top, Colors.Black, new Thickness(0, 10, 0, 10), TextWrapping.Wrap, 600);
                     FlightModelIssues.Children.Insert(0, notice);
 
-                    tabFlightModel.Foreground = new SolidColorBrush(Colors.DarkRed);
+                    tabFlightModel.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
                 }
                 else
                 {
@@ -2038,9 +2067,9 @@ namespace msfsLegacyImporter
                         if (((TabItem)item).Name == "tab" + parentPanel.Name.Replace("Sections", ""))
                         {
                             if (requiredMissing > 0)
-                                ((TabItem)item).Foreground = new SolidColorBrush(Colors.DarkRed);
-                            else if (((TabItem)item).Foreground.ToString() == "#FF000000")
-                                ((TabItem)item).Foreground = new SolidColorBrush(Colors.DarkGreen);
+                                ((TabItem)item).Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
+                            else if (((TabItem)item).Background.ToString() == "#00000000")
+                                ((TabItem)item).Background = new SolidColorBrush(Color.FromArgb(10, 0, 255, 0));
 
                             break;
                         }
@@ -2138,7 +2167,7 @@ namespace msfsLegacyImporter
                 btn2.Content = CsvHelper.trans("textures_nvdxt");
                 btn2.Click += ConvertTexturesClick;
 
-                tabTextures.Foreground = new SolidColorBrush(Colors.DarkRed);
+                tabTextures.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
                 myPanel2.Children.Add(btn);
 
                 TextBlock notice = addTextBlock(CsvHelper.trans("textures_convert_notice"),
@@ -2149,7 +2178,7 @@ namespace msfsLegacyImporter
             {
                 btn2.Content = CsvHelper.trans("textures_no_issues");
                 btn2.IsEnabled = false;
-                tabTextures.Foreground = new SolidColorBrush(Colors.DarkGreen);
+                tabTextures.Background = new SolidColorBrush(Color.FromArgb(10, 0, 255, 0));
             }
 
             myPanel2.Children.Add(btn2);
@@ -2377,7 +2406,7 @@ namespace msfsLegacyImporter
                 }
 
                 if (modelsAfterburnerFound == 0 || warningsAfterburner.Count > 0 || modelsAfterburnerToConvert > 0)
-                    tabModel.Foreground = new SolidColorBrush(Colors.DarkRed);
+                    tabModel.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
 
                 myPanel1.Children.Add(btn1);
                 ModelAfterburnerList.Children.Add(myPanel1);
@@ -2407,8 +2436,8 @@ namespace msfsLegacyImporter
             }
             else
             {
-                if (modelsFound <= 0)
-                    MessageBox.Show(CsvHelper.trans("model_no_interior_model_warning"), CsvHelper.trans("model_no_interior_model"));
+                /*if (modelsFound <= 0)
+                    MessageBox.Show(CsvHelper.trans("model_no_interior_model_warning"), CsvHelper.trans("model_no_interior_model"));*/
 
 
                 btn2.Content = modelsFound > 0 ? CsvHelper.trans("model_no_clickable_switches") : CsvHelper.trans("model_no_interior_model");
@@ -2416,7 +2445,7 @@ namespace msfsLegacyImporter
             }
 
             if (modelsFound == 0 || warnings.Count > 0 /*|| modelsToConvert > 0 && modelsWithoutBackup > 0*/)
-                tabModel.Foreground = new SolidColorBrush(Colors.DarkRed);
+                tabModel.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
 
             myPanel2.Children.Add(btn2);
             ModelsList.Children.Add(myPanel2);
@@ -2635,7 +2664,7 @@ namespace msfsLegacyImporter
             }
 
             /*if (soundsToDisable > 0)
-                tabSound.Foreground = new SolidColorBrush(Colors.DarkRed);*/
+                tabSound.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));*/
 
             myPanel2.Children.Add(btn);
             SoundList.Children.Add(myPanel2);
@@ -2801,7 +2830,7 @@ namespace msfsLegacyImporter
                 dllWarning.Text = CsvHelper.trans("panel_dll_detected");
                 dllWarning.Foreground = new SolidColorBrush(Colors.DarkRed);
                 myPanel1.Children.Add(dllWarning);
-                tabPanel.Foreground = new SolidColorBrush(Colors.DarkRed);
+                tabPanel.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
             }
 
             Button btn1 = new Button();
@@ -2838,7 +2867,7 @@ namespace msfsLegacyImporter
             /*----*/myPanel1.Children.Add(sectiondivider());
 
             if (cabsToConvert > 0 || cabsWithoutBackup > 0)
-                tabPanel.Foreground = new SolidColorBrush(Colors.DarkRed);
+                tabPanel.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
 
             CabsList.Children.Add(myPanel1);
 
@@ -2882,6 +2911,7 @@ namespace msfsLegacyImporter
                 if (engine_type == "1" && afterburner_available != "" && afterburner_available != "0")
                     myPanel2 = AddSingleCheckBox(myPanel2, CsvHelper.trans("panel_afterburner_vars"), 600, HorizontalAlignment.Left, "AfterburnerVars");
                 myPanel2 = AddSingleCheckBox(myPanel2, CsvHelper.trans("panel_ignore_errors"), 600, HorizontalAlignment.Left, "IgnorePanelErrors");
+                myPanel2 = AddSingleCheckBox(myPanel2, CsvHelper.trans("panel_js_validation"), 600, HorizontalAlignment.Left, "PanelJSValidation");
 
                 TextBlock gammaCorr = addTextBlock(string.Format(CsvHelper.trans("panel_gamma_correction"), "0", "1", "2"), HorizontalAlignment.Left, VerticalAlignment.Center, Colors.Black,
                     new Thickness(0, 10, 0, 0));
@@ -2909,7 +2939,7 @@ namespace msfsLegacyImporter
             }
 
             if (panelsToConvert > 0 && panelsWithoutBackup > 0)
-                tabPanel.Foreground = new SolidColorBrush(Colors.DarkRed);
+                tabPanel.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
 
             myPanel2.Children.Add(btn2);
             PanelsList.Children.Add(myPanel2);
@@ -3075,6 +3105,7 @@ namespace msfsLegacyImporter
                     FindName("TransparentMask") != null && ((CheckBox)FindName("TransparentMask")).IsChecked == true ? 1 : 0,
                     FindName("ScaleUpGauge") != null && ((CheckBox)FindName("ScaleUpGauge")).IsChecked == true ? 1 : 0,
                     FindName("AfterburnerVars") != null && ((CheckBox)FindName("AfterburnerVars")).IsChecked == true ? 1 : 0,
+                    FindName("PanelJSValidation") != null && ((CheckBox)FindName("PanelJSValidation")).IsChecked == true ? 1 : 0,
                 }
             );
         }
@@ -3100,7 +3131,7 @@ namespace msfsLegacyImporter
         {
             TextExpressionField.Visibility = Visibility.Visible;
             TextExpressionResult.Visibility = Visibility.Visible;
-            TextExpressionResult.Text = FsxVarHelper.fsx2msfsSimVar(TextExpressionField.Text, new xmlHelper());
+            TextExpressionResult.Text = FsxVarHelper.fsx2msfsSimVar(TextExpressionField.Text, new xmlHelper(), true, "False");
         }
         // PANEL END
 
@@ -3356,7 +3387,12 @@ namespace msfsLegacyImporter
         private void Hyperlink_RequestNavigate(object sender,
                                                System.Windows.Navigation.RequestNavigateEventArgs e)
         {
-            System.Diagnostics.Process.Start(e.Uri.ToString().Contains("//") ? e.Uri.AbsoluteUri : e.Uri.ToString());
+            if (e.Uri.ToString().Contains("msfs.touching.cloud"))
+            {
+                resetMissedUpdates(null, null);
+            }
+
+            Process.Start(e.Uri.ToString().Contains("//") ? e.Uri.AbsoluteUri : e.Uri.ToString());
         }
         private void Button_RequestNavigate(object sender, RoutedEventArgs e)
         {
@@ -3507,9 +3543,15 @@ namespace msfsLegacyImporter
         private void setNewsLabel(string counter)
         {
             if (counter != "0")
-                Application.Current.Dispatcher.Invoke(() => newsLink.Text = counter + " missed update" + (counter != "1" ? "s" : ""));
+            {
+                Application.Current.Dispatcher.Invoke(() => newsLink.Text = "(" + counter + ")");
+                tabAbout.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
+            }
             else
-                Application.Current.Dispatcher.Invoke(() => newsLink.Text = "Updates and announces");
+            {
+                Application.Current.Dispatcher.Invoke(() => newsLink.Text = "");
+                tabAbout.Background = new SolidColorBrush(Colors.Transparent);
+            }
         }
         private void resetMissedUpdates(object sender, RoutedEventArgs e)
         {
@@ -3596,7 +3638,7 @@ namespace msfsLegacyImporter
                     myBlock.Text = string.Format(CsvHelper.trans("update_available"), updateVersion);
                     myBlock.Foreground = new SolidColorBrush(Colors.DarkRed);
 
-                    tabAbout.Foreground = new SolidColorBrush(Colors.DarkRed);
+                    tabAbout.Background = new SolidColorBrush(Color.FromArgb(10, 255, 0, 0));
                 }
                 else
                 {

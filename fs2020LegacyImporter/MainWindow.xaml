@@ -79,14 +79,6 @@
             <TextBlock Name="imageRightTooltip" HorizontalAlignment="Left" Margin="10 5 10 0" Foreground="#FFBEDDFF" Grid.Column="1" FontSize="24" ToolTip="imageRightTooltip">*</TextBlock>
             <ComboBox Name="LangSelector" Grid.ColumnSpan="2" HorizontalAlignment="Right" FontSize="18" Height="30" VerticalAlignment="bottom" Width="auto" Margin="15 15 30 15">
             </ComboBox>
-            <StackPanel  Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="180px" Height="100" VerticalAlignment="bottom" Margin="15 15 30 15">
-                <Image Source="logo-s.png" Height="80"></Image>
-                <TextBlock HorizontalAlignment="Center">
-                    <Hyperlink Click="resetMissedUpdates" Foreground="White"  NavigateUri="https://msfs.touching.cloud/news/" RequestNavigate="Hyperlink_RequestNavigate">
-                        <TextBlock FontSize="16" FontFamily="Impact" HorizontalAlignment="Center" Name="newsLink">Updates and announces</TextBlock>
-                    </Hyperlink>
-                </TextBlock>
-            </StackPanel>
         </Grid>
 
         <TabControl Name="fsTabControl">
@@ -356,6 +348,24 @@
                     <StackPanel>
                         <StackPanel Name="AboutContent" VerticalAlignment="Top">
                         </StackPanel>
+
+                        <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5, 10, 5, 0">
+                              News, updates and feedback at:
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5, 0, 5, 0">
+                            <Hyperlink NavigateUri="https://www.facebook.com/touching.cloud2020" RequestNavigate="Hyperlink_RequestNavigate">
+                                facebook.com/touching.cloud2020
+                            </Hyperlink>
+                        </TextBlock>
+                        <TextBlock ToolTip="Left click - open website, Right click - reset counter" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5, 0, 5, 0">
+                            <Hyperlink NavigateUri="https://msfs.touching.cloud/news/" RequestNavigate="Hyperlink_RequestNavigate" MouseRightButtonDown="resetMissedUpdates">
+                                MSFS.Touching.Cloud <TextBlock Foreground="DarkRed" Name="newsLink"></TextBlock>
+                            </Hyperlink>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5, 10, 5, 0">
+                                Support: msfs@touching.cloud
+                        </TextBlock>
+
                         <StackPanel Name="Label" VerticalAlignment="Top" HorizontalAlignment="Center" Width="auto" Margin="5,5,5,20">
                             <TextBlock Name="about_colored_header" TextWrapping="Wrap" Text="about_colored_header" VerticalAlignment="Top" DockPanel.Dock="Top" FontFamily="Arial Black" HorizontalAlignment="Center" Margin="0,20,0,10" Background="Transparent"/>
                             <TextBlock Name="about_colored_green" Width="600" Foreground="DarkGreen">about_colored_green</TextBlock>
@@ -457,7 +467,6 @@
 
                         <Separator Height="1" Margin="0 0 0 10" Width="auto"/>
                         <StackPanel DockPanel.Dock="Bottom" Height="auto" VerticalAlignment="Bottom" >
-                            <TextBlock TextWrapping="Wrap" Text="Alex Marko @ 2020" DockPanel.Dock="Bottom"  HorizontalAlignment="Center" VerticalAlignment="Bottom"  Background="#03FFFFFF"/>
                             <TextBlock TextWrapping="Wrap" Text="Do not publish imported aircraft without author permission (really, don't)."  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>
                             <TextBlock TextWrapping="Wrap" Text="Instead, send me a link of your import process tutorial and it will be added to the program description."  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>
                             <TextBlock TextWrapping="Wrap" Text="And please mention this tool if you are sharing any kind of import result. Good luck with your experiments!"  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontSize="8" Background="#03FFFFFF"/>

@@ -143,7 +143,7 @@ namespace msfsLegacyImporter
             return new CfgFile(true, file, cfgSections);
         }
 
-        public void splitCfg(string aircraftDirectory, string singleFile = "")
+        public void splitCfg(string aircraftDirectory, string singleFile = "", bool addMissing = false)
         {
             List<CfgFile> cfgFiles = new List<CfgFile>();
             processCfgfiles(aircraftDirectory + "\\", true);
@@ -217,7 +217,7 @@ namespace msfsLegacyImporter
                     }
 
                     // ADD MODERN LINES
-                    if (cfgTempSection != null && cfgTempSection.Lines.Count > 0) {
+                    if (addMissing && cfgTempSection != null && cfgTempSection.Lines.Count > 0) {
                         cfgLines[0].Comment = "LEGACY";
                         cfgLines.Add(new CfgLine(true, "", "", "MODERN"));
                         foreach (CfgLine cfgTemplateLine in cfgTempSection.Lines)

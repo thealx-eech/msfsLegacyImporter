@@ -66,6 +66,7 @@ namespace msfsLegacyImporter
         private string html;
         private string css;
         private string js;
+        private string globalVars;
         private string materialName;
         private string InstrumentFolder;
         private string errors;
@@ -174,6 +175,7 @@ namespace msfsLegacyImporter
                         html = "";
                         css = "";
                         js = Environment.NewLine;
+                        globalVars = atts[8] == 1 ? "" : "False";
 
                         if (atts[4] == 1)
                         {
@@ -324,9 +326,19 @@ namespace msfsLegacyImporter
                                 foreach (var macro in gaugeXml.Elements("Macro"))
                                 {
                                     if (macro.Attribute("Name") != null && !string.IsNullOrEmpty(macro.Value))
-                                        js += "		var " + macro.Attribute("Name").Value + " = " + FsxVarHelper.fsx2msfsSimVar(macro.Value, this, false) + ";" + Environment.NewLine;
+                                    {
+                                        string var = "		var " + macro.Attribute("Name").Value + " = " + FsxVarHelper.fsx2msfsSimVar(macro.Value, this, false, globalVars) + ";" + Environment.NewLine;
+                                        js += var;
+                                        if (globalVars != "False")
+                                            globalVars += "		var " + macro.Attribute("Name").Value + " = 0;" + Environment.NewLine;
+                                    }
                                     else if (macro.Attribute("Name") != null)
-                                        js += "		var " + macro.Attribute("Name").Value + " = \"\";" + Environment.NewLine;
+                                    {
+                                        string var = "		var " + macro.Attribute("Name").Value + " = \"\";" + Environment.NewLine;
+                                        js += var;
+                                        if (globalVars != "False")
+                                            globalVars += "		var " + macro.Attribute("Name").Value + " = 0;" + Environment.NewLine;
+                                    }
                                 }
 
                                 // SET BG IMAGE IF NECESSARY
@@ -416,7 +428,7 @@ namespace msfsLegacyImporter
                                     index = -1;
                                     foreach (XElement gaugeElement in gaugeElements)
                                     {
-                                        processGaugeElement(gaugeElement, FsxVarHelper, atts, 0 );
+                                        processGaugeElement(gaugeElement, FsxVarHelper, atts, 0);
                                     }
                                 }
 
@@ -521,7 +533,7 @@ namespace msfsLegacyImporter
             if (Visibility == null)
                 Visibility = gaugeElement.Element("Visible");
             if (Visibility != null)
-                visibilityCond = FsxVarHelper.fsx2msfsSimVar(Visibility.Value, this, false);
+                visibilityCond = FsxVarHelper.fsx2msfsSimVar(Visibility.Value, this, false, globalVars);
 
             string slug = gaugeElement.Attribute("id") != null ? gaugeSanitizedName + "_" + gaugeElement.Attribute("id").Value : "";
 
@@ -594,9 +606,19 @@ namespace msfsLegacyImporter
             foreach (var macro in gaugeElement.Elements("Macro"))
             {
                 if (macro.Attribute("Name") != null && !string.IsNullOrEmpty(macro.Value))
-                    js += "		var " + macro.Attribute("Name").Value + " = "+ FsxVarHelper.fsx2msfsSimVar(macro.Value, this, false) +";" + Environment.NewLine;
+                {
+                    string var = "		var " + macro.Attribute("Name").Value + " = " + FsxVarHelper.fsx2msfsSimVar(macro.Value, this, false, globalVars) + ";" + Environment.NewLine;
+                    js += var;
+                    if (globalVars != "False")
+                        globalVars += "		var " + macro.Attribute("Name").Value + " = 0;" + Environment.NewLine;
+                }
                 else if (macro.Attribute("Name") != null)
-                    js += "		var " + macro.Attribute("Name").Value + " = \"\";" + Environment.NewLine;
+                {
+                    string var = "		var " + macro.Attribute("Name").Value + " = \"\";" + Environment.NewLine;
+                    js += var;
+                    if (globalVars != "False")
+                        globalVars += "		var " + macro.Attribute("Name").Value + " = 0;" + Environment.NewLine;
+                }
             }
 
 
@@ -704,7 +726,7 @@ namespace msfsLegacyImporter
                 {
                     js += "		  {" + Environment.NewLine + Environment.NewLine;
 
-                    expressionRoutin(Expression, FsxVarHelper);
+                    expressionRoutin(Expression, FsxVarHelper, globalVars);
 
                     XElement PointsTo = Rotation.Elements("PointsTo").FirstOrDefault();
                     XAttribute ImagePointsTo = Image != null ? Image.Attribute("PointsTo") : null;
@@ -795,7 +817,7 @@ namespace msfsLegacyImporter
                 {
                     js += "		  {" + Environment.NewLine;
 
-                    expressionRoutin(Expression, FsxVarHelper);
+                    expressionRoutin(Expression, FsxVarHelper, globalVars);
 
                     // NONLINEAR
                     if (Shift.Elements("NonlinearityTable").FirstOrDefault() != null || Shift.Elements("Nonlinearity").FirstOrDefault() != null)
@@ -892,7 +914,7 @@ namespace msfsLegacyImporter
                 XElement VerticalAlign = GaugeText.Element("VerticalAlign");
                 XElement WidthFit = GaugeText.Element("WidthFit");
 
-                string value = GaugeString != null ? FsxVarHelper.fsx2msfsGaugeString(GaugeString.Value.Trim(), this) : "";
+                string value = GaugeString != null ? FsxVarHelper.fsx2msfsGaugeString(GaugeString.Value.Trim(), this, globalVars) : "";
 
                 string[] GaugeSize = getXYvalue(Size, false);
 
@@ -931,10 +953,10 @@ namespace msfsLegacyImporter
                 if (WidthFit != null && WidthFit.Value == "True") { css += "		font-size: 4vw;;" + Environment.NewLine; }
 
                 //* if (BlinkCode != null) { css += "		rule: " + BlinkCode.Value + ";" + Environment.NewLine; }
-                if (HeightScript != null) { js += "			" + sanitizedSlug + ".style.height = " + FsxVarHelper.fsx2msfsGaugeString(HeightScript.Value.Trim(), this) + " + \"px\";" + Environment.NewLine; }
-                if (WidthScript != null) { js += "			" + sanitizedSlug + ".style.width = " + FsxVarHelper.fsx2msfsGaugeString(WidthScript.Value.Trim(), this) + " + \"px\";" + Environment.NewLine; }
-                if (FontColorScript != null) { js += "			" + sanitizedSlug + ".style.color = " + hexToString(FsxVarHelper.fsx2msfsGaugeString(FontColorScript.Value.Trim(), this)) + ";" + Environment.NewLine; }
-                if (BackgroundColorScript != null) { js += "			" + sanitizedSlug + ".style.backgroundColor = " + hexToString(FsxVarHelper.fsx2msfsGaugeString(BackgroundColorScript.Value.Trim(), this)) + ";" + Environment.NewLine; }
+                if (HeightScript != null) { js += "			" + sanitizedSlug + ".style.height = " + FsxVarHelper.fsx2msfsGaugeString(HeightScript.Value.Trim(), this, globalVars) + " + \"px\";" + Environment.NewLine; }
+                if (WidthScript != null) { js += "			" + sanitizedSlug + ".style.width = " + FsxVarHelper.fsx2msfsGaugeString(WidthScript.Value.Trim(), this, globalVars) + " + \"px\";" + Environment.NewLine; }
+                if (FontColorScript != null) { js += "			" + sanitizedSlug + ".style.color = " + hexToString(FsxVarHelper.fsx2msfsGaugeString(FontColorScript.Value.Trim(), this, globalVars)) + ";" + Environment.NewLine; }
+                if (BackgroundColorScript != null) { js += "			" + sanitizedSlug + ".style.backgroundColor = " + hexToString(FsxVarHelper.fsx2msfsGaugeString(BackgroundColorScript.Value.Trim(), this, globalVars)) + ";" + Environment.NewLine; }
                 if (GaugeString != null && !string.IsNullOrEmpty(value)) { js += "			" + sanitizedSlug + ".innerHTML = " + value + ";" + Environment.NewLine + Environment.NewLine; }
 
 
@@ -977,12 +999,12 @@ namespace msfsLegacyImporter
             return hex;
         }
 
-        private void expressionRoutin(XElement Expression, fsxVarHelper FsxVarHelper)
+        private void expressionRoutin(XElement Expression, fsxVarHelper FsxVarHelper, string globalVars)
         {
             if (Expression.Elements("Script").FirstOrDefault() != null)
-                js += "			" + FsxVarHelper.fsx2msfsSimVar(Expression.Elements("Script").FirstOrDefault().Value, this) + Environment.NewLine;
+                js += "			" + FsxVarHelper.fsx2msfsSimVar(Expression.Elements("Script").FirstOrDefault().Value, this, true, globalVars) + Environment.NewLine;
             else if (Expression.Value.Length > 0 && Expression.Value[0] != '<' && Expression.Value.Contains(')') && Expression.Value.Contains('('))
-                js += "			" + FsxVarHelper.fsx2msfsSimVar(Expression.Value, this) + Environment.NewLine;
+                js += "			" + FsxVarHelper.fsx2msfsSimVar(Expression.Value, this, true, globalVars) + Environment.NewLine;
             else
                 js += "			var ExpressionResult = 0; /* NO SCRIPT NODE FOUND!!! */" + Environment.NewLine;
 
